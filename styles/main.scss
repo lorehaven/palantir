@@ -1,0 +1,15 @@
+@import "facade.scss";
+@import "loader.scss";
+@import "theme.scss";
+
+body {
+	background-color: $primaryColor;
+	color: $secondaryColor;
+	font-family: sans-serif;
+	text-align: center;
+
+	user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	-webkit-user-select: none;
+}

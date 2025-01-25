@@ -1,0 +1,83 @@
+@import "theme.scss";
+
+.facade {
+  @media screen and (max-width: 1023px) {
+    margin: 0;
+  }
+  @media screen and (min-width: 1024px) and (max-width: 1365px) {
+    margin: 0 8rem;
+  }
+  @media screen and (min-width: 1366px) {
+    margin: 0 16rem;
+  }
+
+  display: flex;
+  flex-direction: column;
+
+  .bar {
+    background-color: $primaryAccentColor;
+    font-size: 2.4rem;
+    padding: 1rem;
+  }
+
+  .entries {
+    display: grid;
+    margin-top: 2rem;
+    gap: 1rem;
+
+    @media screen and (max-width: 1023px) {
+      grid-template-columns: 1fr;
+    }
+    @media screen and (min-width: 1024px) and (max-width: 1365px) {
+      grid-template-columns: 1fr 1fr;
+    }
+    @media screen and (min-width: 1366px) {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .entry, .entry-disabled {
+      display: flex;
+      flex-direction: row;
+      text-decoration: none;
+      color: $secondaryColor;
+      padding: 1.4rem 2.6rem;
+      background-size: 200% 100%;
+      background-image: linear-gradient(to right, $primaryAccentColor 50%, $secondaryColor 50%);
+
+      .column-left, .column-right {
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+      }
+      .column-left {
+        flex: 3;
+
+        .entry-title {
+          font-size: 1.2rem;
+        }
+      }
+      .column-right {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    .entry {
+      -webkit-transition: background-position 0.5s, color 0.5s;
+      -moz-transition: background-position 0.5s, color 0.5s;
+      transition: background-position 0.5s, color 0.5s;
+
+      &:hover {
+        background-position: -100% 0;
+        color: $primaryAccentColor;
+      }
+    }
+
+    .entry-disabled {
+      cursor: not-allowed;
+    }
+  }
+}
