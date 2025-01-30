@@ -1,0 +1,131 @@
+@import "theme.scss";
+
+.dashboard {
+  @media screen and (max-width: 1023px) {
+    margin: 0;
+  }
+  @media screen and (min-width: 1024px) and (max-width: 1365px) {
+    margin: 0 2rem;
+  }
+  @media screen and (min-width: 1366px) {
+    margin: 0 4rem;
+  }
+
+  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.dcc-1 {
+  grid-template-columns: 1fr;
+}
+
+.dcc-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.dashboard-card-container {
+  display: grid;
+  gap: 1rem;
+
+  .dashboard-card-circle,
+  .dashboard-card-list {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.8);
+  }
+
+  .dashboard-card-list {
+    flex-direction: column;
+  }
+
+  .dashboard-card-circle {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 12rem;
+
+    .ring {
+      width: 10rem;
+      height: 10rem;
+      border-radius: 50%;
+      background: conic-gradient($secondaryColor 0% var(--fill), $primaryAccentColor var(--fill) 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .ring-inner {
+        width: 65%;
+        height: 65%;
+        border-radius: 50%;
+        background-color: $primaryColor;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        .ring-inner-text {
+          font-size: 1.2rem;
+
+          &:nth-child(2) {
+            font-size: 0.8rem;
+          }
+        }
+      }
+    }
+
+    .label {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin-top: 0.5rem;
+    }
+
+    .label-add {
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+  }
+
+  .dashboard-card-list {
+    padding: 1rem;
+
+    .table-header {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+
+      font-size: 1.3rem;
+      font-weight: bold;
+      padding: 0.5rem;
+      width: 100%;
+
+      .table-header-item {
+        border-bottom: 0.1rem solid $secondaryColor;
+      }
+    }
+
+    .table-body {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+
+      .table-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+
+        font-size: 1rem;
+        padding: 0.5rem;
+        width: 100%;
+
+        .table-row-item {}
+      }
+    }
+  }
+}

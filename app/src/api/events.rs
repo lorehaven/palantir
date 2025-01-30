@@ -1,10 +1,10 @@
 use leptos::prelude::ServerFnError;
 use leptos::server;
 
-use crate::domain::node::{Node, NodesResponse};
+use crate::domain::event::{Event, EventsResponse};
 
-#[server(GetNodes, "/api/nodes")]
-pub async fn get_nodes() -> Result<Vec<Node>, ServerFnError> {
+#[server(GetEvents, "/api/events")]
+pub async fn get_events() -> Result<Vec<Event>, ServerFnError> {
     let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
     let token = crate::api::utils::get_api_token();
 
@@ -13,7 +13,7 @@ pub async fn get_nodes() -> Result<Vec<Node>, ServerFnError> {
         .build()?;
 
     let response = client
-        .get(format!("https://{server_host}:6443/api/v1/nodes"))
+        .get(format!("https://{server_host}:6443/api/v1/events"))
         .bearer_auth(token)
         .send()
         .await?;
@@ -23,7 +23,7 @@ pub async fn get_nodes() -> Result<Vec<Node>, ServerFnError> {
 }
 
 #[allow(dead_code)]
-fn parse_response(response: &str) -> Result<Vec<Node>, Box<dyn std::error::Error>> {
-    let nodes = serde_json::from_str::<NodesResponse>(response)?.items;
+fn parse_response(response: &str) -> Result<Vec<Event>, Box<dyn std::error::Error>> {
+    let nodes = serde_json::from_str::<EventsResponse>(response)?.items;
     Ok(nodes)
 }

@@ -6,6 +6,9 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(wasm_bindgen_unstable_test_coverage)'] }
+
 [dependencies]
 app = { path = "../app", default-features = false, features = ["hydrate"] }
 leptos = { workspace = true, features = [ "hydrate" ] }

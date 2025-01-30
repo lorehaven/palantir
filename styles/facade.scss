@@ -14,12 +14,6 @@
   display: flex;
   flex-direction: column;
 
-  .bar {
-    background-color: $primaryAccentColor;
-    font-size: 2.4rem;
-    padding: 1rem;
-  }
-
   .entries {
     display: grid;
     margin-top: 2rem;

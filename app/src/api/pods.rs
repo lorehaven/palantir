@@ -24,11 +24,6 @@ pub async fn get_pods() -> Result<Vec<Pod>, ServerFnError> {
 
 #[allow(dead_code)]
 fn parse_response(response: &str) -> Result<Vec<Pod>, Box<dyn std::error::Error>> {
-    let pods = serde_json::from_str::<PodsResponse>(response)?
-        .items
-        .iter()
-        .filter(|pod| pod.metadata.namespace != "kube-system")
-        .cloned()
-        .collect::<Vec<Pod>>();
+    let pods = serde_json::from_str::<PodsResponse>(response)?.items;
     Ok(pods)
 }

@@ -1,7 +1,6 @@
 use axum::Router;
 use leptos::prelude::*;
 use leptos_axum::{generate_route_list, LeptosRoutes};
-use leptos::logging::log;
 
 use app::*;
 
@@ -21,7 +20,7 @@ async fn main() {
         .fallback(leptos_axum::file_and_error_handler(shell::shell))
         .with_state(leptos_options);
 
-    log!("listening on http://{}", &addr);
+    leptos::logging::log!("listening on http://{}", &addr);
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     axum::serve(listener, app.into_make_service())
         .await

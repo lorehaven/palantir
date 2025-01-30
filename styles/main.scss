@@ -1,3 +1,5 @@
+@import "components/components.scss";
+@import "dashboard.scss";
 @import "facade.scss";
 @import "loader.scss";
 @import "theme.scss";
@@ -6,10 +8,29 @@ body {
 	background-color: $primaryColor;
 	color: $secondaryColor;
 	font-family: sans-serif;
-	text-align: center;
+	overflow: hidden;
 
 	user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
 	-webkit-user-select: none;
+}
+
+::-webkit-scrollbar {
+	width: 0.7rem;
+	height: 0.7rem;
+}
+
+::-webkit-scrollbar-track {
+	background-color: #bbb;
+	border-radius: 0.2rem;
+}
+
+::-webkit-scrollbar-thumb {
+	background-color: #888;
+	border-radius: 0.2rem;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background-color: #555;
 }
