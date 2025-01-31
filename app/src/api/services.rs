@@ -23,11 +23,11 @@ pub async fn get_services() -> Result<Vec<ServiceEntry>, ServerFnError> {
         .send()
         .await?;
     response.error_for_status_ref()?;
-    Ok(parse_response(&response.text().await?, &get_pods().await?).unwrap_or_default())
+    Ok(parse_response(&response.text().await?, &get_pods().await?).await.unwrap_or_default())
 }
 
 #[allow(dead_code)]
-fn parse_response(response: &str, pods: &[Pod]) -> Result<Vec<ServiceEntry>, Box<dyn std::error::Error>> {
+async fn parse_response(response: &str, pods: &[Pod]) -> Result<Vec<ServiceEntry>, Box<dyn std::error::Error>> {
     let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
     let server_dns_name = std::env::var("SERVER_DNS_NAME").unwrap_or_else(|_| "ossiriand.arda".to_string());
 
@@ -49,31 +49,15 @@ fn parse_response(response: &str, pods: &[Pod]) -> Result<Vec<ServiceEntry>, Box
         })
         .collect::<Vec<ServiceEntry>>();
 
-    let pihole_pod = get_pod_by_label(pods, "pihole");
-    let wireguard_pod = get_pod_by_label(pods, "wireguard");
-    services.extend([
-        ServiceEntry {
-            name: format_service_name("PiHole Web UI"),
-            url: format!("http://{server_host}:32000/admin"),
-            url_display: format!("{server_dns_name}:32000/admin"),
-            available: is_pod_available(pihole_pod),
-        },
-        ServiceEntry {
-            name: format_service_name("Wireguard Web UI"),
-            url: format!("http://{server_host}:51821"),
-            url_display: format!("{server_dns_name}:51821"),
-            available: is_pod_available(wireguard_pod),
-        },
-        ServiceEntry {
-            name: format_service_name("Cockpit Web UI"),
-            url: format!("http://{server_host}:9090"),
-            url_display: format!("{server_dns_name}:9090"),
-            available: true,
-        }
-    ]);
+    let additional_services_json = std::env::var("ADDITIONAL_SERVICES").unwrap_or("[]".to_string());
+    let mut additional_entries = serde_json::from_str::<Vec<ServiceEntry>>(&additional_services_json)?;
+    for s in additional_entries.iter_mut() {
+        if s.available { continue; }
+        s.available = reqwest::get(&s.url).await.is_ok_and(|r| r.status().is_success());
+    }
 
+    services.extend(additional_entries);
     services.sort_by_key(|e| e.url_display.clone());
-
     Ok(services
         .into_iter()
         .filter(|s| s.name.to_lowercase().contains("web ui"))
