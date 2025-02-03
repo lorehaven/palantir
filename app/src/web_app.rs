@@ -18,8 +18,8 @@ pub fn WebApp() -> impl IntoView {
         <Router>
             <main>
                 <Routes fallback=|| "Page not found.".into_view()>
-                    <Route path=StaticSegment("") view=DashboardPage/>
-                    <Route path=StaticSegment("/facade") view=FacadePage/>
+                    <Route path=StaticSegment("") view=DashboardPage />
+                    <Route path=StaticSegment("/facade") view=FacadePage />
                 </Routes>
             </main>
         </Router>

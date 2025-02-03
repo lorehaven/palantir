@@ -1,9 +1,11 @@
 use leptos::prelude::*;
-use leptos::task::spawn;
+use leptos::task::spawn_local;
 
-use crate::pages::utils::dashboard::*;
+use crate::pages::components::dashboard::prelude::*;
 use crate::pages::components::prelude::*;
-use crate::pages::utils::time::time_until_now;
+use crate::pages::utils::dashboard::*;
+use crate::pages::utils::shared::effects::update_page_effect;
+use crate::pages::utils::shared::time::time_until_now;
 
 #[component]
 pub fn DashboardPage() -> impl IntoView {
@@ -11,17 +13,44 @@ pub fn DashboardPage() -> impl IntoView {
     let nodes_cpu = RwSignal::new((0., 0.));
     let nodes_memory_values = RwSignal::new((0., 0.));
     let nodes_memory_labels = RwSignal::new((String::new(), String::new()));
-
     let pods_ready = RwSignal::new((0., 0.));
     let pods_cpu = RwSignal::new((0., 0.));
     let pods_memory_values = RwSignal::new((0., 0.));
     let pods_memory_labels = RwSignal::new((String::new(), String::new()));
-
     let events = RwSignal::new(vec![]);
-
     let loading = RwSignal::new(true);
 
-    Effect::new(move |_| spawn(async move {
+    update_page_effect(10_000, move || update_page(
+        nodes_ready.clone(), nodes_cpu.clone(), nodes_memory_values.clone(), nodes_memory_labels.clone(),
+        pods_ready.clone(), pods_cpu.clone(), pods_memory_values.clone(), pods_memory_labels.clone(),
+        events.clone(), loading.clone()));
+
+    view(
+        nodes_ready,
+        nodes_cpu,
+        nodes_memory_values,
+        nodes_memory_labels,
+        pods_ready,
+        pods_cpu,
+        pods_memory_values,
+        pods_memory_labels,
+        events,
+    )
+}
+
+fn update_page(
+    nodes_ready: RwSignal<(f64, f64)>,
+    nodes_cpu: RwSignal<(f64, f64)>,
+    nodes_memory_values: RwSignal<(f64, f64)>,
+    nodes_memory_labels: RwSignal<(String, String)>,
+    pods_ready: RwSignal<(f64, f64)>,
+    pods_cpu: RwSignal<(f64, f64)>,
+    pods_memory_values: RwSignal<(f64, f64)>,
+    pods_memory_labels: RwSignal<(String, String)>,
+    events: RwSignal<Vec<Vec<String>>>,
+    loading: RwSignal<bool>,
+) {
+    spawn_local(async move {
         let nodes = crate::api::nodes::get_nodes().await.unwrap_or_default();
         let nodes_metrics = crate::api::metrics::get_nodes().await.unwrap_or_default();
         nodes_ready.set(get_nodes_ready(&nodes));
@@ -42,10 +71,21 @@ pub fn DashboardPage() -> impl IntoView {
         events.set(events_list.into_iter().map(|e|
             vec![e.involved_object.kind, e.involved_object.name, time_until_now(&e.first_timestamp), e.reason, e.message]
         ).collect());
-
         loading.set(false);
-    }));
+    });
+}
 
+fn view(
+    nodes_ready: RwSignal<(f64, f64)>,
+    nodes_cpu: RwSignal<(f64, f64)>,
+    nodes_memory_values: RwSignal<(f64, f64)>,
+    nodes_memory_labels: RwSignal<(String, String)>,
+    pods_ready: RwSignal<(f64, f64)>,
+    pods_cpu: RwSignal<(f64, f64)>,
+    pods_memory_values: RwSignal<(f64, f64)>,
+    pods_memory_labels: RwSignal<(String, String)>,
+    events: RwSignal<Vec<Vec<String>>>,
+) -> impl IntoView {
     view! {
         <Header text=" > Overview".to_string() />
         <PageContent>
@@ -107,71 +147,5 @@ pub fn DashboardPage() -> impl IntoView {
             </PageContentSlot>
         </PageContent>
         <Footer />
-    }
-}
-
-#[component]
-pub fn DashboardCardCircle(
-    label: &'static str,
-    label_add: &'static str,
-    values: (f64, f64),
-    #[prop(default = (String::new(), String::new()))] value_labels: (String, String),
-    #[prop(default = true)] decimal: bool,
-) -> impl IntoView {
-    let used_format = if decimal { format!("{:.0}", values.1) } else { format!("{:.2}", values.1) };
-    let total_format = if decimal { format!("{:.0}", values.0) } else { format!("{:.2}", values.0) };
-
-    view! {
-        <div class="dashboard-card-circle">
-            <div>
-                <div class="label">{label}</div>
-                <div class="label-add">{label_add}</div>
-            </div>
-            <div class="ring" style=format!("--fill: {}%", (values.1 / values.0) * 100.0)>
-                <div class="ring-inner">
-                    <div class="ring-inner-text">{used_format} {value_labels.1}</div>
-                    <div class="ring-inner-text">of</div>
-                    <div class="ring-inner-text">{total_format} {value_labels.0}</div>
-                </div>
-            </div>
-        </div>
-    }
-}
-
-#[component]
-pub fn DashboardCardList(
-    labels: &'static[&'static str],
-    widths: &'static[&'static str],
-    rows: Vec<Vec<String>>,
-) -> impl IntoView {
-    view! {
-        <div class="dashboard-card-list">
-            <div class="table-header">
-                <For
-                    each=move || labels.iter().zip(widths).clone()
-                    key=|(l, _)| l.to_string()
-                    children=move |(l, w)| view! {
-                        <div class="table-header-item" style=format!("width: {}", w.to_string())>{ l.to_string() }</div>
-                    }
-                />
-            </div>
-            <div class="table-body">
-                <For
-                    each=move || rows.clone()
-                    key=|r| r.join(" ")
-                    children=move |r| view! {
-                        <div class="table-row">
-                            <For
-                                each=move || r.clone().into_iter().zip(widths).clone()
-                                key=|(r, _)| r.clone()
-                                children=move |(r, w)| view! {
-                                    <div class="table-row-item" style=format!("width: {}", w.to_string())>{ r.to_string() }</div>
-                                }
-                            />
-                        </div>
-                    }
-                />
-            </div>
-        </div>
     }
 }
