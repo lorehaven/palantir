@@ -6,7 +6,7 @@ steps:
   - name: build
     image: rust:1.84.1
     commands:
-      - V
+      - cargo build
   - name: leptos build
     image: rust:1.84.1
     commands:
