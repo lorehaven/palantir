@@ -21,9 +21,9 @@ pub fn DashboardPage() -> impl IntoView {
     let loading = RwSignal::new(true);
 
     update_page_effect(10_000, move || update_page(
-        nodes_ready.clone(), nodes_cpu.clone(), nodes_memory_values.clone(), nodes_memory_labels.clone(),
-        pods_ready.clone(), pods_cpu.clone(), pods_memory_values.clone(), pods_memory_labels.clone(),
-        events.clone(), loading.clone()));
+        nodes_ready, nodes_cpu, nodes_memory_values, nodes_memory_labels,
+        pods_ready, pods_cpu, pods_memory_values, pods_memory_labels,
+        events, loading));
 
     view(
         nodes_ready,
@@ -38,6 +38,7 @@ pub fn DashboardPage() -> impl IntoView {
     )
 }
 
+#[allow(clippy::too_many_arguments)]
 fn update_page(
     nodes_ready: RwSignal<(f64, f64)>,
     nodes_cpu: RwSignal<(f64, f64)>,
@@ -75,6 +76,7 @@ fn update_page(
     });
 }
 
+#[allow(clippy::too_many_arguments)]
 fn view(
     nodes_ready: RwSignal<(f64, f64)>,
     nodes_cpu: RwSignal<(f64, f64)>,

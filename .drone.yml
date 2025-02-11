@@ -1,0 +1,31 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: build
+    image: rust:1.84.1
+    commands:
+      - V
+  - name: leptos build
+    image: rust:1.84.1
+    commands:
+      - cargo install trunk
+      - cargo add leptos --features=ssr
+      - rustup target add wasm32-unknown-unknown
+      - cargo leptos build
+  - name: test
+    image: rust:1.84.1
+    commands:
+      - cargo check
+  - name: lint
+    image: rust:1.84.1
+    commands:
+      - rustup component add clippy
+      - cargo clippy --all-targets --all-features -- -D warnings
+
+trigger:
+  event:
+    - cron
+    - custom
+    - push
