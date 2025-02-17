@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 
+#[allow(dead_code)]
 pub fn time_until_now(timestamp: &str) -> String {
     let timestamp: DateTime<Utc> = timestamp.parse().expect("Failed to parse timestamp");
     let now = Utc::now();

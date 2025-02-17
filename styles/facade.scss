@@ -1,14 +1,20 @@
 @import "theme.scss";
 
+.content-facade {
+  .side-nav-bar {
+    display: none !important;
+  }
+}
+
 .facade {
   @media screen and (max-width: 1023px) {
     margin: 0;
   }
   @media screen and (min-width: 1024px) and (max-width: 1365px) {
-    margin: 0 8rem;
+    margin: 0 4rem;
   }
   @media screen and (min-width: 1366px) {
-    margin: 0 16rem;
+    margin: 0 8rem;
   }
 
   display: flex;

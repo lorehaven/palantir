@@ -7,7 +7,7 @@ pub fn DashboardCardList(
     rows: Vec<Vec<String>>,
 ) -> impl IntoView {
     view! {
-        <div class="dashboard-card-list">
+        <div class="card-list">
             <div class="table-header">
                 <For
                     each=move || labels.iter().zip(widths).clone()

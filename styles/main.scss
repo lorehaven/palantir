@@ -1,4 +1,5 @@
 @import "components/components.scss";
+@import "cluster.scss";
 @import "dashboard.scss";
 @import "facade.scss";
 @import "loader.scss";
@@ -14,6 +15,9 @@ body {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	-webkit-user-select: none;
+
+	padding: 0;
+	margin: 0.4rem;
 }
 
 ::-webkit-scrollbar {

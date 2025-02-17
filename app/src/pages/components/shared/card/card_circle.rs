@@ -12,7 +12,7 @@ pub fn DashboardCardCircle(
     let total_format = if decimal { format!("{:.0}", values.0) } else { format!("{:.2}", values.0) };
 
     view! {
-        <div class="dashboard-card-circle">
+        <div class="card-circle">
             <div>
                 <div class="label">{label}</div>
                 <div class="label-add">{label_add}</div>

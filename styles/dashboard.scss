@@ -1,5 +1,11 @@
 @import "theme.scss";
 
+.content-dashboard {
+  .side-nav-bar {
+    display: none !important;
+  }
+}
+
 .dashboard {
   @media screen and (max-width: 1023px) {
     margin: 0;
@@ -11,120 +17,52 @@
     margin: 0 4rem;
   }
 
-  padding: 1rem 0;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-}
 
-.dcc-1 {
-  grid-template-columns: 1fr;
-}
+  .entries {
+    display: grid;
+    margin-top: 2rem;
+    gap: 1rem;
 
-.dcc-3 {
-  grid-template-columns: 1fr 1fr 1fr;
-}
-
-.dashboard-card-container {
-  display: grid;
-  gap: 1rem;
-
-  .dashboard-card-circle,
-  .dashboard-card-list {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.8);
-  }
-
-  .dashboard-card-list {
-    flex-direction: column;
-  }
-
-  .dashboard-card-circle {
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 0 2rem;
-    height: 12rem;
-
-    .ring {
-      width: 10rem;
-      height: 10rem;
-      border-radius: 50%;
-      background: conic-gradient($secondaryColor 0% var(--fill), $primaryAccentColor var(--fill) 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      .ring-inner {
-        width: 65%;
-        height: 65%;
-        border-radius: 50%;
-        background-color: $primaryColor;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-
-        .ring-inner-text {
-          font-size: 1.2rem;
-
-          &:nth-child(2) {
-            font-size: 0.8rem;
-          }
-        }
-      }
+    @media screen and (max-width: 1023px) {
+      grid-template-columns: 1fr;
+    }
+    @media screen and (min-width: 1024px) and (max-width: 1365px) {
+      grid-template-columns: 1fr 1fr;
+    }
+    @media screen and (min-width: 1366px) {
+      grid-template-columns: 1fr 1fr 1fr;
     }
 
-    .label {
-      font-size: 1.3rem;
-      font-weight: bold;
-      margin-top: 0.5rem;
-    }
-
-    .label-add {
-      font-size: 0.8rem;
-      font-weight: bold;
-    }
-  }
-
-  .dashboard-card-list {
-    padding: 1rem;
-
-    .table-header {
+    .entry {
       display: flex;
       flex-direction: row;
-      justify-content: center;
-      align-items: center;
-      gap: 0.5rem;
+      text-decoration: none;
+      color: $secondaryColor;
+      padding: 1.4rem 2.6rem;
+      background-size: 200% 100%;
+      background-image: linear-gradient(to right, $primaryAccentColor 50%, $secondaryColor 50%);
 
-      font-size: 1.3rem;
-      font-weight: bold;
-      padding: 0.5rem;
-      width: 100%;
-
-      .table-header-item {
-        border-bottom: 0.1rem solid $secondaryColor;
-      }
-    }
-
-    .table-body {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-
-      .table-row {
+      .row {
         display: flex;
         flex-direction: row;
-        justify-content: center;
         align-items: center;
-        gap: 0.5rem;
+        gap: 2rem;
 
-        font-size: 1rem;
-        padding: 0.5rem;
-        width: 100%;
+        .entry-title {
+          font-size: 1.6rem;
+          font-weight: bold;
+        }
+      }
 
-        .table-row-item {}
+      -webkit-transition: background-position 0.5s, color 0.5s;
+      -moz-transition: background-position 0.5s, color 0.5s;
+      transition: background-position 0.5s, color 0.5s;
+
+      &:hover {
+        background-position: -100% 0;
+        color: $primaryAccentColor;
       }
     }
   }

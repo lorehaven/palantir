@@ -1,0 +1,113 @@
+@import "../theme";
+
+.card-container {
+  display: grid;
+  gap: 1rem;
+
+  .card-circle,
+  .card-list {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.8);
+  }
+
+  .card-list {
+    flex-direction: column;
+  }
+
+  .card-circle {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 12rem;
+    position: relative;
+
+    .ring {
+      width: 10rem;
+      height: 10rem;
+      border-radius: 50%;
+      background: conic-gradient($secondaryColor 0% var(--fill), $primaryAccentColor var(--fill) 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .ring-inner {
+        width: 65%;
+        height: 65%;
+        border-radius: 50%;
+        background-color: $primaryColor;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        .ring-inner-text {
+          font-size: 1.2rem;
+
+          &:nth-child(2) {
+            font-size: 0.8rem;
+          }
+        }
+      }
+    }
+
+    .label {
+      font-size: 1.3rem;
+      font-weight: bold;
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      width: 40%;
+    }
+
+    .label-add {
+      font-size: 0.8rem;
+      font-weight: bold;
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+    }
+  }
+
+  .card-list {
+    padding: 1rem;
+
+    .table-header {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+
+      font-size: 1.3rem;
+      font-weight: bold;
+      padding: 0.5rem;
+      width: 100%;
+
+      .table-header-item {
+        border-bottom: 0.1rem solid $secondaryColor;
+      }
+    }
+
+    .table-body {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+
+      .table-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+
+        font-size: 1rem;
+        padding: 0.5rem;
+        width: 100%;
+
+        .table-row-item {}
+      }
+    }
+  }
+}
