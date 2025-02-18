@@ -7,11 +7,20 @@ pub fn time_until_now(timestamp: &str) -> String {
     let duration = now.signed_duration_since(timestamp);
 
     let total_seconds = duration.num_seconds();
+    let days = total_seconds / 86400;
+    let months = days / 30;
+    let years = months / 12;
     let hours = total_seconds / 3600;
     let minutes = (total_seconds % 3600) / 60;
     let seconds = total_seconds % 60;
 
-    if hours > 0 {
+    if years > 0 {
+        format!("{} y", years)
+    } else if months > 0 {
+        format!("{} mo", months)
+    } else if days > 0 {
+        format!("{} d", days)
+    } else if hours > 0 {
         format!("{} h", hours)
     } else if minutes > 0 {
         format!("{} m", minutes)

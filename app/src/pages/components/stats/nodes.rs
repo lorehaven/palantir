@@ -8,7 +8,7 @@ use crate::pages::utils::shared::effects::update_page_effect;
 use crate::pages::utils::stats::convert_memory;
 
 #[component]
-pub fn NodesStatComponents() -> impl IntoView {
+pub fn NodesStatComponent() -> impl IntoView {
     let nodes_ready = RwSignal::new((0., 0.));
     let nodes_cpu = RwSignal::new((0., 0.));
     let nodes_memory_values = RwSignal::new((0., 0.));
@@ -53,16 +53,16 @@ fn view(
         <Expandable label="Nodes" expanded=true>
             <ExpandableSlot slot>
                 <div class="card-container dcc-3">
-                    <DashboardCardCircle
+                    <CardCircle
                         label="Nodes"
                         label_add="ready vs all"
                         values=nodes_ready.get() />
-                    <DashboardCardCircle
+                    <CardCircle
                         label="Node CPU usage"
                         label_add="used vs available"
                         values=nodes_cpu.get()
                         decimal=false />
-                    <DashboardCardCircle
+                    <CardCircle
                         label="Node Memory usage"
                         label_add="used vs available"
                         values=nodes_memory_values.get()

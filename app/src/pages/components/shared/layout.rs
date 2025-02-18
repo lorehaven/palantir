@@ -14,7 +14,7 @@ pub fn Header(
 
 #[component]
 pub fn SideNavBar() -> impl IntoView {
-    let current_path = use_location().pathname.get();
+    let current_path = use_location().pathname.get_untracked();
 
     view! {
         <div class="side-nav-bar">

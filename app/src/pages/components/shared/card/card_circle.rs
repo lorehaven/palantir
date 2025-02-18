@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 
 #[component]
-pub fn DashboardCardCircle(
+pub fn CardCircle(
     label: &'static str,
     label_add: &'static str,
     values: (f64, f64),

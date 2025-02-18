@@ -31,7 +31,7 @@ fn view(
         <Expandable label="Events" expanded=true>
             <ExpandableSlot slot>
                 <div class="card-container dcc-1">
-                    <DashboardCardList
+                    <CardList
                         labels=&["Type", "Name", "Time", "Reason", "Event"]
                         widths=&["5%", "20%", "5%", "10%", "60%"]
                         rows=events.get() />

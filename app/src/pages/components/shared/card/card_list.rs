@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 
 #[component]
-pub fn DashboardCardList(
+pub fn CardList(
     labels: &'static[&'static str],
     widths: &'static[&'static str],
     rows: Vec<Vec<String>>,

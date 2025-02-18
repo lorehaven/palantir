@@ -2,7 +2,7 @@ use leptos::prelude::*;
 
 use crate::pages::components::prelude::*;
 use crate::pages::components::stats::events::EventsComponent;
-use crate::pages::components::stats::nodes::NodesStatComponents;
+use crate::pages::components::stats::nodes::NodesStatComponent;
 use crate::pages::components::stats::pods::PodsStatComponent;
 
 pub mod namespaces;
@@ -15,7 +15,7 @@ pub fn ClusterPage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="cluster">
-                    <NodesStatComponents />
+                    <NodesStatComponent />
                     <PodsStatComponent />
                     <EventsComponent />
                 </div>

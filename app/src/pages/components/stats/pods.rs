@@ -53,16 +53,16 @@ fn view(
         <Expandable label="Pods" expanded=true>
             <ExpandableSlot slot>
                 <div class="card-container dcc-3">
-                    <DashboardCardCircle
+                    <CardCircle
                         label="Pods"
                         label_add="ready vs requested"
                         values=pods_ready.get() />
-                    <DashboardCardCircle
+                    <CardCircle
                         label="Pods CPU usage"
                         label_add="actual vs reserved"
                         values=pods_cpu.get()
                         decimal=false />
-                    <DashboardCardCircle
+                    <CardCircle
                         label="Pods Memory usage"
                         label_add="used vs available"
                         values=pods_memory_values.get()

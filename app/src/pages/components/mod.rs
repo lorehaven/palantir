@@ -1,3 +1,5 @@
+pub mod cluster;
+
 pub mod shared;
 pub mod stats;
 

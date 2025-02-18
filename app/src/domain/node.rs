@@ -73,3 +73,32 @@ pub struct Condition {
     pub reason: String,
     pub message: String,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum NodeType {
+    ControlPlane,
+    Master,
+    Worker,
+}
+
+impl NodeType {
+    pub fn from_node(node: &Node) -> Self {
+        if node.metadata.labels.get("node-role.kubernetes.io/control-plane") == Some(&"true".to_string()) {
+            NodeType::ControlPlane
+        } else if node.metadata.labels.get("node-role.kubernetes.io/master") == Some(&"true".to_string()) {
+            NodeType::Master
+        } else {
+            NodeType::Worker
+        }
+    }
+}
+
+impl std::fmt::Display for NodeType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            NodeType::ControlPlane => write!(f, "Control Plane"),
+            NodeType::Master => write!(f, "Master"),
+            NodeType::Worker => write!(f, "Worker"),
+        }
+    }
+}
