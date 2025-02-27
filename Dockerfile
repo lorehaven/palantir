@@ -1,4 +1,4 @@
-FROM rust:1.84-alpine AS builder
+FROM rust:1.85-alpine AS builder
 
 RUN apk update && apk add --no-cache build-base openssl libressl-dev musl-dev bash curl npm libc-dev binaryen
 RUN npm install -g sass
@@ -11,7 +11,7 @@ COPY . .
 
 RUN cargo leptos build --release -vv
 
-FROM rust:1.84-alpine AS runner
+FROM rust:1.85-alpine AS runner
 
 WORKDIR /app
 

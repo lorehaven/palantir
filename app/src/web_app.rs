@@ -12,11 +12,13 @@ use crate::pages::{
 
 #[component]
 pub fn WebApp() -> impl IntoView {
+    let site_root = std::env::var("LEPTOS_SITE_PKG_DIR").unwrap_or("pkg".to_string());
     provide_meta_context();
 
     view! {
         <Link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet"/>
-        <Stylesheet href="/pkg/palantir.css"/>
+        <Stylesheet href=format!("/pkg/palantir.css")/>
+        <Stylesheet href=format!("/{site_root}/palantir.css")/>
         <Title text="Palantir"/>
         <Router>
             <main>
