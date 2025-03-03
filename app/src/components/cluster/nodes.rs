@@ -4,7 +4,7 @@ use leptos::task::spawn_local;
 use crate::domain::metrics::NodeMetrics;
 use crate::domain::node::{Node, NodeType};
 use crate::domain::pod::Pod;
-use crate::pages::components::prelude::*;
+use crate::components::prelude::*;
 use crate::pages::utils::shared::effects::update_page_effect;
 use crate::pages::utils::shared::time::time_until_now;
 use crate::pages::utils::stats::{convert_memory, parse_memory};
@@ -52,14 +52,29 @@ fn update_page(
 fn view(
     nodes: RwSignal<Vec<Vec<String>>>,
 ) -> impl IntoView {
+    let columns = vec![
+        TableColumn::new("Type", TableColumnType::String, 1),
+        TableColumn::new("Name", TableColumnType::String, 2),
+        TableColumn::new("Age", TableColumnType::String, 1),
+        TableColumn::new("Labels", TableColumnType::StringList, 4),
+        TableColumn::new("Ready", TableColumnType::Bool, 1),
+        TableColumn::new("CPU actual", TableColumnType::StringTwoLine, 2),
+        TableColumn::new("CPU requested", TableColumnType::StringTwoLine, 2),
+        TableColumn::new("CPU limits", TableColumnType::StringTwoLine, 2),
+        TableColumn::new("RAM actual", TableColumnType::StringTwoLine, 2),
+        TableColumn::new("RAM requested", TableColumnType::StringTwoLine, 2),
+        TableColumn::new("RAM limits", TableColumnType::StringTwoLine, 2),
+    ];
+    let mut styles = vec![""; columns.len()];
+    styles[4] = "font-size: 1.6rem;";
+
     view! {
         <Expandable label="" expanded=true>
             <ExpandableSlot slot>
                 <div class="card-container dcc-1">
-                    <CardList
-                        labels=&["Type", "Name", "Age", "Labels", "Ready", "CPU actual", "CPU requested", "CPU limits", "RAM actual", "RAM requested", "RAM limits"]
-                        widths=&["5%", "11%", "5%", "20%", "5%", "9%", "9%", "9%", "9%", "9%", "9%"]
-                        rows=nodes.get() />
+                    <div class="card-table">
+                        <TableComponent columns=columns.clone() values=nodes.get() styles=styles.clone() />
+                    </div>
                 </div>
             </ExpandableSlot>
         </Expandable>
@@ -69,7 +84,7 @@ fn view(
 fn get_node_cpu_actual(node: &Node, metrics: &NodeMetrics) -> String {
     let ncap = node.status.capacity.cpu.parse::<f64>().unwrap_or(0.);
     let nuse = metrics.usage.cpu.trim_end_matches('n').parse::<f64>().unwrap_or(0.) / 1_000_000_000.;
-    format!("{:.2}%\n{:.2}", nuse / ncap * 100., nuse * 1000.)
+    format!("{:.2}%\n{:.2}m", nuse / ncap * 100., nuse * 1000.)
 }
 
 fn get_node_cpu_requests_limits(node: &Node, pods: &[Pod]) -> (String, String) {

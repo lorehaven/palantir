@@ -63,7 +63,7 @@ main {
     .content-internal {
       width: 100vw;
       padding-bottom: 1rem;
-      overflow-y: auto;
+      overflow-y: scroll;
       position: relative;
     }
   }

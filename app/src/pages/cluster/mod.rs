@@ -1,9 +1,9 @@
 use leptos::prelude::*;
 
-use crate::pages::components::prelude::*;
-use crate::pages::components::stats::events::EventsComponent;
-use crate::pages::components::stats::nodes::NodesStatComponent;
-use crate::pages::components::stats::pods::PodsStatComponent;
+use crate::components::prelude::*;
+use crate::components::stats::events::EventsComponent;
+use crate::components::stats::nodes::NodesStatComponent;
+use crate::components::stats::pods::PodsStatComponent;
 
 pub mod namespaces;
 pub mod nodes;

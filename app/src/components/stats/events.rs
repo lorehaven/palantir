@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::pages::components::prelude::*;
+use crate::components::prelude::*;
 use crate::pages::utils::shared::effects::update_page_effect;
 use crate::pages::utils::shared::time::time_until_now;
 
@@ -27,14 +27,22 @@ fn update_page(
 fn view(
     events: RwSignal<Vec<Vec<String>>>,
 ) -> impl IntoView {
+    let columns = vec![
+        TableColumn::new("Type", TableColumnType::String, 1),
+        TableColumn::new("Name", TableColumnType::String, 4),
+        TableColumn::new("Time", TableColumnType::String, 1),
+        TableColumn::new("Reason", TableColumnType::String, 2),
+        TableColumn::new("Event", TableColumnType::String, 12),
+    ];
+    let styles = vec![""; columns.len()];
+
     view! {
         <Expandable label="Events" expanded=true>
             <ExpandableSlot slot>
                 <div class="card-container dcc-1">
-                    <CardList
-                        labels=&["Type", "Name", "Time", "Reason", "Event"]
-                        widths=&["5%", "20%", "5%", "10%", "60%"]
-                        rows=events.get() />
+                    <div class="card-table">
+                        <TableComponent columns=columns.clone() values=events.get() styles=styles.clone() />
+                    </div>
                 </div>
             </ExpandableSlot>
         </Expandable>

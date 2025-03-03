@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 
-use crate::pages::components::prelude::*;
+use crate::components::prelude::*;
 use crate::pages::utils::shared::text::capitalize;
 
 #[component]

@@ -3,7 +3,7 @@ use leptos::task::spawn_local;
 
 use crate::domain::metrics::PodMetrics;
 use crate::domain::pod::Pod;
-use crate::pages::components::prelude::*;
+use crate::components::prelude::*;
 use crate::pages::utils::shared::effects::update_page_effect;
 use crate::pages::utils::stats::{convert_memory, parse_memory};
 

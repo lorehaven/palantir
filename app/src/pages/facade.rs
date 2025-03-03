@@ -3,7 +3,7 @@ use leptos::task::spawn_local;
 
 use crate::api::services as api;
 use crate::domain::service::ServiceEntry;
-use crate::pages::components::prelude::*;
+use crate::components::prelude::*;
 use crate::pages::utils::shared::effects::update_page_effect;
 
 #[component]

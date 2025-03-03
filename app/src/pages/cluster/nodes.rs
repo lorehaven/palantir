@@ -1,7 +1,7 @@
 use leptos::prelude::*;
-use crate::pages::components::cluster::nodes::NodesListComponent;
-use crate::pages::components::prelude::*;
-use crate::pages::components::stats::nodes::NodesStatComponent;
+use crate::components::cluster::nodes::NodesListComponent;
+use crate::components::prelude::*;
+use crate::components::stats::nodes::NodesStatComponent;
 
 #[component]
 pub fn ClusterNodesPage() -> impl IntoView {

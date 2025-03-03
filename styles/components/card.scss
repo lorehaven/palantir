@@ -4,19 +4,10 @@
   display: grid;
   gap: 1rem;
 
-  .card-circle,
-  .card-list {
+  .card-circle {
     display: flex;
-    justify-content: center;
     align-items: center;
     box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.8);
-  }
-
-  .card-list {
-    flex-direction: column;
-  }
-
-  .card-circle {
     flex-direction: row;
     justify-content: space-between;
     padding: 0 2rem;
@@ -70,43 +61,44 @@
     }
   }
 
-  .card-list {
+  .card-table {
     padding: 1rem;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.8);
+    flex-direction: column;
+
+    .table-header,
+    .table-body {
+      display: grid;
+      gap: 0.5rem;
+      width: 100%;
+    }
 
     .table-header {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: end;
-      gap: 0.5rem;
-
-      font-size: 1rem;
-      font-weight: bold;
-      padding: 0.5rem;
-      width: 100%;
+      margin-bottom: 1rem;
 
       .table-header-item {
+        font-weight: bold;
         border-bottom: 0.1rem solid $secondaryColor;
       }
     }
 
     .table-body {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
+      align-items: center;
 
-      .table-row {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        gap: 0.5rem;
-
+      ul.table-body-item-list {
         font-size: 0.8rem;
-        padding: 0.5rem;
-        width: 100%;
+      }
 
-        .table-row-item {}
+      ul.table-body-item-list,
+      ul.table-body-item-two, {
+        padding: 0;
+        margin: 0;
+
+        li {
+          list-style: none;
+        }
       }
     }
   }

@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 
-use crate::pages::components::prelude::*;
+use crate::components::prelude::*;
 
 #[component]
 pub fn ClusterNamespacesPage() -> impl IntoView {
