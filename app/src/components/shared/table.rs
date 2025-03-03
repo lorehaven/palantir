@@ -67,7 +67,7 @@ fn StringValue(item: String, style: &'static str) -> impl IntoView {
 fn StringTwoLineValue(item: String, style: &'static str) -> impl IntoView {
     view! {
         <ul class="table-body-item-two" style=style>
-            {item.split("\n").into_iter()
+            {item.split("\n")
                 .map(|item| view! { <li> { item.to_string() } </li> })
                 .collect::<Vec<_>>()}
         </ul>
@@ -78,7 +78,7 @@ fn StringTwoLineValue(item: String, style: &'static str) -> impl IntoView {
 fn StringListValue(item: String, style: &'static str) -> impl IntoView {
     view! {
         <ul class="table-body-item-list" style=style>
-            {item.split("\n").into_iter()
+            {item.split("\n")
                 .map(|item| view! { <li> { item.to_string() } </li> })
                 .collect::<Vec<_>>()}
         </ul>
