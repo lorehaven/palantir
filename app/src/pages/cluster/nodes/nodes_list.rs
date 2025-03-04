@@ -21,9 +21,9 @@ fn update_page(
     nodes: RwSignal<Vec<Vec<String>>>,
 ) {
     spawn_local(async move {
-        let nodes_data = crate::api::nodes::get_nodes().await.unwrap_or_default();
+        let nodes_data = crate::api::nodes::get_nodes(None).await.unwrap_or_default();
         let nodes_metrics = crate::api::metrics::get_nodes().await.unwrap_or_default();
-        let pods_data = crate::api::pods::get_pods().await.unwrap_or_default();
+        let pods_data = crate::api::pods::get_pods(None).await.unwrap_or_default();
 
         let mut nodes_vec = vec![];
         for node in nodes_data {

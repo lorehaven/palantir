@@ -8,13 +8,21 @@ use crate::pages::utils::shared::effects::update_page_effect;
 use crate::pages::utils::stats::{convert_memory, parse_memory};
 
 #[component]
-pub fn PodsStatComponent() -> impl IntoView {
+pub fn PodsStatComponent(
+    #[prop(default = None)]
+    node_name: Option<String>,
+    #[prop(default = true)]
+    expandable: bool,
+) -> impl IntoView {
+    let node_name = RwSignal::new(node_name);
     let pods_ready = RwSignal::new((0., 0.));
     let pods_cpu = RwSignal::new((0., 0.));
     let pods_memory_values = RwSignal::new((0., 0.));
     let pods_memory_labels = RwSignal::new((String::new(), String::new()));
+    let expandable = RwSignal::new(expandable);
 
     update_page_effect(5_000, move || update_page(
+        node_name,
         pods_ready,
         pods_cpu,
         pods_memory_values,
@@ -23,17 +31,19 @@ pub fn PodsStatComponent() -> impl IntoView {
         pods_ready,
         pods_cpu,
         pods_memory_values,
-        pods_memory_labels,)
+        pods_memory_labels,
+        expandable,)
 }
 
 fn update_page(
+    node_name: RwSignal<Option<String>>,
     pods_ready: RwSignal<(f64, f64)>,
     pods_cpu: RwSignal<(f64, f64)>,
     pods_memory_values: RwSignal<(f64, f64)>,
     pods_memory_labels: RwSignal<(String, String)>,
 ) {
     spawn_local(async move {
-        let pods = crate::api::pods::get_pods().await.unwrap_or_default();
+        let pods = crate::api::pods::get_pods(node_name.get_untracked()).await.unwrap_or_default();
         let pods_metrics = crate::api::metrics::get_pods().await.unwrap_or_default();
         pods_ready.set(get_pods_ready(&pods));
         pods_cpu.set(get_pods_cpu(&pods, &pods_metrics));
@@ -48,29 +58,55 @@ fn view(
     pods_cpu: RwSignal<(f64, f64)>,
     pods_memory_values: RwSignal<(f64, f64)>,
     pods_memory_labels: RwSignal<(String, String)>,
+    expandable: RwSignal<bool>,
 ) -> impl IntoView {
     view! {
-        <Expandable label="Pods" expanded=true>
-            <ExpandableSlot slot>
-                <div class="card-container dcc-3">
-                    <CardCircle
-                        label="Pods"
-                        label_add="ready vs requested"
-                        values=pods_ready.get() />
-                    <CardCircle
-                        label="Pods CPU usage"
-                        label_add="actual vs reserved"
-                        values=pods_cpu.get()
-                        decimal=false />
-                    <CardCircle
-                        label="Pods Memory usage"
-                        label_add="used vs available"
-                        values=pods_memory_values.get()
-                        value_labels=pods_memory_labels.get()
-                        decimal=false />
-                </div>
-            </ExpandableSlot>
-        </Expandable>
+        <Show
+            when=move || expandable.get()
+            fallback=move || view_internal(
+                pods_ready,
+                pods_cpu,
+                pods_memory_values,
+                pods_memory_labels
+            )>
+            <Expandable label="Pods" expanded=true>
+                <ExpandableSlot slot>
+                    {view_internal(
+                        pods_ready,
+                        pods_cpu,
+                        pods_memory_values,
+                        pods_memory_labels
+                    )}
+                </ExpandableSlot>
+            </Expandable>
+        </Show>
+    }
+}
+
+fn view_internal(
+    pods_ready: RwSignal<(f64, f64)>,
+    pods_cpu: RwSignal<(f64, f64)>,
+    pods_memory_values: RwSignal<(f64, f64)>,
+    pods_memory_labels: RwSignal<(String, String)>,
+) -> impl IntoView {
+    view! {
+        <div class="card-container dcc-3">
+            <CardCircle
+                label="Pods"
+                label_add="ready vs requested"
+                values=pods_ready.get() />
+            <CardCircle
+                label="Pods CPU usage"
+                label_add="actual vs reserved"
+                values=pods_cpu.get()
+                decimal=false />
+            <CardCircle
+                label="Pods Memory usage"
+                label_add="used vs available"
+                values=pods_memory_values.get()
+                value_labels=pods_memory_labels.get()
+                decimal=false />
+        </div>
     }
 }
 

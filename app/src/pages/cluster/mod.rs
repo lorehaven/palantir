@@ -6,8 +6,8 @@ use crate::components::stats::nodes::NodesStatComponent;
 use crate::components::stats::pods::PodsStatComponent;
 
 pub mod namespaces;
-pub mod nodes;
 pub mod node;
+pub mod nodes;
 
 #[component]
 pub fn ClusterPage() -> impl IntoView {

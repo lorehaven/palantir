@@ -2,18 +2,16 @@
 
 .card-container {
   display: grid;
-  gap: 1rem;
+  gap: 2rem;
+
+  .card-string {
+    .card-string-content {
+      font-size: 6rem;
+      font-weight: bold;
+    }
+  }
 
   .card-circle {
-    display: flex;
-    align-items: center;
-    box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.8);
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 0 2rem;
-    height: 12rem;
-    position: relative;
-
     .ring {
       width: 10rem;
       height: 10rem;
@@ -42,6 +40,18 @@
         }
       }
     }
+  }
+
+  .card-circle,
+  .card-string {
+    display: flex;
+    align-items: center;
+    box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.8);
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 12rem;
+    position: relative;
 
     .label {
       font-size: 1.3rem;

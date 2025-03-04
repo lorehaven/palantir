@@ -23,7 +23,7 @@ pub async fn get_services() -> Result<Vec<ServiceEntry>, ServerFnError> {
         .send()
         .await?;
     response.error_for_status_ref()?;
-    Ok(parse_response(&response.text().await?, &get_pods().await?).await.unwrap_or_default())
+    Ok(parse_response(&response.text().await?, &get_pods(None).await?).await.unwrap_or_default())
 }
 
 #[allow(dead_code)]
