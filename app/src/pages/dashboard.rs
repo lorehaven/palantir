@@ -15,7 +15,7 @@ pub fn DashboardPage() -> impl IntoView {
     ];
 
     view! {
-        <Header />
+        <Header text=vec![""] />
         <PageContent additional_classes="content-dashboard">
             <PageContentSlot slot>
                 <div class="dashboard">

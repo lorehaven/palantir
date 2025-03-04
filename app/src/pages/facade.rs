@@ -27,7 +27,7 @@ fn update_page(entries: RwSignal<Vec<ServiceEntry>>, loading: RwSignal<bool>) {
 
 fn view(entries: RwSignal<Vec<ServiceEntry>>, loading: RwSignal<bool>) -> impl IntoView {
     view! {
-        <Header text=" > Services" />
+        <Header text=vec!["Services"] />
         <PageContent additional_classes="content-facade">
             <PageContentSlot slot>
                 <div class="facade">

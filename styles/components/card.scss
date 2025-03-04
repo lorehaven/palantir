@@ -87,6 +87,10 @@
     .table-body {
       align-items: center;
 
+      .table-body-item-link {
+        color: $secondaryColor;
+      }
+
       ul.table-body-item-list {
         font-size: 0.8rem;
       }

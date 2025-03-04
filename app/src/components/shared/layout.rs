@@ -5,10 +5,29 @@ use crate::pages::utils::shared::text::capitalize;
 #[component]
 pub fn Header(
     #[prop(optional)]
-    text: &'static str,
+    text: Vec<impl Into<String>>,
 ) -> impl IntoView {
+    let text = text.into_iter()
+        .map(|t| t.into())
+        .collect::<Vec<String>>();
+    let mut links = text
+        .iter()
+        .filter(|t| !t.is_empty())
+        .enumerate()
+        .map(|(idx, t)| {
+            let href = format!("/{}", text[0..=idx].iter()
+                .map(|t| t.to_lowercase())
+                .collect::<Vec<String>>()
+                .join("/"));
+            view! {
+                <span class="header-separator"> / </span>
+                <a href=href class="header-link">{ t.to_string() }</a>
+            }.into_any()
+        })
+        .collect::<Vec<_>>();
+    links.insert(0, view! { <a href="/" class="header-link">Palantir</a> }.into_any());
     view! {
-        <div class="header">Palantir{text}</div>
+        <div class="header"> { links } </div>
     }
 }
 

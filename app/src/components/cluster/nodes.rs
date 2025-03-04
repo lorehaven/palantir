@@ -54,7 +54,7 @@ fn view(
 ) -> impl IntoView {
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 1),
-        TableColumn::new("Name", TableColumnType::String, 2),
+        TableColumn::new("Name", TableColumnType::Link, 2),
         TableColumn::new("Age", TableColumnType::String, 1),
         TableColumn::new("Labels", TableColumnType::StringList, 4),
         TableColumn::new("Ready", TableColumnType::Bool, 1),
@@ -67,13 +67,19 @@ fn view(
     ];
     let mut styles = vec![""; columns.len()];
     styles[4] = "font-size: 1.6rem;";
+    let mut params = vec![""; columns.len()];
+    params[1] = "/cluster/nodes/";
 
     view! {
         <Expandable label="" expanded=true>
             <ExpandableSlot slot>
                 <div class="card-container dcc-1">
                     <div class="card-table">
-                        <TableComponent columns=columns.clone() values=nodes.get() styles=styles.clone() />
+                        <TableComponent
+                            columns=columns.clone()
+                            values=nodes.get()
+                            styles=styles.clone()
+                            params=params.clone() />
                     </div>
                 </div>
             </ExpandableSlot>

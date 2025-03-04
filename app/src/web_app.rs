@@ -9,6 +9,7 @@ use crate::pages::{
     dashboard::DashboardPage,
     facade::FacadePage,
 };
+use crate::pages::cluster::node::ClusterNodePage;
 
 #[component]
 pub fn WebApp() -> impl IntoView {
@@ -26,6 +27,7 @@ pub fn WebApp() -> impl IntoView {
                     <Route path=path!("/") view=DashboardPage />
                     <Route path=path!("/cluster") view=ClusterPage />
                     <Route path=path!("/cluster/nodes") view=ClusterNodesPage />
+                    <Route path=path!("/cluster/nodes/:name") view=ClusterNodePage />
                     <Route path=path!("/cluster/namespaces") view=ClusterNamespacesPage />
                     <Route path=path!("/facade") view=FacadePage />
                 </Routes>

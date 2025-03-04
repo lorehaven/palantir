@@ -7,11 +7,12 @@ use crate::components::stats::pods::PodsStatComponent;
 
 pub mod namespaces;
 pub mod nodes;
+pub mod node;
 
 #[component]
 pub fn ClusterPage() -> impl IntoView {
     view! {
-        <Header text=" > Cluster" />
+        <Header text=vec!["Cluster"] />
         <PageContent>
             <PageContentSlot slot>
                 <div class="cluster">

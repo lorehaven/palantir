@@ -6,7 +6,7 @@ use crate::components::stats::nodes::NodesStatComponent;
 #[component]
 pub fn ClusterNodesPage() -> impl IntoView {
     view! {
-        <Header text=" > Cluster > Nodes" />
+        <Header text=vec!["Cluster", "Nodes"] />
         <PageContent>
             <PageContentSlot slot>
                 <div class="cluster-nodes">

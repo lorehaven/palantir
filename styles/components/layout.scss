@@ -14,6 +14,13 @@ main {
     font-size: 1.6rem;
     font-weight: bold;
     background-color: $primaryAccentColor;
+    gap: 1rem;
+
+    .header-link {
+      text-decoration: none;
+      color: $secondaryColor;
+      cursor: pointer;
+    }
   }
 
   .content {

@@ -35,13 +35,18 @@ fn view(
         TableColumn::new("Event", TableColumnType::String, 12),
     ];
     let styles = vec![""; columns.len()];
+    let params = vec![""; columns.len()];
 
     view! {
         <Expandable label="Events" expanded=true>
             <ExpandableSlot slot>
                 <div class="card-container dcc-1">
                     <div class="card-table">
-                        <TableComponent columns=columns.clone() values=events.get() styles=styles.clone() />
+                        <TableComponent
+                            columns=columns.clone()
+                            values=events.get()
+                            styles=styles.clone()
+                            params=params.clone() />
                     </div>
                 </div>
             </ExpandableSlot>

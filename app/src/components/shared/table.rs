@@ -5,6 +5,7 @@ pub fn TableComponent(
     columns: Vec<TableColumn>,
     values: Vec<Vec<String>>,
     styles: Vec<&'static str>,
+    params: Vec<&'static str>,
 ) -> impl IntoView {
     let grid_template_columns = columns.iter()
         .map(|column| format!("{}fr", column.width))
@@ -23,11 +24,17 @@ pub fn TableComponent(
                 .map(|(idx, item)| {
                     let r#type = columns[idx % columns.len()].r#type.clone();
                     let style = styles[idx % styles.len()];
+                    let param = params[idx % params.len()];
+
                     match r#type {
-                        TableColumnType::String => view! { <StringValue item style /> }.into_any(),
-                        TableColumnType::StringTwoLine => view! { <StringTwoLineValue item style /> }.into_any(),
-                        TableColumnType::StringList => view! { <StringListValue item style /> }.into_any(),
                         TableColumnType::Bool => view! { <BoolValue item style /> }.into_any(),
+                        TableColumnType::Link => {
+                            let link = format!("{param}{item}");
+                            view! { <LinkValue item style link /> }.into_any()
+                        },
+                        TableColumnType::String => view! { <StringValue item style /> }.into_any(),
+                        TableColumnType::StringList => view! { <StringListValue item style /> }.into_any(),
+                        TableColumnType::StringTwoLine => view! { <StringTwoLineValue item style /> }.into_any(),
                     }
                 })
                 .collect::<Vec<_>>()}
@@ -37,10 +44,11 @@ pub fn TableComponent(
 
 #[derive(Debug, Clone)]
 pub enum TableColumnType {
-    String,
-    StringTwoLine,
-    StringList,
     Bool,
+    Link,
+    String,
+    StringList,
+    StringTwoLine,
 }
 
 #[derive(Debug, Clone)]
@@ -57,20 +65,24 @@ impl TableColumn {
 }
 
 #[component]
-fn StringValue(item: String, style: &'static str) -> impl IntoView {
+fn BoolValue(item: String, style: &'static str) -> impl IntoView {
+    let icon = if item == "true" { "check" } else { "xmark" };
     view! {
-        <span class="table-body-item" style=style> { item.to_string() } </span>
+        <i class=format!("fa-regular fa-circle-{icon}") style=style />
     }
 }
 
 #[component]
-fn StringTwoLineValue(item: String, style: &'static str) -> impl IntoView {
+fn LinkValue(item: String, style: &'static str, link: String) -> impl IntoView {
     view! {
-        <ul class="table-body-item-two" style=style>
-            {item.split("\n")
-                .map(|item| view! { <li> { item.to_string() } </li> })
-                .collect::<Vec<_>>()}
-        </ul>
+        <a href=link class="table-body-item-link" style=style> { item.to_string() } </a>
+    }
+}
+
+#[component]
+fn StringValue(item: String, style: &'static str) -> impl IntoView {
+    view! {
+        <span class="table-body-item" style=style> { item.to_string() } </span>
     }
 }
 
@@ -86,9 +98,12 @@ fn StringListValue(item: String, style: &'static str) -> impl IntoView {
 }
 
 #[component]
-fn BoolValue(item: String, style: &'static str) -> impl IntoView {
-    let icon = if item == "true" { "check" } else { "xmark" };
+fn StringTwoLineValue(item: String, style: &'static str) -> impl IntoView {
     view! {
-        <i class=format!("fa-regular fa-circle-{icon}") style=style />
+        <ul class="table-body-item-two" style=style>
+            {item.split("\n")
+                .map(|item| view! { <li> { item.to_string() } </li> })
+                .collect::<Vec<_>>()}
+        </ul>
     }
 }

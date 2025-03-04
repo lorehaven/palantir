@@ -5,7 +5,7 @@ use crate::components::prelude::*;
 #[component]
 pub fn ClusterNamespacesPage() -> impl IntoView {
     view! {
-        <Header text=" > Cluster > Namespaces" />
+        <Header text=vec!["Cluster", "Namespaces"] />
         <PageContent>
             <PageContentSlot slot>
                 <div class="cluster-namespaces">
