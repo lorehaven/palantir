@@ -17,9 +17,13 @@ main {
     gap: 1rem;
 
     .header-link {
-      text-decoration: none;
       color: $secondaryColor;
       cursor: pointer;
+
+      &:last-child {
+        text-decoration: none;
+        cursor: default;
+      }
     }
   }
 

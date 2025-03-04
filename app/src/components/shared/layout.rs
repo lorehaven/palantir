@@ -15,14 +15,21 @@ pub fn Header(
         .filter(|t| !t.is_empty())
         .enumerate()
         .map(|(idx, t)| {
-            let href = format!("/{}", text[0..=idx].iter()
-                .map(|t| t.to_lowercase())
-                .collect::<Vec<String>>()
-                .join("/"));
-            view! {
-                <span class="header-separator"> / </span>
-                <a href=href class="header-link">{ t.to_string() }</a>
-            }.into_any()
+            if idx == text.len() - 1 {
+                view! {
+                    <span class="header-separator"> / </span>
+                    <span class="header-link">{ t.to_string() }</span>
+                }.into_any()
+            } else {
+                let href = format!("/{}", text[0..=idx].iter()
+                    .map(|t| t.to_lowercase())
+                    .collect::<Vec<String>>()
+                    .join("/"));
+                view! {
+                    <span class="header-separator"> / </span>
+                    <a href=href class="header-link">{ t.to_string() }</a>
+                }.into_any()
+            }
         })
         .collect::<Vec<_>>();
     links.insert(0, view! { <a href="/" class="header-link">Palantir</a> }.into_any());
