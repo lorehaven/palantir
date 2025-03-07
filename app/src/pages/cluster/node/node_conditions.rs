@@ -22,6 +22,8 @@ fn update_page(
     conditions: RwSignal<Vec<Vec<String>>>,
 ) {
     spawn_local(async move {
+        if node_name.is_disposed() { return; }
+
         let node = nodes_api::get_node_by_name(node_name.get_untracked()).await
             .unwrap_or_default();
         let mut conditions_vec = vec![];

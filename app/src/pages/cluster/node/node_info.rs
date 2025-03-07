@@ -20,6 +20,8 @@ fn update_page(
     node_data: RwSignal<Vec<(&'static str, String)>>,
 ) {
     spawn_local(async move {
+        if node_name.is_disposed() { return; }
+
         let node = nodes_api::get_nodes_response().await
             .unwrap_or_default();
         let kind = if node.kind == "NodesList" { "Node".to_string() } else { node.kind };

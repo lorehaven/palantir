@@ -51,6 +51,8 @@ fn update_page(
     nodes_memory_labels: RwSignal<(String, String)>,
 ) {
     spawn_local(async move {
+        if node_name.is_disposed() { return; }
+
         let node_name = node_name.get_untracked();
         let nodes = if let Some(name) = node_name {
             vec![nodes_api::get_node_by_name(name).await.unwrap_or_default()]

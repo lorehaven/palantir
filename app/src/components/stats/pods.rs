@@ -45,6 +45,8 @@ fn update_page(
     pods_memory_labels: RwSignal<(String, String)>,
 ) {
     spawn_local(async move {
+        if node_name.is_disposed() { return; }
+
         let node_name = node_name.get_untracked();
         let pods = if let Some(name) = node_name {
             pods_api::get_pods_by_node_name(name).await.unwrap_or_default()

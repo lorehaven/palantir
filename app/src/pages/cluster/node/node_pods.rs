@@ -26,6 +26,8 @@ fn update_page(
     pods: RwSignal<Vec<Vec<String>>>,
 ) {
     spawn_local(async move {
+        if node_name.is_disposed() { return; }
+
         let mut pods_data = pods_api::get_pods_by_node_name(node_name.get_untracked()).await
             .unwrap_or_default();
         pods_data.sort_by(|a, b| a.metadata.name.cmp(&b.metadata.name));
