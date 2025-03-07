@@ -6,7 +6,7 @@ use crate::api::pods as pods_api;
 use crate::components::prelude::*;
 use crate::domain::metrics::PodMetrics;
 use crate::domain::pod::Pod;
-use crate::pages::utils::shared::effects::update_page_effect;
+use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::time_until_now;
 use crate::pages::utils::stats::{convert_memory, parse_memory, parse_pod_cpu};
 
@@ -17,7 +17,9 @@ pub fn NodePodsComponent(
     let node_name = RwSignal::new(node_name);
     let pods = RwSignal::new(vec![]);
 
-    update_page_effect(60_000, move || update_page(node_name, pods));
+    let interval_handle = update_page_effect(60_000, move || update_page(node_name, pods));
+    clear_page_effect(interval_handle);
+
     view(pods)
 }
 

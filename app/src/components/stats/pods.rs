@@ -6,7 +6,7 @@ use crate::api::pods as pods_api;
 use crate::domain::metrics::PodMetrics;
 use crate::domain::pod::Pod;
 use crate::components::prelude::*;
-use crate::pages::utils::shared::effects::update_page_effect;
+use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::stats::{convert_memory, parse_memory, parse_pod_cpu};
 
 #[component]
@@ -23,12 +23,14 @@ pub fn PodsStatComponent(
     let pods_memory_labels = RwSignal::new((String::new(), String::new()));
     let expandable = RwSignal::new(expandable);
 
-    update_page_effect(5_000, move || update_page(
+    let interval_handle = update_page_effect(10_000, move || update_page(
         node_name,
         pods_ready,
         pods_cpu,
         pods_memory_values,
         pods_memory_labels,));
+    clear_page_effect(interval_handle);
+
     view(
         pods_ready,
         pods_cpu,

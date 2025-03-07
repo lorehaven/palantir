@@ -3,14 +3,16 @@ use leptos::task::spawn_local;
 
 use crate::api::events as events_api;
 use crate::components::prelude::*;
-use crate::pages::utils::shared::effects::update_page_effect;
+use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::time_until_now;
 
 #[component]
 pub fn EventsComponent() -> impl IntoView {
     let events = RwSignal::new(vec![]);
 
-    update_page_effect(5_000, move || update_page(events));
+    let interval_handle = update_page_effect(10_000, move || update_page(events));
+    clear_page_effect(interval_handle);
+
     view(events)
 }
 

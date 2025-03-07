@@ -6,7 +6,7 @@ use crate::api::metrics as metrics_api;
 use crate::domain::metrics::NodeMetrics;
 use crate::domain::node::Node;
 use crate::components::prelude::*;
-use crate::pages::utils::shared::effects::update_page_effect;
+use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::time_until_now;
 use crate::pages::utils::stats::convert_memory;
 
@@ -25,13 +25,15 @@ pub fn NodesStatComponent(
     let nodes_memory_labels = RwSignal::new((String::new(), String::new()));
     let expandable = RwSignal::new(expandable);
 
-    update_page_effect(5_000, move || update_page(
+    let interval_handle = update_page_effect(10_000, move || update_page(
         node_name,
         nodes_age,
         nodes_ready,
         nodes_cpu,
         nodes_memory_values,
         nodes_memory_labels,));
+    clear_page_effect(interval_handle);
+
     view(
         node_name,
         nodes_age,

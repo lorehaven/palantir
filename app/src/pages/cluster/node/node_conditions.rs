@@ -3,7 +3,7 @@ use leptos::task::spawn_local;
 
 use crate::api::nodes as nodes_api;
 use crate::components::prelude::*;
-use crate::pages::utils::shared::effects::update_page_effect;
+use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::time_until_now;
 
 #[component]
@@ -13,7 +13,9 @@ pub fn NodeConditionsComponent(
     let node_name = RwSignal::new(node_name);
     let conditions = RwSignal::new(vec![]);
 
-    update_page_effect(60_000, move || update_page(node_name, conditions));
+    let interval_handle = update_page_effect(60_000, move || update_page(node_name, conditions));
+    clear_page_effect(interval_handle);
+
     view(conditions)
 }
 

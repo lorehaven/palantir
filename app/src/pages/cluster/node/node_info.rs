@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use crate::api::nodes as nodes_api;
-use crate::pages::utils::shared::effects::update_page_effect;
+use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
 pub fn NodeInfoComponent(
@@ -11,7 +11,9 @@ pub fn NodeInfoComponent(
     let node_name = RwSignal::new(node_name);
     let node_data = RwSignal::new(vec![]);
 
-    update_page_effect(60_000, move || update_page(node_name, node_data));
+    let interval_handle = update_page_effect(60_000, move || update_page(node_name, node_data));
+    clear_page_effect(interval_handle);
+
     view(node_data)
 }
 

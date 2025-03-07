@@ -4,7 +4,7 @@ use leptos::task::spawn_local;
 use crate::api::services as api;
 use crate::domain::service::ServiceEntry;
 use crate::components::prelude::*;
-use crate::pages::utils::shared::effects::update_page_effect;
+use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
 pub fn FacadePage() -> impl IntoView {
@@ -13,7 +13,8 @@ pub fn FacadePage() -> impl IntoView {
 
     let _update_page = move || update_page(entries, loading);
 
-    update_page_effect(10_000, move || update_page(entries, loading));
+    let interval_handle = update_page_effect(10_000, move || update_page(entries, loading));
+    clear_page_effect(interval_handle);
 
     view(entries, loading)
 }

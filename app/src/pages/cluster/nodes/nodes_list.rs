@@ -8,7 +8,7 @@ use crate::domain::metrics::NodeMetrics;
 use crate::domain::node::{Node, NodeType};
 use crate::domain::pod::Pod;
 use crate::components::prelude::*;
-use crate::pages::utils::shared::effects::update_page_effect;
+use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::time_until_now;
 use crate::pages::utils::stats::{convert_memory, parse_memory};
 
@@ -16,7 +16,8 @@ use crate::pages::utils::stats::{convert_memory, parse_memory};
 pub fn NodesListComponent() -> impl IntoView {
     let nodes = RwSignal::new(vec![]);
 
-    update_page_effect(5_000, move || update_page(nodes));
+    let interval_handle = update_page_effect(10_000, move || update_page(nodes));
+    clear_page_effect(interval_handle);
     view(nodes)
 }
 
