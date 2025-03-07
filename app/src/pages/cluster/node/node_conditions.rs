@@ -1,0 +1,69 @@
+use leptos::prelude::*;
+use leptos::task::spawn_local;
+
+use crate::api::nodes as nodes_api;
+use crate::components::prelude::*;
+use crate::pages::utils::shared::effects::update_page_effect;
+use crate::pages::utils::shared::time::time_until_now;
+
+#[component]
+pub fn NodeConditionsComponent(
+    node_name: String,
+) -> impl IntoView {
+    let node_name = RwSignal::new(node_name);
+    let conditions = RwSignal::new(vec![]);
+
+    update_page_effect(60_000, move || update_page(node_name, conditions));
+    view(conditions)
+}
+
+fn update_page(
+    node_name: RwSignal<String>,
+    conditions: RwSignal<Vec<Vec<String>>>,
+) {
+    spawn_local(async move {
+        let node = nodes_api::get_node_by_name(node_name.get_untracked()).await
+            .unwrap_or_default();
+        let mut conditions_vec = vec![];
+        for condition in node.status.conditions {
+            conditions_vec.push(vec![
+                condition.r#type,
+                condition.status,
+                time_until_now(&condition.last_transition_time),
+                condition.reason,
+                condition.message,
+            ]);
+        }
+        conditions.set(conditions_vec);
+    });
+}
+
+fn view(
+    conditions: RwSignal<Vec<Vec<String>>>,
+) -> impl IntoView {
+    let columns = vec![
+        TableColumn::new("Condition", TableColumnType::String, 1),
+        TableColumn::new("Status", TableColumnType::String, 1),
+        TableColumn::new("Transition", TableColumnType::String, 1),
+        TableColumn::new("Reason", TableColumnType::String, 2),
+        TableColumn::new("Message", TableColumnType::String, 2),
+    ];
+    let styles = vec![""; columns.len()];
+    let params = vec![""; columns.len()];
+
+    view! {
+        <Wrapper>
+            <WrapperSlot slot>
+                <div class="card-container dcc-1">
+                    <div class="card-table">
+                        <TableComponent
+                            columns=columns.clone()
+                            values=conditions.get()
+                            styles=styles.clone()
+                            params=params.clone() />
+                    </div>
+                </div>
+            </WrapperSlot>
+        </Wrapper>
+    }
+}

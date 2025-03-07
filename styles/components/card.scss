@@ -4,6 +4,32 @@
   display: grid;
   gap: 2rem;
 
+  .card-list {
+    display: flex;
+    box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.8);
+    flex-direction: column;
+    padding: 2rem 1rem;
+    gap: 1rem;
+
+    .card-list-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 2rem;
+
+      .card-list-row-title {
+        display: flex;
+        justify-content: right;
+        width: 10%;
+        font-weight: bold;
+      }
+      .card-list-row-content {
+        white-space: pre-line;
+        width: 90%;
+      }
+    }
+  }
+
   .card-string {
     .card-string-content {
       font-size: 6rem;
@@ -81,7 +107,7 @@
     .table-header,
     .table-body {
       display: grid;
-      gap: 0.5rem;
+      gap: 1rem;
       width: 100%;
     }
 

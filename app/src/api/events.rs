@@ -1,12 +1,13 @@
 use leptos::prelude::ServerFnError;
 use leptos::server;
 
+#[allow(unused_imports)]
+use crate::api::utils::get_api_token;
 use crate::domain::event::{Event, EventsResponse};
 
 #[server(GetEvents, "/api/events")]
 pub async fn get_events() -> Result<Vec<Event>, ServerFnError> {
     let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
-    let token = crate::api::utils::get_api_token();
 
     let client = reqwest::ClientBuilder::new()
         .danger_accept_invalid_certs(true)
@@ -14,7 +15,7 @@ pub async fn get_events() -> Result<Vec<Event>, ServerFnError> {
 
     let response = client
         .get(format!("https://{server_host}:6443/api/v1/events"))
-        .bearer_auth(token)
+        .bearer_auth(get_api_token())
         .send()
         .await?;
 

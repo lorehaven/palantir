@@ -1,6 +1,8 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
+use crate::api::nodes as nodes_api;
+use crate::api::metrics as metrics_api;
 use crate::domain::metrics::NodeMetrics;
 use crate::domain::node::Node;
 use crate::components::prelude::*;
@@ -49,9 +51,14 @@ fn update_page(
     nodes_memory_labels: RwSignal<(String, String)>,
 ) {
     spawn_local(async move {
-        let nodes = crate::api::nodes::get_nodes(node_name.get_untracked()).await.unwrap_or_default();
+        let node_name = node_name.get_untracked();
+        let nodes = if let Some(name) = node_name {
+            vec![nodes_api::get_node_by_name(name).await.unwrap_or_default()]
+        } else {
+            nodes_api::get_nodes().await.unwrap_or_default()
+        };
         nodes_age.set(time_until_now(&nodes.iter().map(|n| n.metadata.creation_timestamp.clone()).min().unwrap_or_default()));
-        let nodes_metrics = crate::api::metrics::get_nodes().await.unwrap_or_default();
+        let nodes_metrics = metrics_api::get_nodes().await.unwrap_or_default();
         nodes_ready.set(get_nodes_ready(&nodes));
         nodes_cpu.set(get_nodes_cpu(&nodes, &nodes_metrics));
         let nodes_memory = get_nodes_memory(&nodes, &nodes_metrics);

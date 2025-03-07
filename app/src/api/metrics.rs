@@ -2,6 +2,8 @@ use leptos::prelude::ServerFnError;
 use leptos::server;
 use serde_json::Value;
 
+#[allow(unused_imports)]
+use crate::api::utils::get_api_token;
 use crate::domain::metrics::{NodeMetrics, PodMetrics};
 
 #[server(GetNodesMetrics, "/api/metrics/nodes")]
@@ -21,7 +23,6 @@ pub async fn get_pods() -> Result<Vec<PodMetrics>, ServerFnError> {
 #[server]
 async fn get_metrics(path: String) -> Result<Value, ServerFnError> {
     let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
-    let token = crate::api::utils::get_api_token();
 
     let client = reqwest::ClientBuilder::new()
         .danger_accept_invalid_certs(true)
@@ -29,7 +30,7 @@ async fn get_metrics(path: String) -> Result<Value, ServerFnError> {
 
     let response = client
         .get(format!("https://{server_host}:6443/apis/metrics.k8s.io/v1beta1/{path}"))
-        .bearer_auth(token)
+        .bearer_auth(get_api_token())
         .send()
         .await?;
 

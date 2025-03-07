@@ -1,11 +1,13 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
+use crate::api::metrics as metrics_api;
+use crate::api::pods as pods_api;
 use crate::domain::metrics::PodMetrics;
 use crate::domain::pod::Pod;
 use crate::components::prelude::*;
 use crate::pages::utils::shared::effects::update_page_effect;
-use crate::pages::utils::stats::{convert_memory, parse_memory};
+use crate::pages::utils::stats::{convert_memory, parse_memory, parse_pod_cpu};
 
 #[component]
 pub fn PodsStatComponent(
@@ -43,8 +45,13 @@ fn update_page(
     pods_memory_labels: RwSignal<(String, String)>,
 ) {
     spawn_local(async move {
-        let pods = crate::api::pods::get_pods(node_name.get_untracked()).await.unwrap_or_default();
-        let pods_metrics = crate::api::metrics::get_pods().await.unwrap_or_default();
+        let node_name = node_name.get_untracked();
+        let pods = if let Some(name) = node_name {
+            pods_api::get_pods_by_node_name(name).await.unwrap_or_default()
+        } else {
+            pods_api::get_pods().await.unwrap_or_default()
+        };
+        let pods_metrics = metrics_api::get_pods().await.unwrap_or_default();
         pods_ready.set(get_pods_ready(&pods));
         pods_cpu.set(get_pods_cpu(&pods, &pods_metrics));
         let pods_memory = get_pods_memory(&pods, &pods_metrics);
@@ -139,13 +146,4 @@ fn get_pods_memory(pods: &[Pod], metrics: &[PodMetrics]) -> ((f64, f64), (String
             .fold(0., |acc, c| acc + parse_memory(&c.usage.memory).unwrap_or_default()));
     let puse = convert_memory(puse);
     ((pcap.0, puse.0), (pcap.1, puse.1))
-}
-
-fn parse_pod_cpu(request: &str) -> f64 {
-    if request.ends_with("m") {
-        let value: f64 = request.trim_end_matches("m").parse().unwrap_or(0.);
-        value / 1000.
-    } else {
-        request.parse::<f64>().unwrap_or(0.)
-    }
 }

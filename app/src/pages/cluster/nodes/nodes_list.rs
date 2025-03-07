@@ -1,6 +1,9 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
+use crate::api::metrics as metrics_api;
+use crate::api::nodes as nodes_api;
+use crate::api::pods as pods_api;
 use crate::domain::metrics::NodeMetrics;
 use crate::domain::node::{Node, NodeType};
 use crate::domain::pod::Pod;
@@ -21,9 +24,9 @@ fn update_page(
     nodes: RwSignal<Vec<Vec<String>>>,
 ) {
     spawn_local(async move {
-        let nodes_data = crate::api::nodes::get_nodes(None).await.unwrap_or_default();
-        let nodes_metrics = crate::api::metrics::get_nodes().await.unwrap_or_default();
-        let pods_data = crate::api::pods::get_pods(None).await.unwrap_or_default();
+        let nodes_data = nodes_api::get_nodes().await.unwrap_or_default();
+        let nodes_metrics = metrics_api::get_nodes().await.unwrap_or_default();
+        let pods_data = pods_api::get_pods().await.unwrap_or_default();
 
         let mut nodes_vec = vec![];
         for node in nodes_data {

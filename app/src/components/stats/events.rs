@@ -1,6 +1,7 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
+use crate::api::events as events_api;
 use crate::components::prelude::*;
 use crate::pages::utils::shared::effects::update_page_effect;
 use crate::pages::utils::shared::time::time_until_now;
@@ -17,7 +18,7 @@ fn update_page(
     events: RwSignal<Vec<Vec<String>>>,
 ) {
     spawn_local(async move {
-        let events_list = crate::api::events::get_events().await.unwrap_or_default();
+        let events_list = events_api::get_events().await.unwrap_or_default();
         events.set(events_list.into_iter().map(|e|
             vec![e.involved_object.kind, e.involved_object.name, time_until_now(&e.first_timestamp), e.reason, e.message]
         ).collect());

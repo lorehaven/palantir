@@ -21,3 +21,12 @@ pub fn convert_memory(bytes: f64) -> (f64, String) {
 
     (memory_value, units[unit_idx].to_string())
 }
+
+pub fn parse_pod_cpu(request: &str) -> f64 {
+    if request.ends_with("m") {
+        let value: f64 = request.trim_end_matches("m").parse().unwrap_or(0.);
+        value / 1000.
+    } else {
+        request.parse::<f64>().unwrap_or(0.)
+    }
+}

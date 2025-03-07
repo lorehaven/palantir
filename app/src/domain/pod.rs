@@ -1,21 +1,22 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct PodsResponse {
     pub items: Vec<Pod>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Pod {
     pub metadata: Metadata,
     pub spec: Spec,
     pub status: Status,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Spec {
-    // volumes
+    #[serde(default)]
+    pub volumes: Vec<Volume>,
     pub containers: Vec<Container>,
     #[serde(rename = "restartPolicy")]
     pub restart_policy: String,
@@ -36,7 +37,7 @@ pub struct Spec {
     pub priority: i32,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Metadata {
     pub name: String,
     #[serde(rename = "generateName")]
@@ -48,19 +49,58 @@ pub struct Metadata {
     pub labels: HashMap<String, String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct Volume {
+    #[serde(default)]
+    name: String,
+    #[serde(default)]
+    #[serde(rename = "persistentVolumeClaim")]
+    persistent_volume_claim: PersistentVolumeClaim,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct PersistentVolumeClaim {
+    #[serde(default)]
+    #[serde(rename = "claimName")]
+    claim_name: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Container {
     pub name: String,
     pub image: String,
+    #[serde(default)]
+    pub ports: Vec<Port>,
+    #[serde(default)]
+    pub env: Vec<Env>,
+    pub resources: Resources,
+    #[serde(rename = "terminationMessagePath")]
+    pub termination_message_path: String,
+    #[serde(rename = "terminationMessagePolicy")]
+    pub termination_message_policy: String,
     #[serde(rename = "imagePullPolicy")]
     pub image_pull_policy: String,
-    // ports
-    // env
-    pub resources: Resources,
-    // ...
 }
 
-#[derive(Serialize, Deserialize, Default, Debug, Clone)]
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct Port {
+    #[serde(default)]
+    pub name: String,
+    #[serde(rename = "containerPort")]
+    pub container_port: i32,
+    pub protocol: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct Env {
+    #[serde(default)]
+    pub name: String,
+    #[serde(default)]
+    pub value: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Resources {
     #[serde(default)]
     pub limits: Resource,
@@ -68,7 +108,7 @@ pub struct Resources {
     pub requests: Resource,
 }
 
-#[derive(Serialize, Deserialize, Default, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Resource {
     #[serde(default)]
     pub cpu: String,
@@ -76,9 +116,10 @@ pub struct Resource {
     pub memory: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Status {
     pub phase: String,
+    pub conditions: Vec<Condition>,
     #[serde(rename = "hostIP")]
     pub host_ip: String,
     #[serde(default)]
@@ -86,12 +127,13 @@ pub struct Status {
     pub pod_ip: Option<String>,
     #[serde(rename = "startTime")]
     pub start_time: String,
+    #[serde(rename = "containerStatuses")]
+    pub container_statuses: Vec<ContainerStatus>,
     #[serde(rename = "qosClass")]
     pub qos_class: String,
-    pub conditions: Vec<Condition>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Condition {
     pub r#type: String,
     pub status: String,
@@ -102,3 +144,18 @@ pub struct Condition {
     #[serde(rename = "lastTransitionTime")]
     pub last_transition_time: Option<String>,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct ContainerStatus {
+    pub name: String,
+    pub ready: bool,
+    #[serde(rename = "restartCount")]
+    pub restart_count: i32,
+    pub image: String,
+    #[serde(rename = "imageID")]
+    pub image_id: String,
+    #[serde(rename = "containerID")]
+    pub container_id: String,
+    pub started: bool,
+}
+
