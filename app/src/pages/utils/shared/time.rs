@@ -1,5 +1,14 @@
 use chrono::{DateTime, Utc};
 
+pub fn format_timestamp(timestamp: &str, format: Option<&str>) -> String {
+    let format = format.unwrap_or("%Y-%m-%d %H:%M:%S %Z");
+    if let Ok(parsed_timestamp) = timestamp.parse::<DateTime<Utc>>() {
+        parsed_timestamp.format(format).to_string()
+    } else {
+        "Invalid timestamp".to_string()
+    }
+}
+
 #[allow(dead_code)]
 pub fn time_until_now(timestamp: &str) -> String {
     if timestamp.is_empty() { return "-".to_string(); }

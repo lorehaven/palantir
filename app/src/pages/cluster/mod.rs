@@ -5,6 +5,7 @@ use crate::components::stats::events::EventsComponent;
 use crate::components::stats::nodes::NodesStatComponent;
 use crate::components::stats::pods::PodsStatComponent;
 
+pub mod namespace;
 pub mod namespaces;
 pub mod node;
 pub mod nodes;

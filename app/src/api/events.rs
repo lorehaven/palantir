@@ -2,29 +2,22 @@ use leptos::prelude::ServerFnError;
 use leptos::server;
 
 #[allow(unused_imports)]
-use crate::api::utils::get_api_token;
+use crate::api::utils::kube_api_request;
+#[allow(unused_imports)]
 use crate::domain::event::{Event, EventsResponse};
 
 #[server(GetEvents, "/api/events")]
 pub async fn get_events() -> Result<Vec<Event>, ServerFnError> {
-    let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
-
-    let client = reqwest::ClientBuilder::new()
-        .danger_accept_invalid_certs(true)
-        .build()?;
-
-    let response = client
-        .get(format!("https://{server_host}:6443/api/v1/events"))
-        .bearer_auth(get_api_token())
-        .send()
-        .await?;
-
-    response.error_for_status_ref()?;
-    Ok(parse_response(&response.text().await?).unwrap_or_default())
+    let response = kube_api_request("events".to_string()).await?;
+    Ok(serde_json::from_str::<EventsResponse>(&response)?.items)
 }
 
-#[allow(dead_code)]
-fn parse_response(response: &str) -> Result<Vec<Event>, Box<dyn std::error::Error>> {
-    let nodes = serde_json::from_str::<EventsResponse>(response)?.items;
-    Ok(nodes)
+#[server(GetEventsByNamespaceName, "/api/events/by-namespace/:namespace_name")]
+pub async fn get_events_by_namespace_name(namespace_name: String) -> Result<Vec<Event>, ServerFnError> {
+    let response = kube_api_request("events".to_string()).await?;
+    let pods = serde_json::from_str::<EventsResponse>(&response)?.items
+        .into_iter()
+        .filter(|e| e.metadata.namespace == namespace_name)
+        .collect();
+    Ok(pods)
 }

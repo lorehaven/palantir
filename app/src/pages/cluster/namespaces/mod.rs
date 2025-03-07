@@ -2,6 +2,8 @@ use leptos::prelude::*;
 
 use crate::components::prelude::*;
 
+mod namespaces_list;
+
 #[component]
 pub fn ClusterNamespacesPage() -> impl IntoView {
     view! {
@@ -9,7 +11,7 @@ pub fn ClusterNamespacesPage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="cluster-namespaces">
-                    Namespaces
+                    <namespaces_list::NamespacesListComponent />
                 </div>
             </PageContentSlot>
         </PageContent>

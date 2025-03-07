@@ -2,39 +2,44 @@ use leptos::prelude::ServerFnError;
 use leptos::server;
 
 #[allow(unused_imports)]
-use crate::api::utils::get_api_token;
+use crate::api::utils::kube_api_request;
 use crate::domain::pod::*;
+
+pub async fn get_pods_filtered(
+    namespace_name: &Option<String>,
+    node_name: &Option<String>,
+) -> Vec<Pod> {
+    if let Some(name) = namespace_name {
+        get_pods_by_namespace_name(name.clone()).await.unwrap_or_default()
+    } else if let Some(name) = node_name {
+        get_pods_by_node_name(name.clone()).await.unwrap_or_default()
+    } else {
+        get_pods().await.unwrap_or_default()
+    }
+}
 
 #[server(GetPods, "/api/pods")]
 pub async fn get_pods() -> Result<Vec<Pod>, ServerFnError> {
-    let response = get_pods_internal().await?;
+    let response = kube_api_request("pods".to_string()).await?;
     Ok(serde_json::from_str::<PodsResponse>(&response)?.items)
 }
 
-#[server(GetPodsByNodeName, "/api/pods/:node_name")]
+#[server(GetPodsByNamespaceName, "/api/pods/by-namespace/:namespace_name")]
+pub async fn get_pods_by_namespace_name(namespace_name: String) -> Result<Vec<Pod>, ServerFnError> {
+    let response = kube_api_request("pods".to_string()).await?;
+    let pods = serde_json::from_str::<PodsResponse>(&response)?.items
+        .into_iter()
+        .filter(|p| p.metadata.namespace == namespace_name)
+        .collect();
+    Ok(pods)
+}
+
+#[server(GetPodsByNodeName, "/api/pods/by-node/:node_name")]
 pub async fn get_pods_by_node_name(node_name: String) -> Result<Vec<Pod>, ServerFnError> {
-    let response = get_pods_internal().await?;
+    let response = kube_api_request("pods".to_string()).await?;
     let pods = serde_json::from_str::<PodsResponse>(&response)?.items
         .into_iter()
         .filter(|p| p.spec.node_name == node_name)
         .collect();
     Ok(pods)
-}
-
-#[server]
-async fn get_pods_internal() -> Result<String, ServerFnError> {
-    let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
-
-    let client = reqwest::ClientBuilder::new()
-        .danger_accept_invalid_certs(true)
-        .build()?;
-
-    let response = client
-        .get(format!("https://{server_host}:6443/api/v1/pods"))
-        .bearer_auth(get_api_token())
-        .send()
-        .await?;
-
-    response.error_for_status_ref()?;
-    Ok(response.text().await?)
 }

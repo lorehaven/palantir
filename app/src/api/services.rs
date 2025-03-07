@@ -4,7 +4,7 @@ use leptos::server;
 #[allow(unused_imports)]
 use crate::api::pods::*;
 #[allow(unused_imports)]
-use crate::api::utils::get_api_token;
+use crate::api::utils::kube_api_request;
 use crate::domain::pod::Pod;
 use crate::domain::service::*;
 
@@ -12,19 +12,8 @@ const NAME_LABEL: &str = "app.kubernetes.io/name";
 
 #[server(GetServices, "/api/services")]
 pub async fn get_services() -> Result<Vec<ServiceEntry>, ServerFnError> {
-    let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
-
-    let client = reqwest::ClientBuilder::new()
-        .danger_accept_invalid_certs(true)
-        .build()?;
-
-    let response = client
-        .get(format!("https://{server_host}:6443/api/v1/services"))
-        .bearer_auth(get_api_token())
-        .send()
-        .await?;
-    response.error_for_status_ref()?;
-    Ok(parse_response(&response.text().await?, &get_pods().await?).await.unwrap_or_default())
+    let services = kube_api_request("services".to_string()).await?;
+    Ok(parse_response(&services, &get_pods().await?).await.unwrap_or_default())
 }
 
 #[allow(dead_code)]

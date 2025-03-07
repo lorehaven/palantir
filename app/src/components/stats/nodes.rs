@@ -56,13 +56,13 @@ fn update_page(
         if node_name.is_disposed() { return; }
 
         let node_name = node_name.get_untracked();
-        let nodes = if let Some(name) = node_name {
-            vec![nodes_api::get_node_by_name(name).await.unwrap_or_default()]
-        } else {
-            nodes_api::get_nodes().await.unwrap_or_default()
-        };
+        let nodes = nodes_api::get_nodes_filtered(&node_name).await;
+        let nodes_metrics = metrics_api::get_nodes().await.unwrap_or_default()
+            .into_iter()
+            .filter(|n| nodes.iter().any(|s| s.metadata.name == n.metadata.name))
+            .collect::<Vec<NodeMetrics>>();
+
         nodes_age.set(time_until_now(&nodes.iter().map(|n| n.metadata.creation_timestamp.clone()).min().unwrap_or_default()));
-        let nodes_metrics = metrics_api::get_nodes().await.unwrap_or_default();
         nodes_ready.set(get_nodes_ready(&nodes));
         nodes_cpu.set(get_nodes_cpu(&nodes, &nodes_metrics));
         let nodes_memory = get_nodes_memory(&nodes, &nodes_metrics);

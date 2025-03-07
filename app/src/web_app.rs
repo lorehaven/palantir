@@ -3,13 +3,16 @@ use leptos_meta::{provide_meta_context, Link, Stylesheet, Title};
 use leptos_router::{components::{Route, Router, Routes}, path};
 
 use crate::pages::{
-    cluster::ClusterPage,
-    cluster::nodes::ClusterNodesPage,
-    cluster::namespaces::ClusterNamespacesPage,
+    cluster::{
+        ClusterPage,
+        namespaces::ClusterNamespacesPage,
+        node::ClusterNodePage,
+        nodes::ClusterNodesPage,
+    },
     dashboard::DashboardPage,
     facade::FacadePage,
 };
-use crate::pages::cluster::node::ClusterNodePage;
+use crate::pages::cluster::namespace::ClusterNamespacePage;
 
 #[component]
 pub fn WebApp() -> impl IntoView {
@@ -29,6 +32,7 @@ pub fn WebApp() -> impl IntoView {
                     <Route path=path!("/cluster/nodes") view=ClusterNodesPage />
                     <Route path=path!("/cluster/nodes/:name") view=ClusterNodePage />
                     <Route path=path!("/cluster/namespaces") view=ClusterNamespacesPage />
+                    <Route path=path!("/cluster/namespaces/:name") view=ClusterNamespacePage />
                     <Route path=path!("/facade") view=FacadePage />
                 </Routes>
             </main>

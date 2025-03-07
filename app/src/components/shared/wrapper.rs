@@ -7,11 +7,16 @@ pub struct WrapperSlot {
 
 #[component]
 pub fn Wrapper(
+    #[prop(default = "")]
+    label: &'static str,
     wrapper_slot: WrapperSlot,
 ) -> impl IntoView {
     view! {
-        <div>
-            { move || { (wrapper_slot.children)().into_any() } }
+        <div class="wrapper-container">
+            <div class="bar">{label}</div>
+            <div class="wrapper-content">
+                { move || { (wrapper_slot.children)().into_any() } }
+            </div>
         </div>
     }
 }

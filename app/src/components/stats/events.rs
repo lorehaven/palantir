@@ -21,9 +21,13 @@ fn update_page(
 ) {
     spawn_local(async move {
         let events_list = events_api::get_events().await.unwrap_or_default();
-        events.set(events_list.into_iter().map(|e|
-            vec![e.involved_object.kind, e.involved_object.name, time_until_now(&e.first_timestamp), e.reason, e.message]
-        ).collect());
+        events.set(events_list.into_iter().map(|e| vec![
+            e.involved_object.kind,
+            e.involved_object.name,
+            time_until_now(&e.first_timestamp.unwrap_or_default()),
+            e.reason,
+            e.message,
+        ]).collect());
     });
 }
 

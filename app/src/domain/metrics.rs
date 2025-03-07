@@ -20,6 +20,7 @@ pub struct NodeMetricsMetadata {
     #[serde(rename = "creationTimestamp")]
     pub creation_timestamp: String,
     pub labels: HashMap<String, String>,
+    pub name: String,
 }
 
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]

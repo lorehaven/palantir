@@ -7,30 +7,29 @@ use crate::components::prelude::*;
 use crate::domain::metrics::PodMetrics;
 use crate::domain::pod::Pod;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
-use crate::pages::utils::shared::time::time_until_now;
 use crate::pages::utils::stats::{convert_memory, parse_memory, parse_pod_cpu};
 
 #[component]
-pub fn NodePodsComponent(
-    node_name: String,
+pub fn NamespacePodsComponent(
+    namespace_name: String,
 ) -> impl IntoView {
-    let node_name = RwSignal::new(node_name);
+    let namespace_name = RwSignal::new(namespace_name);
     let pods = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(60_000, move || update_page(node_name, pods));
+    let interval_handle = update_page_effect(60_000, move || update_page(namespace_name, pods));
     clear_page_effect(interval_handle);
 
     view(pods)
 }
 
 fn update_page(
-    node_name: RwSignal<String>,
+    namespace_name: RwSignal<String>,
     pods: RwSignal<Vec<Vec<String>>>,
 ) {
     spawn_local(async move {
-        if node_name.is_disposed() { return; }
+        if namespace_name.is_disposed() { return; }
 
-        let mut pods_data = pods_api::get_pods_by_node_name(node_name.get_untracked()).await
+        let mut pods_data = pods_api::get_pods_by_namespace_name(namespace_name.get_untracked()).await
             .unwrap_or_default();
         pods_data.sort_by(|a, b| a.metadata.name.cmp(&b.metadata.name));
         let pod_names = pods_data.iter().map(|p| p.metadata.name.clone()).collect::<Vec<String>>();
@@ -48,9 +47,6 @@ fn update_page(
             pods_vec.push(vec![
                 "Pod".to_string(),
                 pod.clone().metadata.name,
-                pod.clone().metadata.namespace,
-                time_until_now(&pod.metadata.creation_timestamp),
-                pod.clone().status.container_statuses.iter().map(|c| c.restart_count).sum::<i32>().to_string(),
                 pod_cpu_actual(&metrics),
                 pod_cpu_request(&pod, &metrics),
                 pod_cpu_limit(&pod, &metrics),
@@ -69,9 +65,6 @@ fn view(
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 1),
         TableColumn::new("Name", TableColumnType::Link, 3),
-        TableColumn::new("Namespace", TableColumnType::String, 2),
-        TableColumn::new("Age", TableColumnType::String, 1),
-        TableColumn::new("Restarts", TableColumnType::String, 1),
         TableColumn::new("CPU actual", TableColumnType::String, 1),
         TableColumn::new("CPU request", TableColumnType::StringTwoLine, 1),
         TableColumn::new("CPU limit", TableColumnType::StringTwoLine, 1),

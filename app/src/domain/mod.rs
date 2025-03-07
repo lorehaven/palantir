@@ -1,5 +1,6 @@
 pub mod event;
 pub mod metrics;
+pub mod namespace;
 pub mod node;
 pub mod pod;
 pub mod service;

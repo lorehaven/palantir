@@ -26,28 +26,31 @@ fn update_page(
 ) {
     spawn_local(async move {
         let nodes_data = nodes_api::get_nodes().await.unwrap_or_default();
-        let nodes_metrics = metrics_api::get_nodes().await.unwrap_or_default();
+        let nodes_metrics = metrics_api::get_nodes().await.unwrap_or_default()
+            .into_iter()
+            .filter(|n| nodes_data.iter().any(|s| s.metadata.name == n.metadata.name))
+            .collect::<Vec<NodeMetrics>>();
         let pods_data = pods_api::get_pods().await.unwrap_or_default();
 
         let mut nodes_vec = vec![];
         for node in nodes_data {
-            let mut vec = vec![];
             let node_metric = nodes_metrics.clone().into_iter().find(|nm| nm.get_node_name() == node.metadata.name).unwrap();
             let node_pods_data = pods_data.clone().into_iter().filter(|p| p.spec.node_name == node.metadata.name).collect::<Vec<Pod>>();
-            vec.push(NodeType::from_node(&node).to_string());
-            vec.push(node.clone().metadata.name);
-            vec.push(time_until_now(&node.metadata.creation_timestamp));
-            vec.push(node.clone().metadata.labels.into_iter().map(|(k, v)| format!("{}: {}", k, v)).collect::<Vec<String>>().join("\n"));
-            vec.push(node.clone().status.conditions.iter().any(|c| c.r#type == "Ready" && c.status == "True").to_string());
-            vec.push(get_node_cpu_actual(&node, &node_metric));
             let node_cpu_requests_limits = get_node_cpu_requests_limits(&node, &node_pods_data);
-            vec.push(node_cpu_requests_limits.0);
-            vec.push(node_cpu_requests_limits.1);
-            vec.push(get_node_memory_actual(&node, &node_metric));
             let node_memory_requests_limits = get_node_memory_requests_limits(&node, &node_pods_data);
-            vec.push(node_memory_requests_limits.0);
-            vec.push(node_memory_requests_limits.1);
-            nodes_vec.push(vec);
+            nodes_vec.push(vec![
+                NodeType::from_node(&node).to_string(),
+                node.clone().metadata.name,
+                time_until_now(&node.metadata.creation_timestamp),
+                node.clone().metadata.labels.into_iter().map(|(k, v)| format!("{}: {}", k, v)).collect::<Vec<String>>().join("\n"),
+                node.clone().status.conditions.iter().any(|c| c.r#type == "Ready" && c.status == "True").to_string(),
+                get_node_cpu_actual(&node, &node_metric),
+                node_cpu_requests_limits.0,
+                node_cpu_requests_limits.1,
+                get_node_memory_actual(&node, &node_metric),
+                node_memory_requests_limits.0,
+                node_memory_requests_limits.1,
+            ]);
         }
         nodes.set(nodes_vec);
     });

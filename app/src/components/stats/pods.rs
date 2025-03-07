@@ -12,10 +12,13 @@ use crate::pages::utils::stats::{convert_memory, parse_memory, parse_pod_cpu};
 #[component]
 pub fn PodsStatComponent(
     #[prop(default = None)]
+    namespace_name: Option<String>,
+    #[prop(default = None)]
     node_name: Option<String>,
     #[prop(default = true)]
     expandable: bool,
 ) -> impl IntoView {
+    let namespace_name = RwSignal::new(namespace_name);
     let node_name = RwSignal::new(node_name);
     let pods_ready = RwSignal::new((0., 0.));
     let pods_cpu = RwSignal::new((0., 0.));
@@ -24,6 +27,7 @@ pub fn PodsStatComponent(
     let expandable = RwSignal::new(expandable);
 
     let interval_handle = update_page_effect(10_000, move || update_page(
+        namespace_name,
         node_name,
         pods_ready,
         pods_cpu,
@@ -40,6 +44,7 @@ pub fn PodsStatComponent(
 }
 
 fn update_page(
+    namespace_name: RwSignal<Option<String>>,
     node_name: RwSignal<Option<String>>,
     pods_ready: RwSignal<(f64, f64)>,
     pods_cpu: RwSignal<(f64, f64)>,
@@ -47,15 +52,20 @@ fn update_page(
     pods_memory_labels: RwSignal<(String, String)>,
 ) {
     spawn_local(async move {
+        if namespace_name.is_disposed() { return; }
         if node_name.is_disposed() { return; }
 
+        let namespace_name = namespace_name
+            .get_untracked();
         let node_name = node_name.get_untracked();
-        let pods = if let Some(name) = node_name {
-            pods_api::get_pods_by_node_name(name).await.unwrap_or_default()
-        } else {
-            pods_api::get_pods().await.unwrap_or_default()
-        };
-        let pods_metrics = metrics_api::get_pods().await.unwrap_or_default();
+
+        let pods = pods_api::get_pods_filtered(&namespace_name, &node_name).await;
+        let pod_names = pods.iter().map(|p| p.metadata.name.clone()).collect::<Vec<String>>();
+        let pods_metrics = metrics_api::get_pods().await.unwrap_or_default()
+            .into_iter()
+            .filter(|pm| pod_names.contains(&pm.metadata.name))
+            .collect::<Vec<PodMetrics>>();
+
         pods_ready.set(get_pods_ready(&pods));
         pods_cpu.set(get_pods_cpu(&pods, &pods_metrics));
         let pods_memory = get_pods_memory(&pods, &pods_metrics);
