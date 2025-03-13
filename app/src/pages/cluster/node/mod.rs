@@ -25,7 +25,7 @@ pub fn ClusterNodePage() -> impl IntoView {
         <Header text=page_title />
         <PageContent>
             <PageContentSlot slot>
-                <div class="cluster-node">
+                <div class="cluster-node main-page">
                     <NodesStatComponent node_name=Some(node_name.clone()) expandable=false />
                     <PodsStatComponent node_name=Some(node_name.clone()) expandable=false />
                     <NodeInfoComponent node_name=node_name.clone() />

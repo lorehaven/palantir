@@ -10,7 +10,7 @@ pub fn ClusterNamespacesPage() -> impl IntoView {
         <Header text=vec!["Cluster", "Namespaces"] />
         <PageContent>
             <PageContentSlot slot>
-                <div class="cluster-namespaces">
+                <div class="cluster-namespaces main-page">
                     <namespaces_list::NamespacesListComponent />
                 </div>
             </PageContentSlot>

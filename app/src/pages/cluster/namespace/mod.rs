@@ -21,7 +21,7 @@ pub fn ClusterNamespacePage() -> impl IntoView {
         <Header text=page_title />
         <PageContent>
             <PageContentSlot slot>
-                <div class="cluster-namespace">
+                <div class="cluster-namespace main-page">
                     <PodsStatComponent namespace_name=Some(namespace_name.clone()) expandable=false />
                     <namespace_info::NamespaceInfoComponent namespace_name=namespace_name.clone() />
                     <namespace_pods::NamespacePodsComponent namespace_name=namespace_name.clone() />

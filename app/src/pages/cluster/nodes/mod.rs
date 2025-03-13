@@ -11,7 +11,7 @@ pub fn ClusterNodesPage() -> impl IntoView {
         <Header text=vec!["Cluster", "Nodes"] />
         <PageContent>
             <PageContentSlot slot>
-                <div class="cluster-nodes">
+                <div class="cluster-nodes main-page">
                     <NodesStatComponent />
                     <nodes_list::NodesListComponent />
                 </div>

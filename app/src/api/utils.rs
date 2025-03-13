@@ -13,6 +13,11 @@ pub fn get_api_token() -> String {
 }
 
 #[server]
+pub async fn get_api_token_wasm() -> Result<String, ServerFnError> {
+    Ok(get_api_token())
+}
+
+#[server]
 pub async fn kube_api_request(endpoint: String) -> Result<String, ServerFnError> {
     let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
 
