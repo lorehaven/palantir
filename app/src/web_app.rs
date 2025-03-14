@@ -12,6 +12,25 @@ use crate::pages::{
         node::ClusterNodePage,
         nodes::ClusterNodesPage,
     },
+    workloads::{
+        WorkloadsPage,
+        services::WorkloadsServicesPage,
+        replicas::WorkloadsReplicasPage,
+        pods::WorkloadsPodsPage,
+        ingresses::WorkloadsIngressesPage,
+        config::WorkloadsConfigPage,
+    },
+    storage::{
+        StoragePage,
+        volumes::StorageVolumesPage,
+        claims::StorageClaimsPage,
+    },
+    accounts::{
+        AccountsPage,
+        roles::AccountsRolesPage,
+        bindings::AccountsBindingsPage,
+        secrets::AccountsSecretsPage,
+    },
     profile::ProfilePage,
 };
 
@@ -35,6 +54,19 @@ pub fn WebApp() -> impl IntoView {
                     <Route path=path!("/cluster/nodes/:name") view=ClusterNodePage />
                     <Route path=path!("/cluster/namespaces") view=ClusterNamespacesPage />
                     <Route path=path!("/cluster/namespaces/:name") view=ClusterNamespacePage />
+                    <Route path=path!("/workloads") view=WorkloadsPage />
+                    <Route path=path!("/workloads/services") view=WorkloadsServicesPage />
+                    <Route path=path!("/workloads/replicas") view=WorkloadsReplicasPage />
+                    <Route path=path!("/workloads/pods") view=WorkloadsPodsPage />
+                    <Route path=path!("/workloads/ingresses") view=WorkloadsIngressesPage />
+                    <Route path=path!("/workloads/config") view=WorkloadsConfigPage />
+                    <Route path=path!("/storage") view=StoragePage />
+                    <Route path=path!("/storage/volumes") view=StorageVolumesPage />
+                    <Route path=path!("/storage/claims") view=StorageClaimsPage />
+                    <Route path=path!("/accounts") view=AccountsPage />
+                    <Route path=path!("/accounts/roles") view=AccountsRolesPage />
+                    <Route path=path!("/accounts/bindings") view=AccountsBindingsPage />
+                    <Route path=path!("/accounts/secrets") view=AccountsSecretsPage />
                     <Route path=path!("/profile") view=ProfilePage />
                 </Routes>
             </main>

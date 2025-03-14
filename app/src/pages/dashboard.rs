@@ -11,7 +11,6 @@ pub fn DashboardPage() -> impl IntoView {
         ("storage", "warehouse"),
         ("accounts", "users"),
         ("profile", "user"),
-        ("apply", "plus"),
     ];
 
     view! {
