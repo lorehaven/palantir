@@ -154,6 +154,7 @@ pub struct ContainerStatus {
     pub image: String,
     #[serde(rename = "imageID")]
     pub image_id: String,
+    #[serde(default)]
     #[serde(rename = "containerID")]
     pub container_id: String,
     pub started: bool,
