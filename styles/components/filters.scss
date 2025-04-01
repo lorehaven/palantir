@@ -1,0 +1,33 @@
+@import "../theme.scss";
+
+.filter {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2rem;
+
+  .wrapper-container {
+    width: unset;
+
+    .bar {
+      display: none !important;
+    }
+  }
+
+  .filter-label {
+    font-size: 1.4rem;
+  }
+
+  .filter-spacer {
+    flex-grow: 1;
+  }
+
+  .namespace-filter > select,
+  .prompt-filter > input {
+    font-size: 1.2rem;
+    color: $secondaryColor;
+    background-color: $primaryAccentColor;
+    padding: 0.3rem;
+    border: none;
+  }
+}

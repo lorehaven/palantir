@@ -1,5 +1,6 @@
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+
+use crate::domain::shared::metadata::Metadata;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct NodesResponse {
@@ -21,16 +22,6 @@ pub struct Node {
     pub metadata: Metadata,
     pub spec: Spec,
     pub status: Status,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct Metadata {
-    pub name: String,
-    pub uid: String,
-    #[serde(rename = "creationTimestamp")]
-    pub creation_timestamp: String,
-    pub labels: HashMap<String, String>,
-    pub annotations: HashMap<String, String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]

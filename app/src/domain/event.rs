@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::domain::shared::metadata::Metadata;
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EventsResponse {
     pub kind: String,
@@ -37,17 +39,6 @@ pub struct Event {
     pub reporting_component: String,
     #[serde(rename = "reportingInstance")]
     pub reporting_instance: String,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Metadata {
-    pub name: String,
-    pub namespace: String,
-    pub uid: String,
-    #[serde(rename = "resourceVersion")]
-    pub resource_version: String,
-    #[serde(rename = "creationTimestamp")]
-    pub creation_timestamp: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

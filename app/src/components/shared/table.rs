@@ -18,13 +18,23 @@ pub fn TableComponent(
                 .collect::<Vec<_>>()}
         </div>
         <div class="table-body" style=format!("grid-template-columns: {grid_template_columns};")>
-            {values.into_iter()
+            {values.clone().into_iter()
                 .flatten()
                 .enumerate()
                 .map(|(idx, item)| {
                     let r#type = columns[idx % columns.len()].r#type.clone();
                     let style = styles[idx % styles.len()];
-                    let param = params[idx % params.len()];
+                    let param = params[idx % params.len()].to_string();
+                    let values_idx = values[idx / values.first().unwrap_or(&vec!["".to_string()]).len()].clone();
+
+                    let param = param.split("/")
+                        .map(|p|
+                            if p.starts_with(":") { values_idx[p.replace(":", "").parse::<usize>().unwrap_or(0)].clone().to_lowercase() }
+                            else { p.to_string() })
+                        .collect::<Vec<String>>()
+                        .join("/");
+                    leptos::logging::log!("{param}");
+                    leptos::logging::log!("{values_idx:?}");
 
                     match r#type {
                         TableColumnType::Bool => view! { <BoolValue item style /> }.into_any(),

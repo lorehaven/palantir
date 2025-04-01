@@ -1,5 +1,6 @@
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+
+use crate::domain::shared::metadata::Metadata;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct PodsResponse {
@@ -35,18 +36,6 @@ pub struct Spec {
     pub host_network: Option<bool>,
     // security context
     pub priority: i32,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct Metadata {
-    pub name: String,
-    #[serde(rename = "generateName")]
-    pub generate_name: String,
-    pub namespace: String,
-    pub uid: String,
-    #[serde(rename = "creationTimestamp")]
-    pub creation_timestamp: String,
-    pub labels: HashMap<String, String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]

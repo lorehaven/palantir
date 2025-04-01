@@ -1,5 +1,6 @@
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+
+use crate::domain::shared::metadata::Metadata;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ServicesResponse {
@@ -10,23 +11,6 @@ pub struct ServicesResponse {
 pub struct Service {
     pub metadata: Metadata,
     pub spec: Spec,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Metadata {
-    pub name: String,
-    pub namespace: String,
-    pub uid: String,
-    #[serde(rename = "creationTimestamp")]
-    pub creation_timestamp: String,
-    pub labels: HashMap<String, String>,
-    pub annotations: Option<Annotations>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Annotations {
-    #[serde(rename = "kubectl.kubernetes.io/last-applied-configuration")]
-    pub last_applied_configuration: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

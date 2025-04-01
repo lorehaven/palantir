@@ -19,6 +19,21 @@ pub async fn get_api_token_wasm() -> Result<String, ServerFnError> {
 
 #[server]
 pub async fn kube_api_request(endpoint: String) -> Result<String, ServerFnError> {
+    kube_api_request_internal("api/v1".to_string(), endpoint).await
+}
+
+#[server]
+pub async fn kube_api_apps_request(endpoint: String) -> Result<String, ServerFnError> {
+    kube_api_request_internal("apis/apps/v1".to_string(), endpoint).await
+}
+
+#[server]
+pub async fn kube_api_batch_request(endpoint: String) -> Result<String, ServerFnError> {
+    kube_api_request_internal("apis/batch/v1".to_string(), endpoint).await
+}
+
+#[server]
+async fn kube_api_request_internal(path: String, endpoint: String) -> Result<String, ServerFnError> {
     let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
 
     let client = reqwest::ClientBuilder::new()
@@ -26,7 +41,7 @@ pub async fn kube_api_request(endpoint: String) -> Result<String, ServerFnError>
         .build()?;
 
     let response = client
-        .get(format!("https://{server_host}:6443/api/v1/{endpoint}"))
+        .get(format!("https://{server_host}:6443/{path}/{endpoint}"))
         .bearer_auth(get_api_token())
         .send()
         .await?;
