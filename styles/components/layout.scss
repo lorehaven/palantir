@@ -36,14 +36,13 @@ main {
     .side-nav-bar {
       display: flex;
       flex-direction: column;
-      gap: 0.8rem;
       padding: 1rem 0;
       width: 6rem;
       border-right: 0.2rem solid $primaryAccentColor;
 
       .separator {
         height: 0.1rem;
-        margin: 0 1rem;
+        margin: 0.5rem 1rem;
         background-color: $secondaryColor;
       }
 
@@ -51,11 +50,13 @@ main {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.4rem;
         cursor: pointer;
         color: $secondaryColor;
         text-decoration: none;
-        padding: 0.5rem 1rem;
+
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
 
         .side-nav-bar-entry-title {
           font-size: 0.8rem;
@@ -67,6 +68,12 @@ main {
 
         &:hover {
           background-color: $primaryAccentColor;
+        }
+
+        &.visible {
+          margin: 0.2rem 0;
+          max-height: 3rem;
+          padding: 0.4rem 1rem;
         }
       }
     }

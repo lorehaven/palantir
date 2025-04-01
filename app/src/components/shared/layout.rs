@@ -49,10 +49,20 @@ pub fn SideNavBar() -> impl IntoView {
             <SideNavBarEntry name="namespaces" icon="circle-nodes" url_prefix="/cluster" visible={current_path.starts_with("/cluster")} />
             <div class="separator" />
             <SideNavBarEntry name="workloads" icon="rotate-right" />
+            <SideNavBarEntry name="services" icon="network-wired" url_prefix="/workloads" visible={current_path.starts_with("/workloads")} />
+            <SideNavBarEntry name="replicas" icon="object-ungroup" url_prefix="/workloads" visible={current_path.starts_with("/workloads")} />
+            <SideNavBarEntry name="pods" icon="boxes-stacked" url_prefix="/workloads" visible={current_path.starts_with("/workloads")} />
+            <SideNavBarEntry name="ingresses" icon="circle-nodes" url_prefix="/workloads" visible={current_path.starts_with("/workloads")} />
+            <SideNavBarEntry name="config" icon="sliders" url_prefix="/workloads" visible={current_path.starts_with("/workloads")} />
             <div class="separator" />
             <SideNavBarEntry name="storage" icon="warehouse" />
+            <SideNavBarEntry name="volumes" icon="hard-drive" url_prefix="/storage" visible={current_path.starts_with("/storage")} />
+            <SideNavBarEntry name="claims" icon="hard-drive" icon_type="regular" url_prefix="/storage" visible={current_path.starts_with("/storage")} />
             <div class="separator" />
             <SideNavBarEntry name="accounts" icon="users" />
+            <SideNavBarEntry name="roles" icon="user-lock" url_prefix="/accounts" visible={current_path.starts_with("/accounts")} />
+            <SideNavBarEntry name="bindings" icon="user-lock" url_prefix="/accounts" visible={current_path.starts_with("/accounts")} />
+            <SideNavBarEntry name="secrets" icon="lock" url_prefix="/accounts" visible={current_path.starts_with("/accounts")} />
             <div class="separator" />
             <SideNavBarEntry name="profile" icon="user" />
             <div class="separator" />
@@ -65,18 +75,18 @@ pub fn SideNavBar() -> impl IntoView {
 pub fn SideNavBarEntry(
     name: &'static str,
     icon: &'static str,
+    #[prop(default = "solid")]
+    icon_type: &'static str,
     #[prop(optional)]
     url_prefix: &'static str,
     #[prop(default = true)]
     visible: bool,
 ) -> impl IntoView {
     view! {
-        <Show when=move || visible>
-            <a href=format!("{}/{}", url_prefix, &name) class="side-nav-bar-entry">
-                <i class=format!("fa-solid fa-{icon}") />
-                <div class="side-nav-bar-entry-title">{{ capitalize(name) }}</div>
-            </a>
-        </Show>
+        <a href=format!("{}/{}", url_prefix, &name) class=format!("side-nav-bar-entry {}", if visible { "visible" } else { "hidden" })>
+            <i class=format!("fa-{icon_type} fa-{icon}") />
+            <div class="side-nav-bar-entry-title">{{ capitalize(name) }}</div>
+        </a>
     }
 }
 
