@@ -19,7 +19,7 @@ pub fn NamespacePodsComponent(
     let interval_handle = update_page_effect(60_000, move || update_page(namespace_name, pods));
     clear_page_effect(interval_handle);
 
-    view(pods)
+    view(namespace_name, pods)
 }
 
 fn update_page(
@@ -60,6 +60,7 @@ fn update_page(
 }
 
 fn view(
+    namespace_name: RwSignal<String>,
     pods: RwSignal<Vec<Vec<String>>>,
 ) -> impl IntoView {
     let columns = vec![
@@ -73,8 +74,8 @@ fn view(
         TableColumn::new("RAM limit", TableColumnType::StringTwoLine, 1),
     ];
     let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/workloads/pods/";
+    let mut params = vec!["".to_string(); columns.len()];
+    params[1] = format!("/workloads/{}/pods/", namespace_name.get_untracked());
 
     view! {
         <Wrapper>

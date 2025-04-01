@@ -31,7 +31,8 @@ fn update_page(
             .collect::<Vec<_>>();
         events.set(events_list.into_iter().map(|e| vec![
             e.involved_object.kind,
-            format!("{}:{}", e.involved_object.namespace, e.involved_object.name),
+            e.involved_object.namespace,
+            e.involved_object.name,
             time_until_now(&e.first_timestamp.unwrap_or_default()),
             e.reason,
             e.message,
@@ -44,13 +45,16 @@ fn view(
 ) -> impl IntoView {
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 1),
-        TableColumn::new("Name", TableColumnType::String, 4),
+        TableColumn::new("Namespace", TableColumnType::Link, 2),
+        TableColumn::new("Name", TableColumnType::Link, 2),
         TableColumn::new("Time", TableColumnType::String, 1),
         TableColumn::new("Reason", TableColumnType::String, 2),
         TableColumn::new("Event", TableColumnType::String, 12),
     ];
     let styles = vec![""; columns.len()];
-    let params = vec![""; columns.len()];
+    let mut params = vec![""; columns.len()];
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/workloads/:1/";
 
     view! {
         <Expandable label="Events" expanded=true>

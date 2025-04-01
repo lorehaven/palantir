@@ -81,7 +81,7 @@ fn view(
     ];
     let styles = vec![""; columns.len()];
     let mut params = vec![""; columns.len()];
-    params[1] = "/workloads/pods/";
+    params[1] = "/workloads/:2/pods/";
 
     view! {
         <Wrapper>
