@@ -7,10 +7,12 @@ use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect
 use crate::pages::utils::shared::time::time_until_now;
 
 #[component]
-pub fn EventsComponent() -> impl IntoView {
+pub fn EventsComponent(
+    prompt: RwSignal<String>,
+) -> impl IntoView {
     let events = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(10_000, move || update_page(events));
+    let interval_handle = update_page_effect(10_000, move || update_page(events, prompt));
     clear_page_effect(interval_handle);
 
     view(events)
@@ -18,12 +20,18 @@ pub fn EventsComponent() -> impl IntoView {
 
 fn update_page(
     events: RwSignal<Vec<Vec<String>>>,
+    prompt: RwSignal<String>,
 ) {
+    let prompt_value = prompt.get();
     spawn_local(async move {
-        let events_list = events_api::get_events().await.unwrap_or_default();
+        let events_list = events_api::get_events().await
+            .unwrap_or_default()
+            .into_iter()
+            .filter(|e| e.involved_object.name.to_lowercase().contains(&prompt_value.to_lowercase()))
+            .collect::<Vec<_>>();
         events.set(events_list.into_iter().map(|e| vec![
             e.involved_object.kind,
-            e.involved_object.name,
+            format!("{}:{}", e.involved_object.namespace, e.involved_object.name),
             time_until_now(&e.first_timestamp.unwrap_or_default()),
             e.reason,
             e.message,

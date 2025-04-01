@@ -33,8 +33,6 @@ pub fn TableComponent(
                             else { p.to_string() })
                         .collect::<Vec<String>>()
                         .join("/");
-                    leptos::logging::log!("{param}");
-                    leptos::logging::log!("{values_idx:?}");
 
                     match r#type {
                         TableColumnType::Bool => view! { <BoolValue item style /> }.into_any(),

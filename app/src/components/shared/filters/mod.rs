@@ -14,15 +14,21 @@ use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect
 #[component]
 pub fn Filter(
     label: &'static str,
+    #[prop(default = RwSignal::new("".to_string()))]
     selected: RwSignal<String>,
+    #[prop(default = RwSignal::new("".to_string()))]
     prompt: RwSignal<String>,
+    #[prop(default = false)]
+    with_namespace: bool,
+    #[prop(default = false)]
+    with_prompt: bool,
 ) -> impl IntoView {
     let namespaces = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(60_000, move || update_page(namespaces));
     clear_page_effect(interval_handle);
 
-    view(label, selected, namespaces, prompt)
+    view(label, selected, namespaces, prompt, with_namespace, with_prompt)
 }
 
 fn update_page(namespaces: RwSignal<Vec<String>>) {
@@ -42,15 +48,21 @@ fn view(
     selected: RwSignal<String>,
     namespaces: RwSignal<Vec<String>>,
     prompt: RwSignal<String>,
+    with_namespace: bool,
+    with_prompt: bool,
 ) -> impl IntoView {
     view! {
         <Wrapper>
             <WrapperSlot slot>
                 <div class="filter">
                     <label::FilterLabel label />
-                    <namespace::NamespaceFilter namespaces selected />
+                    <Show when=move || with_namespace>
+                        <namespace::NamespaceFilter namespaces selected />
+                    </Show>
                     <spacer::FilterSpacer />
-                    <prompt::PromptFilter prompt />
+                    <Show when=move || with_prompt>
+                        <prompt::PromptFilter prompt />
+                    </Show>
                 </div>
             </WrapperSlot>
         </Wrapper>

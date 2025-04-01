@@ -5,9 +5,10 @@ use crate::domain::shared::metadata::Metadata;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EventsResponse {
     pub kind: String,
-    #[serde(rename = "apiVersion")]
+    #[serde(default, rename = "apiVersion")]
     pub api_version: String,
     pub metadata: ResponseMetadata,
+    #[serde(default)]
     pub items: Vec<Event>,
 }
 
@@ -20,46 +21,47 @@ pub struct ResponseMetadata {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Event {
     pub metadata: Metadata,
-    #[serde(rename = "involvedObject")]
+    #[serde(default, rename = "involvedObject")]
     pub involved_object: InvolvedObject,
+    #[serde(default)]
     pub reason: String,
+    #[serde(default)]
     pub message: String,
+    #[serde(default)]
     pub source: Source,
-    #[serde(rename = "firstTimestamp")]
+    #[serde(default, rename = "firstTimestamp")]
     pub first_timestamp: Option<String>,
-    #[serde(rename = "lastTimestamp")]
+    #[serde(default, rename = "lastTimestamp")]
     pub last_timestamp: Option<String>,
     #[serde(default)]
     pub count: usize,
     pub r#type: String,
-    #[serde(default)]
-    #[serde(rename = "eventTime")]
+    #[serde(default, rename = "eventTime")]
     pub event_time: Option<String>,
-    #[serde(rename = "reportingComponent")]
+    #[serde(default, rename = "reportingComponent")]
     pub reporting_component: String,
-    #[serde(rename = "reportingInstance")]
+    #[serde(default, rename = "reportingInstance")]
     pub reporting_instance: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct InvolvedObject {
     pub kind: String,
     pub namespace: String,
     pub name: String,
     #[serde(default)]
     pub uid: String,
-    #[serde(rename = "apiVersion")]
+    #[serde(default, rename = "apiVersion")]
     pub api_version: String,
-    #[serde(default)]
-    #[serde(rename = "resourceVersion")]
+    #[serde(default, rename = "resourceVersion")]
     pub resource_version: String,
-    #[serde(default)]
-    #[serde(rename = "fieldPath")]
+    #[serde(default, rename = "fieldPath")]
     pub field_path: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Source {
+    #[serde(default)]
     pub component: String,
     #[serde(default)]
     pub host: String,

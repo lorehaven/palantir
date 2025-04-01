@@ -22,7 +22,12 @@ pub fn WorkloadsPage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="workloads main-page">
-                    <Filter label="Workloads" selected prompt />
+                    <Filter
+                        label="Workloads"
+                        selected
+                        prompt
+                        with_namespace=true
+                        with_prompt=true />
                     <WorkloadsStats selected />
                     <WorkloadsList selected prompt />
                 </div>
@@ -123,7 +128,7 @@ fn update_page_list(
             if selected_value == "All Namespaces" { workloads_api::get_workloads().await }
             else { workloads_api::get_workloads_by_namespace_name(selected_value.clone()).await };
         let workloads_list = workloads_list.into_iter()
-            .filter(|w| w.get_name().contains(&prompt_value))
+            .filter(|w| w.get_name().to_lowercase().contains(&prompt_value.to_lowercase()))
             .map(|w| w.to_model())
             .collect::<Vec<_>>();
         let mut list = workloads_list.into_iter().map(|w| vec![

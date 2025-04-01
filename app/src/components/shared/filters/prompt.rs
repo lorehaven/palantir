@@ -13,7 +13,7 @@ pub fn PromptFilter(
                     <input
                         prop:value=prompt
                         on:keyup=move |ev| prompt.set(event_target_value(&ev).parse().unwrap())
-                        prop:placeholder="type name"
+                        prop:placeholder="filter"
                     />
                 </div>
             </WrapperSlot>

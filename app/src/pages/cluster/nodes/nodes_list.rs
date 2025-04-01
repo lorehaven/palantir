@@ -13,19 +13,27 @@ use crate::pages::utils::shared::time::time_until_now;
 use crate::pages::utils::stats::{convert_memory, parse_memory};
 
 #[component]
-pub fn NodesListComponent() -> impl IntoView {
+pub fn NodesListComponent(
+    prompt: RwSignal<String>,
+) -> impl IntoView {
     let nodes = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(10_000, move || update_page(nodes));
+    let interval_handle = update_page_effect(10_000, move || update_page(nodes, prompt));
     clear_page_effect(interval_handle);
     view(nodes)
 }
 
 fn update_page(
     nodes: RwSignal<Vec<Vec<String>>>,
+    prompt: RwSignal<String>,
 ) {
+    let prompt_value = prompt.get();
     spawn_local(async move {
-        let nodes_data = nodes_api::get_nodes().await.unwrap_or_default();
+        let nodes_data = nodes_api::get_nodes().await
+            .unwrap_or_default()
+            .into_iter()
+            .filter(|n| n.metadata.name.to_lowercase().contains(&prompt_value.to_lowercase()))
+            .collect::<Vec<_>>();
         let nodes_metrics = metrics_api::get_nodes().await.unwrap_or_default()
             .into_iter()
             .filter(|n| nodes_data.iter().any(|s| s.metadata.name == n.metadata.name))

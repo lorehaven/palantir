@@ -6,12 +6,18 @@ mod namespaces_list;
 
 #[component]
 pub fn ClusterNamespacesPage() -> impl IntoView {
+    let prompt = RwSignal::new("".to_string());
+
     view! {
         <Header text=vec!["Cluster", "Namespaces"] />
         <PageContent>
             <PageContentSlot slot>
                 <div class="cluster-namespaces main-page">
-                    <namespaces_list::NamespacesListComponent />
+                    <Filter
+                        label="Namespaces"
+                        prompt
+                        with_prompt=true />
+                    <namespaces_list::NamespacesListComponent prompt />
                 </div>
             </PageContentSlot>
         </PageContent>

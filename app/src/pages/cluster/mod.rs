@@ -12,14 +12,20 @@ pub mod nodes;
 
 #[component]
 pub fn ClusterPage() -> impl IntoView {
+    let prompt = RwSignal::new("".to_string());
+
     view! {
         <Header text=vec!["Cluster"] />
         <PageContent>
             <PageContentSlot slot>
                 <div class="cluster main-page">
+                    <Filter
+                        label="Cluster overview"
+                        prompt
+                        with_prompt=true />
                     <NodesStatComponent />
                     <PodsStatComponent />
-                    <EventsComponent />
+                    <EventsComponent prompt />
                 </div>
             </PageContentSlot>
         </PageContent>

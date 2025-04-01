@@ -7,30 +7,34 @@ use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect
 use crate::pages::utils::shared::time::time_until_now;
 
 #[component]
-pub fn NamespacesListComponent() -> impl IntoView {
+pub fn NamespacesListComponent(
+    prompt: RwSignal<String>,
+) -> impl IntoView {
     let namespaces = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(10_000, move || update_page(namespaces));
+    let interval_handle = update_page_effect(10_000, move || update_page(namespaces, prompt));
     clear_page_effect(interval_handle);
     view(namespaces)
 }
 
 fn update_page(
     namespaces: RwSignal<Vec<Vec<String>>>,
+    prompt: RwSignal<String>,
 ) {
+    let prompt_value = prompt.get();
     spawn_local(async move {
         let namespaces_data = namespaces_api::get_namespaces().await.unwrap_or_default();
 
-        let mut namespaces_vec = vec![];
-        for namespace in namespaces_data {
-            namespaces_vec.push(vec![
+        namespaces.set(namespaces_data
+            .into_iter()
+            .filter(|n| n.metadata.name.to_lowercase().contains(&prompt_value.to_lowercase()))
+            .map(|n| vec![
                 "Namespace".to_string(),
-                namespace.clone().metadata.name,
-                time_until_now(&namespace.clone().metadata.creation_timestamp),
-                namespace.clone().status.phase,
-            ]);
-        }
-        namespaces.set(namespaces_vec);
+                n.clone().metadata.name,
+                time_until_now(&n.clone().metadata.creation_timestamp),
+                n.clone().status.phase,
+            ])
+            .collect());
     });
 }
 
@@ -48,7 +52,7 @@ fn view(
     params[1] = "/cluster/namespaces/";
 
     view! {
-        <Wrapper label="Namespaces">
+        <Wrapper>
             <WrapperSlot slot>
                 <div class="card-container dcc-1">
                     <div class="card-table">

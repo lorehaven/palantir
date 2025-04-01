@@ -91,7 +91,7 @@ fn view(
                 nodes_memory_values,
                 nodes_memory_labels
             )>
-            <Expandable label="Nodes" expanded=true>
+            <Expandable label="Stats" expanded=true>
                 <ExpandableSlot slot>
                     {view_internal(
                         node_name,
