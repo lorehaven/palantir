@@ -7,16 +7,20 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.85.1"
 
+[profile.dev]
+opt-level = 0
+debug = 0
+
 [profile.release]
 codegen-units = 1
 lto = true
 opt-level = 'z'
 
 [workspace.dependencies]
-leptos = "0.7.0"
-leptos_meta = "0.7.0"
-leptos_router = "0.7.0"
-leptos_axum = "0.7.0"
+leptos = "0.7.8"
+leptos_meta = "0.7.8"
+leptos_router = "0.7.8"
+leptos_axum = "0.7.8"
 
 axum = "0.7.9"
 base64 = "0.22"
