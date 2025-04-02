@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::api::pods as pods_api;
+use crate::api::workloads::pods as pods_api;
 use crate::api::workloads as workloads_api;
 use crate::components::prelude::*;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
@@ -10,6 +10,7 @@ pub mod config;
 pub mod ingresses;
 pub mod pods;
 pub mod replicas;
+pub mod service;
 pub mod services;
 
 #[component]

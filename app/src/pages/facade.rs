@@ -1,8 +1,8 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::api::services as api;
-use crate::domain::service::ServiceEntry;
+use crate::api::service_entries as api;
+use crate::domain::workload::service::ServiceEntry;
 use crate::components::prelude::*;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 
@@ -21,7 +21,7 @@ pub fn FacadePage() -> impl IntoView {
 
 fn update_page(entries: RwSignal<Vec<ServiceEntry>>, loading: RwSignal<bool>) {
     spawn_local(async move {
-        entries.set(api::get_services().await.unwrap_or_default());
+        entries.set(api::get_service_entries().await.unwrap_or_default());
         loading.set(false);
     });
 }

@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::api::nodes as nodes_api;
+use crate::api::cluster::nodes as nodes_api;
 use crate::api::metrics as metrics_api;
 use crate::domain::metrics::NodeMetrics;
 use crate::domain::node::Node;

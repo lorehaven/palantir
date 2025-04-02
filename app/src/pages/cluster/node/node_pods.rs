@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use crate::api::metrics as metrics_api;
-use crate::api::pods as pods_api;
+use crate::api::workloads::pods as pods_api;
 use crate::components::prelude::*;
 use crate::domain::metrics::PodMetrics;
 use crate::domain::pod::Pod;

@@ -2,22 +2,22 @@ use leptos::prelude::ServerFnError;
 use leptos::server;
 
 #[allow(unused_imports)]
-use crate::api::pods::*;
+use crate::api::workloads::pods::*;
 #[allow(unused_imports)]
 use crate::api::utils::kube_api_request;
 use crate::domain::pod::Pod;
-use crate::domain::service::*;
+use crate::domain::workload::service::*;
 
 const NAME_LABEL: &str = "app.kubernetes.io/name";
 
-#[server(GetServices, "/api/services")]
-pub async fn get_services() -> Result<Vec<ServiceEntry>, ServerFnError> {
+#[server(GetServiceEntries, "/api/services/entries")]
+pub async fn get_service_entries() -> Result<Vec<ServiceEntry>, ServerFnError> {
     let services = kube_api_request("services".to_string()).await?;
-    Ok(parse_response(&services, &get_pods().await?).await.unwrap_or_default())
+    Ok(parse_entries_response(&services, &get_pods().await?).await.unwrap_or_default())
 }
 
 #[allow(dead_code)]
-async fn parse_response(response: &str, pods: &[Pod]) -> Result<Vec<ServiceEntry>, Box<dyn std::error::Error>> {
+async fn parse_entries_response(response: &str, pods: &[Pod]) -> Result<Vec<ServiceEntry>, Box<dyn std::error::Error>> {
     let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
     let server_dns_name = std::env::var("SERVER_DNS_NAME").unwrap_or_else(|_| "ossiriand.arda".to_string());
 
@@ -84,7 +84,7 @@ fn get_pod_by_label(pods: &[Pod], label: &str) -> Option<Pod> {
     pods
         .iter()
         .find(|p| p.metadata.labels
-            .get("app.kubernetes.io/name")
+            .get(NAME_LABEL)
             .unwrap_or(&String::new()) == label)
         .cloned()
 }

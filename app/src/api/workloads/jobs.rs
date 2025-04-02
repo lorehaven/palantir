@@ -1,0 +1,19 @@
+use leptos::prelude::ServerFnError;
+use leptos::server;
+
+#[allow(unused_imports)]
+use crate::api::utils::kube_api_batch_request;
+#[allow(unused_imports)]
+use crate::domain::workload::job::{Job, JobsResponse};
+
+#[server(GetJobs, "/api/workloads/jobs")]
+pub async fn get_jobs(
+    namespace_name: Option<String>,
+) -> Result<Vec<Job>, ServerFnError> {
+    let response = kube_api_batch_request("jobs".to_string()).await?;
+    let items = serde_json::from_str::<JobsResponse>(&response)?.items
+        .into_iter()
+        .filter(|f| f.metadata.namespace.contains(&namespace_name.clone().unwrap_or_default()))
+        .collect();
+    Ok(items)
+}
