@@ -6,8 +6,8 @@ use crate::api::workloads::pods as pods_api;
 use crate::domain::metrics::PodMetrics;
 use crate::domain::pod::Pod;
 use crate::components::prelude::*;
+use crate::components::stats::shared::{get_pods_cpu, get_pods_memory};
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
-use crate::pages::utils::stats::{convert_memory, parse_memory, parse_pod_cpu};
 
 #[component]
 pub fn PodsStatComponent(
@@ -137,27 +137,4 @@ fn get_pods_ready(pods: &[Pod]) -> (f64, f64) {
         .filter(|s| s.status.conditions.iter().any(|c| c.r#type == "Ready" && c.status == "True"))
         .count();
     (pcount as f64, pready as f64)
-}
-
-fn get_pods_cpu(pods: &[Pod], metrics: &[PodMetrics]) -> (f64, f64) {
-    let pcap = pods.iter()
-        .fold(0., |acc, p| acc + p.spec.containers.iter()
-            .fold(0., |acc, c| acc + parse_pod_cpu(&c.resources.requests.cpu)));
-    let puse = metrics.iter()
-        .fold(0., |acc, p| acc + p.containers.iter()
-            .fold(0., |acc, c| acc + c.usage.cpu.trim_end_matches('n').parse::<f64>().unwrap_or(0.)));
-    (pcap, puse / 1_000_000_000.)
-}
-
-fn get_pods_memory(pods: &[Pod], metrics: &[PodMetrics]) -> ((f64, f64), (String, String)) {
-    let pcap = pods.iter()
-        .fold(0., |acc, p| acc + p.spec.containers.iter()
-            .filter(|c| !c.resources.requests.memory.is_empty())
-            .fold(0., |acc, c| acc + parse_memory(&c.resources.requests.memory).unwrap_or_default()));
-    let pcap = convert_memory(pcap);
-    let puse = metrics.iter()
-        .fold(0., |acc, p| acc + p.containers.iter()
-            .fold(0., |acc, c| acc + parse_memory(&c.usage.memory).unwrap_or_default()));
-    let puse = convert_memory(puse);
-    ((pcap.0, puse.0), (pcap.1, puse.1))
 }

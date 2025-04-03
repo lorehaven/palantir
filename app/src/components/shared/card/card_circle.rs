@@ -3,7 +3,7 @@ use leptos::prelude::*;
 #[component]
 pub fn CardCircle(
     label: &'static str,
-    label_add: &'static str,
+    #[prop(default = "")] label_add: &'static str,
     values: (f64, f64),
     #[prop(default = (String::new(), String::new()))] value_labels: (String, String),
     #[prop(default = true)] decimal: bool,

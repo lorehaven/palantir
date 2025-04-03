@@ -6,47 +6,42 @@ use crate::domain::workload::{Workload, WorkloadModel};
 use crate::pages::utils::shared::time::time_until_now;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct DaemonSetsResponse {
-    pub items: Vec<DaemonSet>,
+pub struct ReplicaSetsResponse {
+    pub items: Vec<ReplicaSet>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct DaemonSet {
+pub struct ReplicaSet {
     pub metadata: Metadata,
-    pub spec: DaemonSetSpec,
-    pub status: DaemonSetStatus,
+    pub spec: ReplicaSetSpec,
+    pub status: ReplicaSetStatus,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct DaemonSetSpec {
-    #[serde(rename = "revisionHistoryLimit")]
-    pub revision_history_limit: i32,
+pub struct ReplicaSetSpec {
+    #[serde(default)]
+    pub replicas: i32,
     // selector
     pub template: Template,
-    // update strategy
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct DaemonSetStatus {
-    #[serde(rename = "currentNumberScheduled")]
-    pub current_number_scheduled: i32,
-    #[serde(rename = "desiredNumberScheduled")]
-    pub desired_number_scheduled: i32,
-    #[serde(rename = "numberAvailable")]
-    pub number_available: i32,
-    #[serde(rename = "numberMisscheduled")]
-    pub number_misscheduled: i32,
-    #[serde(rename = "numberReady")]
-    pub number_ready: i32,
-    #[serde(rename = "observedGeneration")]
+pub struct ReplicaSetStatus {
+    #[serde(default, rename = "availableReplicas")]
+    pub available_replicas: i32,
+    #[serde(default, rename = "fullyLabeledReplicas")]
+    pub fully_labeled_replicas: i32,
+    #[serde(default, rename = "observedGeneration")]
     pub observed_generation: i32,
-    #[serde(rename = "updatedNumberScheduled")]
-    pub updated_number_scheduled: i32,
+    #[serde(default, rename = "readyReplicas")]
+    pub ready_replicas: i32,
+    #[serde(default)]
+    pub replicas: i32,
 }
 
-impl Workload for DaemonSet {
+impl Workload for ReplicaSet {
     fn is_ready(&self) -> bool {
-        self.status.current_number_scheduled == self.status.number_ready
+        self.status.ready_replicas == self.status.replicas
     }
 
     fn get_name(&self) -> String {
@@ -59,7 +54,8 @@ impl Workload for DaemonSet {
             name: self.metadata.name.clone(),
             namespace: self.metadata.namespace.clone(),
             age: time_until_now(&self.clone().metadata.creation_timestamp.unwrap_or_default()),
-            pods: format!("{}/{}", self.status.number_ready, self.status.number_available),
+            pods: format!("{}/{}", self.status.ready_replicas, self.status.replicas),
         }
     }
 }
+

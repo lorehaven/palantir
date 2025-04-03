@@ -14,9 +14,29 @@ pub struct Metadata {
     #[serde(default, rename = "resourceVersion")]
     pub resource_version: String,
     #[serde(default, rename = "creationTimestamp")]
-    pub creation_timestamp: String,
+    pub creation_timestamp: Option<String>,
     #[serde(default)]
     pub labels: HashMap<String, String>,
     #[serde(default)]
     pub annotations: HashMap<String, String>,
+    #[serde(default)]
+    pub generation: i32,
+    #[serde(default, rename = "ownerReferences")]
+    pub owner_references: Vec<OwnerReference>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct OwnerReference {
+    #[serde(default, rename = "apiVersion")]
+    pub api_version: String,
+    #[serde(default, rename = "blockOwnerDeletion")]
+    pub block_owner_deletion: bool,
+    #[serde(default)]
+    pub controller: bool,
+    #[serde(default)]
+    pub kind: String,
+    #[serde(default)]
+    pub name: String,
+    #[serde(default)]
+    pub uid: String,
 }

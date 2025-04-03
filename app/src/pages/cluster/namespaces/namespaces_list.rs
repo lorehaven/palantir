@@ -31,7 +31,7 @@ fn update_page(
             .map(|n| vec![
                 "Namespace".to_string(),
                 n.clone().metadata.name,
-                time_until_now(&n.clone().metadata.creation_timestamp),
+                time_until_now(&n.clone().metadata.creation_timestamp.unwrap_or_default()),
                 n.clone().status.phase,
             ])
             .collect());

@@ -2,14 +2,25 @@ use leptos::prelude::*;
 
 use crate::components::prelude::*;
 
+pub mod replicasets_list;
+
 #[component]
-pub fn WorkloadsReplicasPage() -> impl IntoView {
+pub fn WorkloadsReplicaSetsPage() -> impl IntoView {
+    let prompt = RwSignal::new("".to_string());
+    let selected = RwSignal::new("All Namespaces".to_string());
+
     view! {
         <Header text=vec!["Workloads", "Replicas"] />
         <PageContent>
             <PageContentSlot slot>
                 <div class="workloads-replicas main-page">
-                    Replicas
+                    <Filter
+                        label="Replica Sets"
+                        selected
+                        prompt
+                        with_namespace=true
+                        with_prompt=true />
+                    <replicasets_list::ReplicaSetsListComponent selected prompt />
                 </div>
             </PageContentSlot>
         </PageContent>

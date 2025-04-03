@@ -49,7 +49,7 @@ fn update_page(
                 "Pod".to_string(),
                 pod.clone().metadata.name,
                 pod.clone().metadata.namespace,
-                time_until_now(&pod.metadata.creation_timestamp),
+                time_until_now(&pod.clone().metadata.creation_timestamp.unwrap_or_default()),
                 pod.clone().status.container_statuses.iter().map(|c| c.restart_count).sum::<i32>().to_string(),
                 pod_cpu_actual(&metrics),
                 pod_cpu_request(&pod, &metrics),

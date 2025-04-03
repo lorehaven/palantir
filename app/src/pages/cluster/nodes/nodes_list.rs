@@ -49,7 +49,7 @@ fn update_page(
             nodes_vec.push(vec![
                 NodeType::from_node(&node).to_string(),
                 node.clone().metadata.name,
-                time_until_now(&node.metadata.creation_timestamp),
+                time_until_now(&node.clone().metadata.creation_timestamp.unwrap_or_default()),
                 node.clone().metadata.labels.into_iter().map(|(k, v)| format!("{}: {}", k, v)).collect::<Vec<String>>().join("\n"),
                 node.clone().status.conditions.iter().any(|c| c.r#type == "Ready" && c.status == "True").to_string(),
                 get_node_cpu_actual(&node, &node_metric),

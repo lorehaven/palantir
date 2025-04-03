@@ -3,42 +3,45 @@ use leptos::task::spawn_local;
 
 use crate::api::metrics as metrics_api;
 use crate::api::workloads::pods as pods_api;
-use crate::components::prelude::*;
+use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
 use crate::domain::metrics::PodMetrics;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::stats::pod_stats::*;
 
 #[component]
-pub fn NamespacePodsComponent(
+pub fn ReplicaSetListComponent(
     namespace_name: String,
+    replicaset_name: String,
 ) -> impl IntoView {
     let namespace_name = RwSignal::new(namespace_name);
-    let pods = RwSignal::new(vec![]);
+    let replicaset_name = RwSignal::new(replicaset_name);
+    let replicas = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(60_000, move || update_page(namespace_name, pods));
+    let interval_handle = update_page_effect(10_000, move || update_page(namespace_name, replicaset_name, replicas));
     clear_page_effect(interval_handle);
-
-    view(namespace_name, pods)
+    view(namespace_name, replicas)
 }
 
 fn update_page(
     namespace_name: RwSignal<String>,
-    pods: RwSignal<Vec<Vec<String>>>,
+    replicaset_name: RwSignal<String>,
+    replicas: RwSignal<Vec<Vec<String>>>,
 ) {
     spawn_local(async move {
-        if namespace_name.is_disposed() { return; }
+        if namespace_name.is_disposed() || replicaset_name.is_disposed() { return; }
 
-        let mut pods_data = pods_api::get_pods_by_namespace_name(namespace_name.get_untracked()).await
-            .unwrap_or_default();
-        pods_data.sort_by(|a, b| a.metadata.name.cmp(&b.metadata.name));
-        let pod_names = pods_data.iter().map(|p| p.metadata.name.clone()).collect::<Vec<String>>();
+        let pods = pods_api::get_pods_by_namespace_name(namespace_name.get_untracked()).await.unwrap_or_default()
+            .into_iter()
+            .filter(|p| p.metadata.name.contains(&replicaset_name.get_untracked()))
+            .collect::<Vec<_>>();
+        let pod_names = pods.iter().map(|p| p.metadata.name.clone()).collect::<Vec<String>>();
         let pods_metrics = metrics_api::get_pods().await.unwrap_or_default()
             .into_iter()
             .filter(|pm| pod_names.contains(&pm.metadata.name))
             .collect::<Vec<PodMetrics>>();
 
         let mut pods_vec = vec![];
-        for pod in pods_data {
+        for pod in pods {
             let metrics = pods_metrics.clone().into_iter()
                 .find(|p| p.metadata.name == pod.metadata.name)
                 .unwrap_or_default();
@@ -54,13 +57,13 @@ fn update_page(
                 pod_memory_limit(&pod, &metrics),
             ]);
         }
-        pods.set(pods_vec);
+        replicas.set(pods_vec);
     });
 }
 
 fn view(
     namespace_name: RwSignal<String>,
-    pods: RwSignal<Vec<Vec<String>>>,
+    replicas: RwSignal<Vec<Vec<String>>>,
 ) -> impl IntoView {
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 1),
@@ -83,7 +86,7 @@ fn view(
                     <div class="card-table">
                         <TableComponent
                             columns=columns.clone()
-                            values=pods.get()
+                            values=replicas.get()
                             styles=styles.clone()
                             params=params.clone() />
                     </div>

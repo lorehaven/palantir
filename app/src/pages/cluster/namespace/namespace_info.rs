@@ -35,7 +35,7 @@ fn update_page(
         let mut items = vec![];
         items.push(("Name", namespace.metadata.name));
         items.push(("Kind", kind));
-        items.push(("Created", format_timestamp(&namespace.metadata.creation_timestamp, None)));
+        items.push(("Created", format_timestamp(&namespace.metadata.creation_timestamp.unwrap_or_default(), None)));
         items.push(("Labels", namespace.metadata.labels.into_iter()
             .map(|(k, v)| format!("{} • {}", k, v))
             .collect::<Vec<String>>()

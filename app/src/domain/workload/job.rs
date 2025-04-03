@@ -68,7 +68,7 @@ impl Workload for Job {
             r#type: "Job".to_string(),
             name: self.metadata.name.clone(),
             namespace: self.metadata.namespace.clone(),
-            age: time_until_now(&self.metadata.creation_timestamp),
+            age: time_until_now(&self.clone().metadata.creation_timestamp.unwrap_or_default()),
             pods: format!("{}/{}", self.status.ready, self.status.succeeded),
         }
     }

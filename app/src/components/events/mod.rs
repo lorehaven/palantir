@@ -7,17 +7,20 @@ use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect
 use crate::pages::utils::shared::time::time_until_now;
 
 #[component]
-pub fn ServiceEventsComponent(
+pub fn EventsListComponent(
+    object_type: String,
     namespace_name: String,
-    service_name: String,
+    object_name: String,
 ) -> impl IntoView {
+    let object_type = RwSignal::new(object_type);
     let namespace_name = RwSignal::new(namespace_name);
-    let service_name = RwSignal::new(service_name);
+    let object_name = RwSignal::new(object_name);
     let events = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(60_000, move || update_page(
+        object_type,
         namespace_name,
-        service_name,
+        object_name,
         events,
     ));
     clear_page_effect(interval_handle);
@@ -26,17 +29,18 @@ pub fn ServiceEventsComponent(
 }
 
 fn update_page(
+    object_type: RwSignal<String>,
     namespace_name: RwSignal<String>,
-    service_name: RwSignal<String>,
+    object_name: RwSignal<String>,
     events: RwSignal<Vec<Vec<String>>>,
 ) {
     spawn_local(async move {
-        if namespace_name.is_disposed() || service_name.is_disposed() { return; }
+        if namespace_name.is_disposed() || object_name.is_disposed() { return; }
 
         let mut events_data = events_api::get_events_by_namespace_name(namespace_name.get_untracked()).await
             .unwrap_or_default()
             .into_iter()
-            .filter(|e| e.involved_object.kind == "Service" && e.involved_object.name == service_name.get_untracked())
+            .filter(|e| e.involved_object.kind == object_type.get_untracked() && e.involved_object.name == object_name.get_untracked())
             .collect::<Vec<_>>();
         events_data.sort_by(|a, b| a.metadata.creation_timestamp.cmp(&b.metadata.creation_timestamp));
 

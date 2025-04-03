@@ -62,7 +62,7 @@ fn update_page(
             .filter(|n| nodes.iter().any(|s| s.metadata.name == n.metadata.name))
             .collect::<Vec<NodeMetrics>>();
 
-        nodes_age.set(time_until_now(&nodes.iter().map(|n| n.metadata.creation_timestamp.clone()).min().unwrap_or_default()));
+        nodes_age.set(time_until_now(&nodes.iter().map(|n| n.clone().metadata.creation_timestamp.unwrap_or_default().clone()).min().unwrap_or_default()));
         nodes_ready.set(get_nodes_ready(&nodes));
         nodes_cpu.set(get_nodes_cpu(&nodes, &nodes_metrics));
         let nodes_memory = get_nodes_memory(&nodes, &nodes_metrics);

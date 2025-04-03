@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::domain::shared::metadata::Metadata;
+use crate::domain::shared::template::Template;
 use crate::domain::workload::{Workload, WorkloadModel};
 use crate::pages::utils::shared::time::time_until_now;
 
@@ -26,7 +27,7 @@ pub struct DeploymentSpec {
     pub revision_history_limit: i32,
     pub selector: DeploymentSelector,
     pub strategy: DeploymentStrategy,
-    pub template: DeploymentTemplate,
+    pub template: Template,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
@@ -39,39 +40,6 @@ pub struct DeploymentSelector {
 pub struct DeploymentStrategy {
     // rolling update
     pub r#type: String,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct DeploymentTemplate {
-    pub metadata: DeploymentTemplateMetadata,
-    pub spec: DeploymentTemplateSpec,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct DeploymentTemplateMetadata {
-    #[serde(default, rename = "creationTimestamp")]
-    pub creation_timestamp: Option<String>,
-    #[serde(default)]
-    pub labels: HashMap<String, String>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct DeploymentTemplateSpec {
-    // containers
-    #[serde(rename = "dnsPolicy")]
-    pub dns_policy: String,
-    #[serde(rename = "restartPolicy")]
-    pub restart_policy: String,
-    #[serde(rename = "schedulerName")]
-    pub scheduler_name: String,
-    // security context
-    #[serde(rename = "serviceAccount")]
-    pub service_account: String,
-    #[serde(rename = "serviceAccountName")]
-    pub service_account_name: String,
-    #[serde(rename = "terminationGracePeriodSeconds")]
-    pub termination_grace_period_seconds: i32,
-    // volumes
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
@@ -114,7 +82,7 @@ impl Workload for Deployment {
             r#type: "Deployment".to_string(),
             name: self.metadata.name.clone(),
             namespace: self.metadata.namespace.clone(),
-            age: time_until_now(&self.metadata.creation_timestamp),
+            age: time_until_now(&self.clone().metadata.creation_timestamp.unwrap_or_default()),
             pods: format!("{}/{}", self.status.available_replicas, self.status.replicas),
         }
     }

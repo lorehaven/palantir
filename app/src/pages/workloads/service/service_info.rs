@@ -42,7 +42,7 @@ fn update_page(
         items.push(("Name", service.metadata.name));
         items.push(("Kind", "Service".to_string()));
         items.push(("Namespace", service.metadata.namespace));
-        items.push(("Created", format_timestamp(&service.metadata.creation_timestamp, None)));
+        items.push(("Created", format_timestamp(&service.metadata.creation_timestamp.unwrap_or_default(), None)));
         items.push(("Labels", service.metadata.labels.into_iter()
             .map(|(k, v)| format!("{} • {}", k, v))
             .collect::<Vec<String>>()

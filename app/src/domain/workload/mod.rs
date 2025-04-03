@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 pub mod daemonset;
 pub mod deployment;
 pub mod job;
+pub mod replicaset;
 pub mod service;
 
 pub trait Workload: Debug + Sync + Send {

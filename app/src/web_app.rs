@@ -16,7 +16,8 @@ use crate::pages::{
         WorkloadsPage,
         service::WorkloadsServicePage,
         services::WorkloadsServicesPage,
-        replicas::WorkloadsReplicasPage,
+        replica::WorkloadsReplicaSetPage,
+        replicas::WorkloadsReplicaSetsPage,
         pods::WorkloadsPodsPage,
         ingresses::WorkloadsIngressesPage,
         config::WorkloadsConfigPage,
@@ -58,7 +59,8 @@ pub fn WebApp() -> impl IntoView {
                     <Route path=path!("/workloads") view=WorkloadsPage />
                     <Route path=path!("/workloads/services") view=WorkloadsServicesPage />
                     <Route path=path!("/workloads/:namespace/services/:name") view=WorkloadsServicePage />
-                    <Route path=path!("/workloads/replicas") view=WorkloadsReplicasPage />
+                    <Route path=path!("/workloads/replicas") view=WorkloadsReplicaSetsPage />
+                    <Route path=path!("/workloads/:namespace/replicasets/:name") view=WorkloadsReplicaSetPage />
                     <Route path=path!("/workloads/pods") view=WorkloadsPodsPage />
                     <Route path=path!("/workloads/ingresses") view=WorkloadsIngressesPage />
                     <Route path=path!("/workloads/config") view=WorkloadsConfigPage />
