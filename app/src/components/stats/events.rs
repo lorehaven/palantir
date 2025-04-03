@@ -27,9 +27,8 @@ fn update_page(
         let events_list = events_api::get_events().await
             .unwrap_or_default()
             .into_iter()
-            .filter(|e| e.involved_object.name.to_lowercase().contains(&prompt_value.to_lowercase()))
-            .collect::<Vec<_>>();
-        events.set(events_list.into_iter().map(|e| vec![
+            .filter(|e| e.involved_object.name.to_lowercase().contains(&prompt_value.to_lowercase()));
+        events.set(events_list.map(|e| vec![
             e.involved_object.kind,
             e.involved_object.namespace,
             e.involved_object.name,

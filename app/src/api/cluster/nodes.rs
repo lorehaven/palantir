@@ -6,7 +6,7 @@ use crate::api::utils::kube_api_request;
 use crate::domain::node::{Node, NodesResponse};
 
 pub async fn get_nodes_filtered(
-    node_name: &Option<String>,
+    node_name: Option<String>,
 ) -> Vec<Node> {
     if let Some(name) = node_name {
         vec![get_node_by_name(name.clone()).await.unwrap_or_default()]
@@ -35,5 +35,5 @@ pub async fn get_node_by_name(name: String) -> Result<Node, ServerFnError> {
         .find(|n| n.metadata.name == name)
         .cloned()
         .unwrap_or_default();
-    Ok(node.clone())
+    Ok(node)
 }

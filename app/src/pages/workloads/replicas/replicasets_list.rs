@@ -35,8 +35,8 @@ fn update_page(
                 "ReplicaSet".to_string(),
                 r.clone().metadata.namespace,
                 r.clone().metadata.name,
-                r.clone().metadata.generation.to_string(),
-                format!("{}/{}", r.clone().status.available_replicas, r.clone().status.replicas),
+                r.metadata.generation.to_string(),
+                format!("{}/{}", r.status.available_replicas, r.status.replicas),
             ])
             .collect());
     });

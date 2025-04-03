@@ -59,7 +59,7 @@ fn update_page(
             .get_untracked();
         let node_name = node_name.get_untracked();
 
-        let pods = pods_api::get_pods_filtered(&namespace_name, &node_name).await;
+        let pods = pods_api::get_pods_filtered(namespace_name, node_name).await;
         let pod_names = pods.iter().map(|p| p.metadata.name.clone()).collect::<Vec<String>>();
         let pods_metrics = metrics_api::get_pods().await.unwrap_or_default()
             .into_iter()

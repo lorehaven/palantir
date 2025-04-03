@@ -11,8 +11,6 @@ pub fn FacadePage() -> impl IntoView {
     let entries = RwSignal::new(vec![]);
     let loading = RwSignal::new(true);
 
-    let _update_page = move || update_page(entries, loading);
-
     let interval_handle = update_page_effect(10_000, move || update_page(entries, loading));
     clear_page_effect(interval_handle);
 

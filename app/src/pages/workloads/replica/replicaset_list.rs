@@ -6,7 +6,7 @@ use crate::api::workloads::pods as pods_api;
 use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
 use crate::domain::metrics::PodMetrics;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
-use crate::pages::utils::stats::pod_stats::*;
+use crate::pages::utils::stats::pod_stats::{pod_cpu_actual, pod_cpu_limit, pod_cpu_request, pod_memory_actual, pod_memory_limit, pod_memory_request};
 
 #[component]
 pub fn ReplicaSetListComponent(
@@ -76,7 +76,7 @@ fn view(
         TableColumn::new("RAM limit", TableColumnType::StringTwoLine, 1),
     ];
     let styles = vec![""; columns.len()];
-    let mut params = vec!["".to_string(); columns.len()];
+    let mut params = vec![String::new(); columns.len()];
     params[1] = format!("/workloads/{}/pods/", namespace_name.get_untracked());
 
     view! {

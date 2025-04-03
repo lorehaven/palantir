@@ -31,7 +31,7 @@ fn update_page(
         services.set(services_data
             .into_iter()
             .filter(|s| s.metadata.name.to_lowercase().contains(&prompt_value.to_lowercase()))
-            .map(|n| vec!["Service".to_string(), n.clone().metadata.namespace, n.clone().metadata.name])
+            .map(|n| vec!["Service".to_string(), n.clone().metadata.namespace, n.metadata.name])
             .collect());
     });
 }

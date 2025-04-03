@@ -6,7 +6,7 @@ pub mod replicasets_list;
 
 #[component]
 pub fn WorkloadsReplicaSetsPage() -> impl IntoView {
-    let prompt = RwSignal::new("".to_string());
+    let prompt = RwSignal::new(String::new());
     let selected = RwSignal::new("All Namespaces".to_string());
 
     view! {

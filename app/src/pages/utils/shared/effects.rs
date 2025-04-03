@@ -26,6 +26,6 @@ where
 pub fn clear_page_effect(interval_handle: Arc<Mutex<Option<IntervalHandle>>>) {
     on_cleanup(move ||
         if let Some(handle) = interval_handle.lock().unwrap().as_ref() {
-            handle.clear()
+            handle.clear();
         });
 }

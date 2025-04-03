@@ -13,6 +13,7 @@ pub fn get_api_token() -> String {
 }
 
 #[server]
+#[allow(clippy::unused_async)]
 pub async fn get_api_token_wasm() -> Result<String, ServerFnError> {
     Ok(get_api_token())
 }

@@ -18,7 +18,7 @@ pub fn ReplicaSetsStatsComponent(
     let replicas_ready = RwSignal::new((0., 0.));
     let pod_cpu_usage = RwSignal::new((0., 0.));
     let pod_memory_values = RwSignal::new((0., 0.));
-    let pod_memory_labels = RwSignal::new(("".to_string(), "".to_string()));
+    let pod_memory_labels = RwSignal::new((String::new(), String::new()));
 
     let interval_handle = update_page_effect(3_600_000, move || update_page(
         namespace_name,

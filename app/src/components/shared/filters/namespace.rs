@@ -16,7 +16,7 @@ pub fn NamespaceFilter(
                         on:change=move |ev| selected.set(event_target_value(&ev).parse().unwrap())
                     >
                         {namespaces.get().into_iter()
-                            .map(|item| view! { <option> { item.to_string() } </option> })
+                            .map(|item| view! { <option> { item } </option> })
                             .collect::<Vec<_>>()}
                     </select>
                 </div>

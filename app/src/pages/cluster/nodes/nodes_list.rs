@@ -50,7 +50,7 @@ fn update_page(
                 NodeType::from_node(&node).to_string(),
                 node.clone().metadata.name,
                 time_until_now(&node.clone().metadata.creation_timestamp.unwrap_or_default()),
-                node.clone().metadata.labels.into_iter().map(|(k, v)| format!("{}: {}", k, v)).collect::<Vec<String>>().join("\n"),
+                node.clone().metadata.labels.into_iter().map(|(k, v)| format!("{k}: {v}")).collect::<Vec<String>>().join("\n"),
                 node.clone().status.conditions.iter().any(|c| c.r#type == "Ready" && c.status == "True").to_string(),
                 get_node_cpu_actual(&node, &node_metric),
                 node_cpu_requests_limits.0,
@@ -120,8 +120,8 @@ fn get_node_cpu_requests_limits(node: &Node, pods: &[Pod]) -> (String, String) {
 }
 
 fn parse_pod_cpu(request: &str) -> f64 {
-    if request.ends_with("m") {
-        request.trim_end_matches("m").parse().unwrap_or(0.)
+    if request.ends_with('m') {
+        request.trim_end_matches('m').parse().unwrap_or(0.)
     } else {
         request.parse::<f64>().unwrap_or(0.) * 1000.
     }

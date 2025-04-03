@@ -38,7 +38,7 @@ use crate::pages::{
 
 #[component]
 pub fn WebApp() -> impl IntoView {
-    let site_root = std::env::var("LEPTOS_SITE_PKG_DIR").unwrap_or("pkg".to_string());
+    let site_root = std::env::var("LEPTOS_SITE_PKG_DIR").unwrap_or_else(|_| "pkg".to_string());
     provide_meta_context();
 
     view! {

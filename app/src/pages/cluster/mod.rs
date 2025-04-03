@@ -12,7 +12,7 @@ pub mod nodes;
 
 #[component]
 pub fn ClusterPage() -> impl IntoView {
-    let prompt = RwSignal::new("".to_string());
+    let prompt = RwSignal::new(String::new());
 
     view! {
         <Header text=vec!["Cluster"] />

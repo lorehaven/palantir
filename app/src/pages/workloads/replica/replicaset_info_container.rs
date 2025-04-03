@@ -38,7 +38,7 @@ fn update_page(
         let replicaset = replicaset.into_iter()
             .find(|n| n.metadata.namespace == namespace_name && n.metadata.name == replicaset_name)
             .unwrap_or_default();
-        let container = replicaset.spec.template.spec.containers.first().cloned().unwrap_or_default().clone();
+        let container = replicaset.spec.template.spec.containers.first().cloned().unwrap_or_default();
 
         let mut items = vec![];
         items.push(("Container", container.name));
@@ -51,10 +51,7 @@ fn update_page(
         items.push(("Memory Limit", container.resources.requests.memory));
         items.push(("Ports", container.ports.into_iter()
             .map(|p| {
-                let name = match p.name.is_empty() {
-                    false => format!("{} • ", p.name),
-                    true => "".to_string(),
-                };
+                let name = if p.name.is_empty() { String::new() } else { format!("{} • ", p.name) };
                 format!("{name}{} • {}", p.container_port, p.protocol)
             })
             .collect::<Vec<String>>()

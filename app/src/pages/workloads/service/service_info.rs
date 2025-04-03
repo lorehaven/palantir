@@ -44,11 +44,11 @@ fn update_page(
         items.push(("Namespace", service.metadata.namespace));
         items.push(("Created", format_timestamp(&service.metadata.creation_timestamp.unwrap_or_default(), None)));
         items.push(("Labels", service.metadata.labels.into_iter()
-            .map(|(k, v)| format!("{} • {}", k, v))
+            .map(|(k, v)| format!("{k} • {v}"))
             .collect::<Vec<String>>()
             .join("\n")));
         items.push(("Annotations", service.metadata.annotations.into_iter()
-            .map(|(k, v)| format!("{} • {}", k, v))
+            .map(|(k, v)| format!("{k} • {v}"))
             .collect::<Vec<String>>()
             .join("\n")));
         items.push(("Version", service.metadata.resource_version));
@@ -56,19 +56,13 @@ fn update_page(
         items.push(("Type", service.spec.r#type));
         items.push(("Affinity", service.spec.session_affinity));
         items.push(("Selector", service.spec.selector.into_iter()
-            .map(|(k, v)| format!("{} • {}", k, v))
+            .map(|(k, v)| format!("{k} • {v}"))
             .collect::<Vec<String>>()
             .join("\n")));
         items.push(("Ports", service.spec.ports.into_iter()
             .map(|p| {
-                let target_port = match p.target_port {
-                    Some(ref tp) => format!(" • {tp}"),
-                    None => "".to_string(),
-                };
-                let node_port = match p.node_port {
-                    Some(ref tp) => format!(" • {tp}"),
-                    None => "".to_string(),
-                };
+                let target_port = p.target_port.as_ref().map_or_else(String::new, |tp| format!(" • {tp}"));
+                let node_port = p.node_port.as_ref().map_or_else(String::new, |tp| format!(" • {tp}"));
                 format!("{} • {}{target_port}{node_port} • {}", p.name, p.port.unwrap_or(0), p.protocol)
             })
             .collect::<Vec<String>>()

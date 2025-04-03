@@ -3,11 +3,11 @@ use leptos::server;
 
 #[allow(unused_imports)]
 use crate::api::utils::kube_api_request;
-use crate::domain::pod::*;
+use crate::domain::pod::{Pod, PodsResponse};
 
 pub async fn get_pods_filtered(
-    namespace_name: &Option<String>,
-    node_name: &Option<String>,
+    namespace_name: Option<String>,
+    node_name: Option<String>,
 ) -> Vec<Pod> {
     if let Some(name) = namespace_name {
         get_pods_by_namespace_name(name.clone()).await.unwrap_or_default()

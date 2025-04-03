@@ -14,7 +14,7 @@ pub fn TableComponent(
     view! {
         <div class="table-header" style=format!("grid-template-columns: {grid_template_columns};")>
             {columns.clone().into_iter()
-                .map(|item| view! { <div class="table-header-item"> { item.header.to_string() } </div> })
+                .map(|item| view! { <div class="table-header-item"> { item.header } </div> })
                 .collect::<Vec<_>>()}
         </div>
         <div class="table-body" style=format!("grid-template-columns: {grid_template_columns};")>
@@ -25,11 +25,11 @@ pub fn TableComponent(
                     let r#type = columns[idx % columns.len()].r#type.clone();
                     let style = styles[idx % styles.len()];
                     let param = params[idx % params.len()].to_string();
-                    let values_idx = values[idx / values.first().unwrap_or(&vec!["".to_string()]).len()].clone();
+                    let values_idx = values[idx / values.first().cloned().unwrap_or_else(|| vec![String::new()]).len()].clone();
 
-                    let param = param.split("/")
+                    let param = param.split('/')
                         .map(|p|
-                            if p.starts_with(":") { values_idx[p.replace(":", "").parse::<usize>().unwrap_or(0)].clone().to_lowercase() }
+                            if p.starts_with(':') { values_idx[p.replace(':', "").parse::<usize>().unwrap_or(0)].clone().to_lowercase() }
                             else { p.to_string() })
                         .collect::<Vec<String>>()
                         .join("/");
@@ -83,14 +83,14 @@ fn BoolValue(item: String, style: &'static str) -> impl IntoView {
 #[component]
 fn LinkValue(item: String, style: &'static str, link: String) -> impl IntoView {
     view! {
-        <a href=link class="table-body-item-link" style=style> { item.to_string() } </a>
+        <a href=link class="table-body-item-link" style=style> { item } </a>
     }
 }
 
 #[component]
 fn StringValue(item: String, style: &'static str) -> impl IntoView {
     view! {
-        <span class="table-body-item" style=style> { item.to_string() } </span>
+        <span class="table-body-item" style=style> { item } </span>
     }
 }
 
@@ -98,7 +98,7 @@ fn StringValue(item: String, style: &'static str) -> impl IntoView {
 fn StringListValue(item: String, style: &'static str) -> impl IntoView {
     view! {
         <ul class="table-body-item-list" style=style>
-            {item.split("\n")
+            {item.split('\n')
                 .map(|item| view! { <li> { item.to_string() } </li> })
                 .collect::<Vec<_>>()}
         </ul>
@@ -109,7 +109,7 @@ fn StringListValue(item: String, style: &'static str) -> impl IntoView {
 fn StringTwoLineValue(item: String, style: &'static str) -> impl IntoView {
     view! {
         <ul class="table-body-item-two" style=style>
-            {item.split("\n")
+            {item.split('\n')
                 .map(|item| view! { <li> { item.to_string() } </li> })
                 .collect::<Vec<_>>()}
         </ul>

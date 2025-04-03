@@ -2,11 +2,11 @@ use leptos::prelude::ServerFnError;
 use leptos::server;
 
 #[allow(unused_imports)]
-use crate::api::workloads::pods::*;
+use crate::api::workloads::pods::get_pods;
 #[allow(unused_imports)]
 use crate::api::utils::kube_api_request;
 use crate::domain::pod::Pod;
-use crate::domain::workload::service::*;
+use crate::domain::workload::service::{ServiceEntry, ServicesResponse, Service};
 
 const NAME_LABEL: &str = "app.kubernetes.io/name";
 
@@ -30,7 +30,7 @@ async fn parse_entries_response(response: &str, pods: &[Pod]) -> Result<Vec<Serv
             let server_host = server_host.clone();
             let server_dns_name = server_dns_name.clone();
             let selector = get_service_selector(&s);
-            s.spec.ports.clone().into_iter().map(move |p| ServiceEntry {
+            s.spec.ports.into_iter().map(move |p| ServiceEntry {
                 name: format_service_name(&p.name),
                 url: format!("http://{server_host}:{}", p.port.unwrap()),
                 url_display: format!("{server_dns_name}:{}", p.port.unwrap()),
@@ -39,9 +39,9 @@ async fn parse_entries_response(response: &str, pods: &[Pod]) -> Result<Vec<Serv
         })
         .collect::<Vec<ServiceEntry>>();
 
-    let additional_services_json = std::env::var("ADDITIONAL_SERVICES").unwrap_or("[]".to_string());
+    let additional_services_json = std::env::var("ADDITIONAL_SERVICES").unwrap_or_else(|_| "[]".to_string());
     let mut additional_entries = serde_json::from_str::<Vec<ServiceEntry>>(&additional_services_json)?;
-    for s in additional_entries.iter_mut() {
+    for s in &mut additional_entries.iter_mut() {
         if s.available { continue; }
         s.available = reqwest::get(&s.url).await.is_ok_and(|r| r.status().is_success());
     }
@@ -72,11 +72,10 @@ fn format_service_name(service_name: &str) -> String {
 
 #[allow(dead_code)]
 fn get_service_selector(service: &Service) -> String {
-    service.clone().metadata.labels
+    service.metadata.labels
         .get(NAME_LABEL)
         .cloned()
-        .unwrap_or("".to_string())
-        .clone()
+        .unwrap_or(String::new())
 }
 
 #[allow(dead_code)]
@@ -91,5 +90,5 @@ fn get_pod_by_label(pods: &[Pod], label: &str) -> Option<Pod> {
 
 #[allow(dead_code)]
 fn is_pod_available(pod: Option<Pod>) -> bool {
-    pod.map(|p| p.status.phase == "Running").unwrap_or(false)
+    pod.is_some_and(|p| p.status.phase == "Running")
 }

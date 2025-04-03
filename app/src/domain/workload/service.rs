@@ -60,8 +60,8 @@ pub enum PortValue {
 impl Display for PortValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            PortValue::Number(n) => write!(f, "{n}"),
-            PortValue::String(s) => write!(f, "{s}"),
+            Self::Number(n) => write!(f, "{n}"),
+            Self::String(s) => write!(f, "{s}"),
         }
     }
 }

@@ -46,11 +46,11 @@ fn update_page(
         items.push(("Namespace", replicaset.metadata.namespace));
         items.push(("Created", format_timestamp(&replicaset.metadata.creation_timestamp.unwrap_or_default(), None)));
         items.push(("Labels", replicaset.metadata.labels.into_iter()
-            .map(|(k, v)| format!("{} • {}", k, v))
+            .map(|(k, v)| format!("{k} • {v}"))
             .collect::<Vec<String>>()
             .join("\n")));
         items.push(("Annotations", replicaset.metadata.annotations.into_iter()
-            .map(|(k, v)| format!("{} • {}", k, v))
+            .map(|(k, v)| format!("{k} • {v}"))
             .collect::<Vec<String>>()
             .join("\n")));
         items.push(("Version", replicaset.metadata.resource_version));

@@ -8,7 +8,7 @@ pub fn Header(
     text: Vec<impl Into<String>>,
 ) -> impl IntoView {
     let text = text.into_iter()
-        .map(|t| t.into())
+        .map(Into::into)
         .collect::<Vec<String>>();
     let mut links = text
         .iter()

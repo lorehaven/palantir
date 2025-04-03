@@ -14,9 +14,9 @@ use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect
 #[component]
 pub fn Filter(
     label: &'static str,
-    #[prop(default = RwSignal::new("".to_string()))]
+    #[prop(default = RwSignal::new(String::new()))]
     selected: RwSignal<String>,
-    #[prop(default = RwSignal::new("".to_string()))]
+    #[prop(default = RwSignal::new(String::new()))]
     prompt: RwSignal<String>,
     #[prop(default = false)]
     with_namespace: bool,

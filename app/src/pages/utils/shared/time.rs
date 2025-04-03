@@ -2,11 +2,9 @@ use chrono::{DateTime, Utc};
 
 pub fn format_timestamp(timestamp: &str, format: Option<&str>) -> String {
     let format = format.unwrap_or("%Y-%m-%d %H:%M:%S %Z");
-    if let Ok(parsed_timestamp) = timestamp.parse::<DateTime<Utc>>() {
-        parsed_timestamp.format(format).to_string()
-    } else {
-        "Invalid timestamp".to_string()
-    }
+    timestamp.parse::<DateTime<Utc>>().map_or_else(
+        |_| "Invalid timestamp".to_string(),
+        |parsed_timestamp| parsed_timestamp.format(format).to_string())
 }
 
 #[allow(dead_code)]
@@ -26,16 +24,16 @@ pub fn time_until_now(timestamp: &str) -> String {
     let seconds = total_seconds % 60;
 
     if years > 0 {
-        format!("{} y", years)
+        format!("{years} y")
     } else if months > 0 {
-        format!("{} mo", months)
+        format!("{months} mo")
     } else if days > 0 {
-        format!("{} d", days)
+        format!("{days} d")
     } else if hours > 0 {
-        format!("{} h", hours)
+        format!("{hours} h")
     } else if minutes > 0 {
-        format!("{} m", minutes)
+        format!("{minutes} m")
     } else {
-        format!("{} s", seconds)
+        format!("{seconds} s")
     }
 }

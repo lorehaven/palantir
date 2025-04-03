@@ -37,11 +37,11 @@ fn update_page(
         items.push(("Kind", kind));
         items.push(("Created", node.metadata.creation_timestamp.unwrap_or_default()));
         items.push(("Labels", node.metadata.labels.into_iter()
-            .map(|(k, v)| format!("{} • {}", k, v))
+            .map(|(k, v)| format!("{k} • {v}"))
             .collect::<Vec<String>>()
             .join("\n")));
         items.push(("Annotations", node.metadata.annotations.into_iter()
-            .map(|(k, v)| format!("{} • {}", k, v))
+            .map(|(k, v)| format!("{k} • {v}"))
             .collect::<Vec<String>>()
             .join("\n")));
         items.push(("Version", resource_version));

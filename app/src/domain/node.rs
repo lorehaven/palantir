@@ -112,11 +112,11 @@ pub enum NodeType {
 impl NodeType {
     pub fn from_node(node: &Node) -> Self {
         if node.metadata.labels.get("node-role.kubernetes.io/control-plane") == Some(&"true".to_string()) {
-            NodeType::ControlPlane
+            Self::ControlPlane
         } else if node.metadata.labels.get("node-role.kubernetes.io/master") == Some(&"true".to_string()) {
-            NodeType::Master
+            Self::Master
         } else {
-            NodeType::Worker
+            Self::Worker
         }
     }
 }
@@ -124,9 +124,9 @@ impl NodeType {
 impl std::fmt::Display for NodeType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            NodeType::ControlPlane => write!(f, "Control Plane"),
-            NodeType::Master => write!(f, "Master"),
-            NodeType::Worker => write!(f, "Worker"),
+            Self::ControlPlane => write!(f, "Control Plane"),
+            Self::Master => write!(f, "Master"),
+            Self::Worker => write!(f, "Worker"),
         }
     }
 }
