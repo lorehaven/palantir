@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::domain::shared::metadata::Metadata;
@@ -36,6 +37,8 @@ pub struct Spec {
     pub host_network: Option<bool>,
     // security context
     pub priority: i32,
+    #[serde(default)]
+    pub selector: HashMap<String, String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]

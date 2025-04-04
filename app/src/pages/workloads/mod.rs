@@ -8,6 +8,7 @@ use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect
 
 pub mod config;
 pub mod ingresses;
+pub mod pod;
 pub mod pods;
 pub mod replica;
 pub mod replicas;
