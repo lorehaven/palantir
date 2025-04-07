@@ -15,7 +15,7 @@ pub fn Header(
         .filter(|t| !t.is_empty())
         .enumerate()
         .map(|(idx, t)| {
-            if idx == text.len() - 1 {
+            if idx == text.len() - 1 || idx >= 1 {
                 view! {
                     <span class="header-separator"> / </span>
                     <span class="header-link">{ t.to_string() }</span>

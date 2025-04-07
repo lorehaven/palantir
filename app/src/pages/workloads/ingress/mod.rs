@@ -15,7 +15,7 @@ pub fn WorkloadsIngressPage() -> impl IntoView {
     let ingress_name = params.with_untracked(|p| p.get("name"))
         .into_iter()
         .collect::<Vec<_>>().join("-");
-    let page_title = vec!["Workloads".to_string(), namespace_name.clone(), "Ingress".to_string(), ingress_name.clone()];
+    let page_title = vec!["Workloads".to_string(), namespace_name.clone(), "Ingresses".to_string(), ingress_name.clone()];
 
     view! {
         <Header text=page_title />
