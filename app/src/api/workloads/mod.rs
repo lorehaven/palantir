@@ -2,6 +2,7 @@
 use crate::api::utils::*;
 use crate::domain::workload::Workload;
 
+pub mod configmaps;
 pub mod daemonsets;
 pub mod deployments;
 pub mod ingresses;

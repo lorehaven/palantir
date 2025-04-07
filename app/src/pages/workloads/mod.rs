@@ -6,7 +6,8 @@ use crate::api::workloads as workloads_api;
 use crate::components::prelude::*;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 
-pub mod config;
+pub mod configmap;
+pub mod configmaps;
 pub mod ingress;
 pub mod ingresses;
 pub mod pod;

@@ -16,17 +16,19 @@
       flex-direction: row;
       align-items: center;
       gap: 2rem;
+      max-width: 100%;
 
       .card-list-row-title {
         display: flex;
         justify-content: right;
-        width: 10%;
+        width: 15%;
         font-weight: bold;
         text-align: right;
       }
       .card-list-row-content {
         white-space: pre-line;
-        width: 90%;
+        word-break: break-all;
+        width: 85%;
       }
     }
   }
