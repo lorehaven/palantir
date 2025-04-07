@@ -4,6 +4,7 @@ use crate::domain::workload::Workload;
 
 pub mod daemonsets;
 pub mod deployments;
+pub mod ingresses;
 pub mod jobs;
 pub mod pods;
 pub mod replicasets;

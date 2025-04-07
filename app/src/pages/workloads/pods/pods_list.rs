@@ -22,27 +22,27 @@ pub fn PodsListComponent(
 
 fn update_page(
     namespace_name: RwSignal<String>,
-    replicaset_name: RwSignal<String>,
-    replicas: RwSignal<Vec<Vec<String>>>,
+    pod_name: RwSignal<String>,
+    pods: RwSignal<Vec<Vec<String>>>,
 ) {
     spawn_local(async move {
-        if namespace_name.is_disposed() || replicaset_name.is_disposed() { return; }
+        if namespace_name.is_disposed() || pod_name.is_disposed() { return; }
 
-        let pods =
+        let pods_data =
             if namespace_name.get_untracked() == "All Namespaces" { pods_api::get_pods().await }
             else { pods_api::get_pods_by_namespace_name(namespace_name.get_untracked().clone()).await };
-        let pods = pods.unwrap_or_default()
+        let pods_data = pods_data.unwrap_or_default()
             .into_iter()
-            .filter(|p| p.metadata.name.contains(&replicaset_name.get_untracked()))
+            .filter(|p| p.metadata.name.contains(&pod_name.get_untracked()))
             .collect::<Vec<_>>();
-        let pod_names = pods.iter().map(|p| p.metadata.name.clone()).collect::<Vec<String>>();
+        let pod_names = pods_data.iter().map(|p| p.metadata.name.clone()).collect::<Vec<String>>();
         let pods_metrics = metrics_api::get_pods().await.unwrap_or_default()
             .into_iter()
             .filter(|pm| pod_names.contains(&pm.metadata.name))
             .collect::<Vec<PodMetrics>>();
 
         let mut pods_vec = vec![];
-        for pod in pods {
+        for pod in pods_data {
             let metrics = pods_metrics.clone().into_iter()
                 .find(|p| p.metadata.name == pod.metadata.name)
                 .unwrap_or_default();
@@ -58,7 +58,7 @@ fn update_page(
                 pod_memory_limit(&pod, &metrics),
             ]);
         }
-        replicas.set(pods_vec);
+        pods.set(pods_vec);
     });
 }
 

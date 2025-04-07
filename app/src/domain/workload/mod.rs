@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 pub mod daemonset;
 pub mod deployment;
+pub mod ingress;
 pub mod job;
 pub mod replicaset;
 pub mod service;

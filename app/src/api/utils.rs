@@ -32,6 +32,10 @@ pub async fn kube_api_apps_request(endpoint: String) -> Result<String, ServerFnE
 pub async fn kube_api_batch_request(endpoint: String) -> Result<String, ServerFnError> {
     kube_api_request_internal("apis/batch/v1".to_string(), endpoint).await
 }
+#[server]
+pub async fn kube_api_networking_request(endpoint: String) -> Result<String, ServerFnError> {
+    kube_api_request_internal("apis/networking.k8s.io/v1".to_string(), endpoint).await
+}
 
 #[server]
 async fn kube_api_request_internal(path: String, endpoint: String) -> Result<String, ServerFnError> {
