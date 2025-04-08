@@ -1,5 +1,7 @@
 use leptos::prelude::*;
 use leptos_router::hooks::use_location;
+
+use crate::components::shared::dialog::apply_yaml::ApplyYamlDialog;
 use crate::pages::utils::shared::text::capitalize;
 
 #[component]
@@ -39,7 +41,9 @@ pub fn Header(
 }
 
 #[component]
-pub fn SideNavBar() -> impl IntoView {
+pub fn SideNavBar(
+    show_dialog: RwSignal<bool>,
+) -> impl IntoView {
     let current_path = use_location().pathname.get_untracked();
 
     view! {
@@ -66,7 +70,7 @@ pub fn SideNavBar() -> impl IntoView {
             <div class="separator" />
             <SideNavBarEntry name="profile" icon="user" />
             <div class="separator" />
-            <SideNavBarEntry name="apply" icon="plus" />
+            <SideNavBarEntry name="apply" icon="plus" action={Box::new(move || { show_dialog.set(true); })} />
         </div>
     }
 }
@@ -81,12 +85,31 @@ pub fn SideNavBarEntry(
     url_prefix: &'static str,
     #[prop(default = true)]
     visible: bool,
+    #[prop(optional)]
+    action: Option<Box<dyn Fn() + Send + Sync + 'static>>,
 ) -> impl IntoView {
+    let class = format!(
+        "side-nav-bar-entry {}",
+        if visible { "visible" } else { "hidden" }
+    );
+    let icon_class = format!("fa-{icon_type} fa-{icon}");
+    let title = capitalize(name);
+
     view! {
-        <a href=format!("{}/{}", url_prefix, &name) class=format!("side-nav-bar-entry {}", if visible { "visible" } else { "hidden" })>
-            <i class=format!("fa-{icon_type} fa-{icon}") />
-            <div class="side-nav-bar-entry-title">{{ capitalize(name) }}</div>
-        </a>
+        {match action {
+            Some(action) => view! {
+                <div class=class on:click=move |_| action()>
+                    <i class=icon_class />
+                    <div class="side-nav-bar-entry-title">{title}</div>
+                </div>
+            }.into_any(),
+            None => view! {
+                <a href=format!("{}/{}", url_prefix, name) class=class>
+                    <i class=icon_class />
+                    <div class="side-nav-bar-entry-title">{title}</div>
+                </a>
+            }.into_any(),
+        }}
     }
 }
 
@@ -108,9 +131,12 @@ pub fn PageContent(
     #[prop(optional)]
     additional_classes: &'static str,
 ) -> impl IntoView {
+    let show_dialog = RwSignal::new(false);
+
     view! {
         <div class=format!("content {additional_classes}")>
-            <SideNavBar />
+            <SideNavBar show_dialog />
+            <ApplyYamlDialog show_dialog />
             <div class="content-internal">
                 { move || { (page_content_slot.children)().into_any() } }
             </div>
