@@ -4,7 +4,7 @@ use leptos::server;
 #[allow(unused_imports)]
 use crate::api::utils::kube_api_request;
 #[allow(unused_imports)]
-use crate::domain::event::{Event, EventsResponse};
+use crate::domain::cluster::event::{Event, EventsResponse};
 
 #[server(GetEvents, "/api/events")]
 pub async fn get_events() -> Result<Vec<Event>, ServerFnError> {

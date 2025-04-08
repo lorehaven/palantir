@@ -1,3 +1,4 @@
+pub mod accounts;
 pub mod cluster;
 pub mod storage;
 pub mod workloads;

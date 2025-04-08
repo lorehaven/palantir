@@ -27,7 +27,9 @@ fn update_page(
     nodes: RwSignal<Vec<Vec<String>>>,
     prompt: RwSignal<String>,
 ) {
+    if prompt.is_disposed() { return; }
     let prompt_value = prompt.get();
+
     spawn_local(async move {
         let nodes_data = nodes_api::get_nodes().await
             .unwrap_or_default()

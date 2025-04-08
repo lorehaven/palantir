@@ -34,13 +34,16 @@ fn update_page(
     object_name: RwSignal<String>,
     events: RwSignal<Vec<Vec<String>>>,
 ) {
-    spawn_local(async move {
-        if namespace_name.is_disposed() || object_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || object_name.is_disposed() { return; }
+    let namespace_name = namespace_name.get();
+    let object_type = object_type.get();
+    let object_name = object_name.get();
 
-        let mut events_data = events_api::get_events_by_namespace_name(namespace_name.get_untracked()).await
+    spawn_local(async move {
+        let mut events_data = events_api::get_events_by_namespace_name(namespace_name).await
             .unwrap_or_default()
             .into_iter()
-            .filter(|e| e.involved_object.kind == object_type.get_untracked() && e.involved_object.name == object_name.get_untracked())
+            .filter(|e| e.involved_object.kind == object_type && e.involved_object.name == object_name)
             .collect::<Vec<_>>();
         events_data.sort_by(|a, b| a.metadata.creation_timestamp.cmp(&b.metadata.creation_timestamp));
 

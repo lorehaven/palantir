@@ -12,25 +12,27 @@ pub fn ServicesListComponent(
 ) -> impl IntoView {
     let services = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(10_000, move || update_page(services, selected, prompt));
+    let interval_handle = update_page_effect(10_000, move || update_page(selected, prompt, services));
     clear_page_effect(interval_handle);
     view(services)
 }
 
 fn update_page(
+    namespace_name: RwSignal<String>,
+    service_name: RwSignal<String>,
     services: RwSignal<Vec<Vec<String>>>,
-    selected: RwSignal<String>,
-    prompt: RwSignal<String>,
 ) {
-    let selected_value = selected.get();
-    let prompt_value = prompt.get();
+    if namespace_name.is_disposed() || service_name.is_disposed() { return; }
+    let selected_value = namespace_name.get();
+    let service_name = service_name.get();
+
     spawn_local(async move {
         let selected_value = if selected_value == "All Namespaces" { None } else { Some(selected_value) };
         let services_data = services_api::get_services(selected_value).await.unwrap_or_default();
 
         services.set(services_data
             .into_iter()
-            .filter(|s| s.metadata.name.to_lowercase().contains(&prompt_value.to_lowercase()))
+            .filter(|s| s.metadata.name.to_lowercase().contains(&service_name.to_lowercase()))
             .map(|n| vec!["Service".to_string(), n.clone().metadata.namespace, n.metadata.name])
             .collect());
     });

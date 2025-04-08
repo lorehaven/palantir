@@ -22,15 +22,16 @@ fn update_page(
     node_name: RwSignal<String>,
     node_data: RwSignal<Vec<(String, String)>>,
 ) {
-    spawn_local(async move {
-        if node_name.is_disposed() { return; }
+    if node_name.is_disposed() { return; }
+    let node_name = node_name.get();
 
+    spawn_local(async move {
         let node = nodes_api::get_nodes_response().await
             .unwrap_or_default();
         let kind = if node.kind == "NodesList" { "Node".to_string() } else { node.kind };
         let resource_version = node.metadata.resource_version;
         let node = node.items.into_iter()
-            .find(|n| n.metadata.name == node_name.get_untracked())
+            .find(|n| n.metadata.name == node_name)
             .unwrap_or_default();
 
         let mut items = vec![];

@@ -30,15 +30,15 @@ fn update_page(
     replicaset_name: RwSignal<String>,
     replicaset_data: RwSignal<Vec<(String, String)>>,
 ) {
-    spawn_local(async move {
-        if namespace_name.is_disposed() || replicaset_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || replicaset_name.is_disposed() { return; }
+    let selected_value = namespace_name.get();
+    let replicaset_name = replicaset_name.get();
 
-        let namespace_name = namespace_name.get_untracked();
-        let replicaset_name = replicaset_name.get_untracked();
+    spawn_local(async move {
         let replicaset = replicasets_api::get_replicasets(None).await
             .unwrap_or_default();
         let replicaset = replicaset.into_iter()
-            .find(|n| n.metadata.namespace == namespace_name && n.metadata.name == replicaset_name)
+            .find(|n| n.metadata.namespace == selected_value && n.metadata.name == replicaset_name)
             .unwrap_or_default();
 
         let mut items = vec![];
@@ -56,7 +56,7 @@ fn update_page(
             .join("\n")));
         items.push(("Version", replicaset.metadata.resource_version));
         items.push(("Owned By", replicaset.metadata.owner_references.into_iter()
-            .map(|or| format!("{}/{namespace_name}/{}", or.kind.to_lowercase(), or.name))
+            .map(|or| format!("{}/{selected_value}/{}", or.kind.to_lowercase(), or.name))
             .collect::<Vec<String>>()
             .join("\n")));
         replicaset_data.set(items.into_iter().map(|(k, v)| (k.to_string(), v)).collect());

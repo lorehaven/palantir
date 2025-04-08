@@ -22,13 +22,15 @@ fn update_page(
     ingress_name: RwSignal<String>,
     ingresses: RwSignal<Vec<Vec<String>>>,
 ) {
-    spawn_local(async move {
-        if namespace_name.is_disposed() || ingress_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || ingress_name.is_disposed() { return; }
+    let selected_value = namespace_name.get();
+    let ingress_name = ingress_name.get();
 
-        let selected_value = if namespace_name.get_untracked() == "All Namespaces" { None } else { Some(namespace_name.get_untracked()) };
+    spawn_local(async move {
+        let selected_value = if selected_value == "All Namespaces" { None } else { Some(selected_value) };
         let ingresses_data = ingresses_api::get_ingresses(selected_value).await.unwrap_or_default()
             .into_iter()
-            .filter(|i| i.metadata.name.contains(&ingress_name.get_untracked()))
+            .filter(|i| i.metadata.name.contains(&ingress_name))
             .collect::<Vec<_>>();
 
         let mut ingresses_vec = vec![];

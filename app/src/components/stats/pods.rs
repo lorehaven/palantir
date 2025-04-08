@@ -51,14 +51,12 @@ fn update_page(
     pods_memory_values: RwSignal<(f64, f64)>,
     pods_memory_labels: RwSignal<(String, String)>,
 ) {
+    if namespace_name.is_disposed() || node_name.is_disposed() { return; }
+    let namespace_name = namespace_name.get();
+    let node_name = node_name.get();
+
+
     spawn_local(async move {
-        if namespace_name.is_disposed() { return; }
-        if node_name.is_disposed() { return; }
-
-        let namespace_name = namespace_name
-            .get_untracked();
-        let node_name = node_name.get_untracked();
-
         let pods = pods_api::get_pods_filtered(namespace_name, node_name).await;
         let pod_names = pods.iter().map(|p| p.metadata.name.clone()).collect::<Vec<String>>();
         let pods_metrics = metrics_api::get_pods().await.unwrap_or_default()

@@ -30,13 +30,15 @@ fn update_page(
     service_name: RwSignal<String>,
     service_data: RwSignal<Vec<(String, String)>>,
 ) {
-    spawn_local(async move {
-        if namespace_name.is_disposed() || service_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || service_name.is_disposed() { return; }
+    let selected_value = namespace_name.get();
+    let service_name = service_name.get();
 
+    spawn_local(async move {
         let service = services_api::get_services(None).await
             .unwrap_or_default();
         let service = service.into_iter()
-            .find(|n| n.metadata.namespace == namespace_name.get_untracked() && n.metadata.name == service_name.get_untracked())
+            .find(|n| n.metadata.namespace == selected_value && n.metadata.name == service_name)
             .unwrap_or_default();
 
         let mut items = vec![];

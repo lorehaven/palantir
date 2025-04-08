@@ -20,7 +20,9 @@ fn update_page(
     volumes: RwSignal<Vec<Vec<String>>>,
     prompt: RwSignal<String>,
 ) {
+    if prompt.is_disposed() { return; }
     let prompt_value = prompt.get();
+
     spawn_local(async move {
         let volumes_data = volumes_api::get_volumes().await.unwrap_or_default();
 

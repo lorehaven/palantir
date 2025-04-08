@@ -23,12 +23,13 @@ fn update_page(
     volume_name: RwSignal<String>,
     volume_data: RwSignal<Vec<(String, String)>>,
 ) {
-    spawn_local(async move {
-        if volume_name.is_disposed() { return; }
+    if volume_name.is_disposed() { return; }
+    let volume_name = volume_name.get();
 
+    spawn_local(async move {
         let volume = volumes_api::get_volumes().await
             .unwrap_or_default()
-            .iter().find(|sc| sc.metadata.name == volume_name.get())
+            .iter().find(|sc| sc.metadata.name == volume_name)
             .cloned()
             .unwrap_or_default();
 

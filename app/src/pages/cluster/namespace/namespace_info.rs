@@ -23,14 +23,15 @@ fn update_page(
     namespace_name: RwSignal<String>,
     namespace_data: RwSignal<Vec<(String, String)>>,
 ) {
-    spawn_local(async move {
-        if namespace_name.is_disposed() { return; }
+    if namespace_name.is_disposed() { return; }
+    let selected_value = namespace_name.get();
 
+    spawn_local(async move {
         let namespace = namespaces_api::get_namespaces_response().await
             .unwrap_or_default();
         let kind = if namespace.kind == "NamespaceList" { "Namespace".to_string() } else { namespace.kind };
         let namespace = namespace.items.into_iter()
-            .find(|n| n.metadata.name == namespace_name.get_untracked())
+            .find(|n| n.metadata.name == selected_value)
             .unwrap_or_default();
 
         let mut items = vec![];

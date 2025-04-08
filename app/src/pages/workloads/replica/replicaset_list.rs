@@ -27,12 +27,14 @@ fn update_page(
     replicaset_name: RwSignal<String>,
     replicas: RwSignal<Vec<Vec<String>>>,
 ) {
-    spawn_local(async move {
-        if namespace_name.is_disposed() || replicaset_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || replicaset_name.is_disposed() { return; }
+    let selected_value = namespace_name.get();
+    let replicaset_name = replicaset_name.get();
 
-        let pods = pods_api::get_pods_by_namespace_name(namespace_name.get_untracked()).await.unwrap_or_default()
+    spawn_local(async move {
+        let pods = pods_api::get_pods_by_namespace_name(selected_value).await.unwrap_or_default()
             .into_iter()
-            .filter(|p| p.metadata.name.contains(&replicaset_name.get_untracked()))
+            .filter(|p| p.metadata.name.contains(&replicaset_name))
             .collect::<Vec<_>>();
         let pod_names = pods.iter().map(|p| p.metadata.name.clone()).collect::<Vec<String>>();
         let pods_metrics = metrics_api::get_pods().await.unwrap_or_default()

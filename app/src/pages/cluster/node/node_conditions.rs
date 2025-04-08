@@ -23,10 +23,11 @@ fn update_page(
     node_name: RwSignal<String>,
     conditions: RwSignal<Vec<Vec<String>>>,
 ) {
-    spawn_local(async move {
-        if node_name.is_disposed() { return; }
+    if node_name.is_disposed() { return; }
+    let node_name = node_name.get();
 
-        let node = nodes_api::get_node_by_name(node_name.get_untracked()).await
+    spawn_local(async move {
+        let node = nodes_api::get_node_by_name(node_name).await
             .unwrap_or_default();
         let mut conditions_vec = vec![];
         for condition in node.status.conditions {

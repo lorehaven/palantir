@@ -35,6 +35,7 @@ use crate::pages::{
     },
     accounts::{
         AccountsPage,
+        serviceaccount::ServiceAccountPage,
         roles::AccountsRolesPage,
         bindings::AccountsBindingsPage,
         secrets::AccountsSecretsPage,
@@ -80,6 +81,7 @@ pub fn WebApp() -> impl IntoView {
                     <Route path=path!("/storage/claims") view=StorageClaimsPage />
                     <Route path=path!("/storage/:namespace/claims/:name") view=StorageClaimPage />
                     <Route path=path!("/accounts") view=AccountsPage />
+                    <Route path=path!("/accounts/:namespace/serviceaccounts/:name") view=ServiceAccountPage />
                     <Route path=path!("/accounts/roles") view=AccountsRolesPage />
                     <Route path=path!("/accounts/bindings") view=AccountsBindingsPage />
                     <Route path=path!("/accounts/secrets") view=AccountsSecretsPage />

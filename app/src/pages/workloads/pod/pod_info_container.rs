@@ -29,12 +29,12 @@ fn update_page(
     pod_name: RwSignal<String>,
     pod_data: RwSignal<Vec<(String, String)>>,
 ) {
-    spawn_local(async move {
-        if namespace_name.is_disposed() || pod_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || pod_name.is_disposed() { return; }
+    let selected_value = namespace_name.get();
+    let pod_name = pod_name.get();
 
-        let namespace_name = namespace_name.get_untracked();
-        let pod_name = pod_name.get_untracked();
-        let pod = pods_api::get_pods_by_namespace_name(namespace_name.clone()).await.unwrap_or_default()
+    spawn_local(async move {
+        let pod = pods_api::get_pods_by_namespace_name(selected_value).await.unwrap_or_default()
             .into_iter()
             .find(|n| n.metadata.name == pod_name)
             .unwrap_or_default();

@@ -24,12 +24,12 @@ fn update_page(
     ingress_name: RwSignal<String>,
     rules: RwSignal<Vec<Vec<String>>>,
 ) {
-    spawn_local(async move {
-        if namespace_name.is_disposed() || ingress_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || ingress_name.is_disposed() { return; }
+    let selected_value = namespace_name.get();
+    let ingress_name = ingress_name.get();
 
-        let namespace_name = namespace_name.get_untracked();
-        let ingress_name = ingress_name.get_untracked();
-        let selected_value = if namespace_name == "All Namespaces" { None } else { Some(namespace_name) };
+    spawn_local(async move {
+        let selected_value = if selected_value == "All Namespaces" { None } else { Some(selected_value) };
         let ingress = ingresses_api::get_ingresses(selected_value).await.unwrap_or_default()
             .into_iter()
             .find(|n| n.metadata.name == ingress_name)

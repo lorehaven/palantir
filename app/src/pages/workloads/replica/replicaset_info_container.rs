@@ -28,15 +28,15 @@ fn update_page(
     replicaset_name: RwSignal<String>,
     replicaset_data: RwSignal<Vec<(&'static str, String)>>,
 ) {
-    spawn_local(async move {
-        if namespace_name.is_disposed() || replicaset_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || replicaset_name.is_disposed() { return; }
+    let selected_value = namespace_name.get();
+    let replicaset_name = replicaset_name.get();
 
-        let namespace_name = namespace_name.get_untracked();
-        let replicaset_name = replicaset_name.get_untracked();
+    spawn_local(async move {
         let replicaset = replicasets_api::get_replicasets(None).await
             .unwrap_or_default();
         let replicaset = replicaset.into_iter()
-            .find(|n| n.metadata.namespace == namespace_name && n.metadata.name == replicaset_name)
+            .find(|n| n.metadata.namespace == selected_value && n.metadata.name == replicaset_name)
             .unwrap_or_default();
         let container = replicaset.spec.template.spec.containers.first().cloned().unwrap_or_default();
 

@@ -30,14 +30,15 @@ fn update_page(
     claim_name: RwSignal<String>,
     claim_data: RwSignal<Vec<(String, String)>>,
 ) {
-    spawn_local(async move {
-        if namespace_name.is_disposed() || claim_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || claim_name.is_disposed() { return; }
+    let namespace_name = namespace_name.get();
+    let claim_name = claim_name.get();
 
-        let namespace_name = namespace_name.get_untracked();
+    spawn_local(async move {
         let selected_value = if namespace_name == "All Namespaces" { None } else { Some(namespace_name) };
         let claim = claims_api::get_claims(selected_value).await
             .unwrap_or_default()
-            .iter().find(|sc| sc.metadata.name == claim_name.get())
+            .iter().find(|sc| sc.metadata.name == claim_name)
             .cloned()
             .unwrap_or_default();
 

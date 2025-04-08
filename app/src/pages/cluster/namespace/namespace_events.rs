@@ -23,11 +23,11 @@ fn update_page(
     namespace_name: RwSignal<String>,
     events: RwSignal<Vec<Vec<String>>>,
 ) {
-    spawn_local(async move {
-        if namespace_name.is_disposed() { return; }
+    if namespace_name.is_disposed() { return; }
+    let selected_value = namespace_name.get();
 
-        let mut events_data = events_api::get_events_by_namespace_name(namespace_name.get_untracked()).await
-            .unwrap_or_default();
+    spawn_local(async move {
+        let mut events_data = events_api::get_events_by_namespace_name(selected_value).await.unwrap_or_default();
         events_data.sort_by(|a, b| a.metadata.creation_timestamp.cmp(&b.metadata.creation_timestamp));
 
         let mut events_vec = vec![];

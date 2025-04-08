@@ -30,11 +30,11 @@ fn update_page(
     configmap_name: RwSignal<String>,
     configmap_data: RwSignal<Vec<(String, String)>>,
 ) {
-    spawn_local(async move {
-        if namespace_name.is_disposed() || configmap_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || configmap_name.is_disposed() { return; }
+    let namespace_name = namespace_name.get();
+    let configmap_name = configmap_name.get();
 
-        let namespace_name = namespace_name.get_untracked();
-        let configmap_name = configmap_name.get_untracked();
+    spawn_local(async move {
         let selected_value = if namespace_name == "All Namespaces" { None } else { Some(namespace_name) };
         let configmap = configmaps_api::get_configmaps(selected_value).await.unwrap_or_default()
             .into_iter()

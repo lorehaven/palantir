@@ -12,25 +12,27 @@ pub fn ReplicaSetsListComponent(
 ) -> impl IntoView {
     let replicasets = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(10_000, move || update_page(replicasets, selected, prompt));
+    let interval_handle = update_page_effect(10_000, move || update_page(selected, prompt, replicasets));
     clear_page_effect(interval_handle);
     view(replicasets)
 }
 
 fn update_page(
+    namespace_name: RwSignal<String>,
+    replicaset_name: RwSignal<String>,
     replicasets: RwSignal<Vec<Vec<String>>>,
-    selected: RwSignal<String>,
-    prompt: RwSignal<String>,
 ) {
-    let selected_value = selected.get();
-    let prompt_value = prompt.get();
+    if namespace_name.is_disposed() || replicaset_name.is_disposed() { return; }
+    let selected_value = namespace_name.get();
+    let replicaset_name = replicaset_name.get();
+
     spawn_local(async move {
         let selected_value = if selected_value == "All Namespaces" { None } else { Some(selected_value) };
         let replicasets_data = replicasets_api::get_replicasets(selected_value).await.unwrap_or_default();
 
         replicasets.set(replicasets_data
             .into_iter()
-            .filter(|s| s.metadata.name.to_lowercase().contains(&prompt_value.to_lowercase()))
+            .filter(|s| s.metadata.name.to_lowercase().contains(&replicaset_name.to_lowercase()))
             .map(|r| vec![
                 "ReplicaSet".to_string(),
                 r.clone().metadata.namespace,

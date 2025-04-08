@@ -25,10 +25,11 @@ fn update_page(
     namespace_name: RwSignal<String>,
     pods: RwSignal<Vec<Vec<String>>>,
 ) {
-    spawn_local(async move {
-        if namespace_name.is_disposed() { return; }
+    if namespace_name.is_disposed() { return; }
+    let selected_value = namespace_name.get();
 
-        let mut pods_data = pods_api::get_pods_by_namespace_name(namespace_name.get_untracked()).await
+    spawn_local(async move {
+        let mut pods_data = pods_api::get_pods_by_namespace_name(selected_value).await
             .unwrap_or_default();
         pods_data.sort_by(|a, b| a.metadata.name.cmp(&b.metadata.name));
         let pod_names = pods_data.iter().map(|p| p.metadata.name.clone()).collect::<Vec<String>>();

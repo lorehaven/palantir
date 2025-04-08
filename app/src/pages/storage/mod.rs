@@ -49,10 +49,10 @@ fn update_page_list(
     prompt: RwSignal<String>,
     classes: RwSignal<Vec<Vec<String>>>,
 ) {
-    spawn_local(async move {
-        if prompt.is_disposed() || classes.is_disposed() { return; }
+    if prompt.is_disposed() || classes.is_disposed() { return; }
+    let prompt_value = prompt.get();
 
-        let prompt_value = prompt.get();
+    spawn_local(async move {
         let classes_data = storage_api::get_storageclasses().await.unwrap_or_default();
 
         classes.set(classes_data

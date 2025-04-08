@@ -52,10 +52,10 @@ fn update_page(
     nodes_memory_values: RwSignal<(f64, f64)>,
     nodes_memory_labels: RwSignal<(String, String)>,
 ) {
-    spawn_local(async move {
-        if node_name.is_disposed() { return; }
+    if node_name.is_disposed() { return; }
+    let node_name = node_name.get();
 
-        let node_name = node_name.get_untracked();
+    spawn_local(async move {
         let nodes = nodes_api::get_nodes_filtered(node_name).await;
         let nodes_metrics = metrics_api::get_nodes().await.unwrap_or_default()
             .into_iter()

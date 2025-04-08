@@ -4,6 +4,7 @@ use leptos::task::spawn_local;
 use crate::api::storage::claims as claims_api;
 use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
+use crate::pages::utils::shared::time::time_until_now;
 
 #[component]
 pub fn ClaimsListComponent(
@@ -22,11 +23,12 @@ fn update_page(
     claim_name: RwSignal<String>,
     claims: RwSignal<Vec<Vec<String>>>,
 ) {
-    spawn_local(async move {
-        if namespace_name.is_disposed() || claim_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || claim_name.is_disposed() { return; }
+    let selected_value = namespace_name.get();
+    let prompt_value = claim_name.get();
 
-        let selected_value = if namespace_name.get_untracked() == "All Namespaces" { None } else { Some(namespace_name.get_untracked()) };
-        let prompt_value = claim_name.get_untracked();
+    spawn_local(async move {
+        let selected_value = if selected_value == "All Namespaces" { None } else { Some(selected_value) };
         let claims_data = claims_api::get_claims(selected_value).await.unwrap_or_default();
 
         claims.set(claims_data
@@ -35,7 +37,11 @@ fn update_page(
             .map(|n| vec![
                 "PersistentVolume".to_string(),
                 n.clone().metadata.name,
+                n.clone().metadata.namespace,
+                time_until_now(&n.metadata.creation_timestamp.unwrap_or_default()),
                 n.status.phase,
+                n.spec.storage_class_name,
+                n.spec.volume_name,
                 n.spec.resources.requests.storage,
             ])
             .collect());
@@ -49,7 +55,11 @@ fn view(
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 2),
         TableColumn::new("Name", TableColumnType::Link, 3),
+        TableColumn::new("Namespace", TableColumnType::Link, 3),
+        TableColumn::new("Age", TableColumnType::String, 3),
         TableColumn::new("Status", TableColumnType::String, 3),
+        TableColumn::new("Class Name", TableColumnType::String, 3),
+        TableColumn::new("Volume", TableColumnType::String, 3),
         TableColumn::new("Capacity", TableColumnType::String, 3),
     ];
     let styles = vec![""; columns.len()];

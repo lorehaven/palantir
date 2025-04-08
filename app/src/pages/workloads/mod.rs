@@ -64,7 +64,9 @@ fn update_page_stats(
     workloads_ready: RwSignal<(f64, f64)>,
     pods_ready: RwSignal<(f64, f64)>,
 ) {
+    if selected.is_disposed() { return; }
     let selected_value = selected.get();
+
     spawn_local(async move {
         let workloads =
             if selected_value == "All Namespaces" { workloads_api::get_workloads().await }

@@ -23,12 +23,13 @@ fn update_page(
     storageclass_name: RwSignal<String>,
     storageclass_data: RwSignal<Vec<(String, String)>>,
 ) {
-    spawn_local(async move {
-        if storageclass_name.is_disposed() { return; }
+    if storageclass_name.is_disposed() { return; }
+    let storageclass_name = storageclass_name.get();
 
+    spawn_local(async move {
         let storageclass = storage_api::get_storageclasses().await
             .unwrap_or_default()
-            .iter().find(|sc| sc.metadata.name == storageclass_name.get())
+            .iter().find(|sc| sc.metadata.name == storageclass_name)
             .cloned()
             .unwrap_or_default();
 

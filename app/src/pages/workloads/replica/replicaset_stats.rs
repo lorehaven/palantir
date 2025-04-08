@@ -46,16 +46,16 @@ fn update_page(
     pod_memory_values: RwSignal<(f64, f64)>,
     pod_memory_labels: RwSignal<(String, String)>,
 ) {
-    spawn_local(async move {
-        if namespace_name.is_disposed() || replicaset_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || replicaset_name.is_disposed() { return; }
+    let selected_value = namespace_name.get();
+    let replicaset_name = replicaset_name.get();
 
-        let namespace_name = namespace_name.get_untracked();
-        let replicaset_name = replicaset_name.get_untracked();
-        let replica = replicasets_api::get_replicasets(Some(namespace_name.clone())).await.unwrap_or_default()
+    spawn_local(async move {
+        let replica = replicasets_api::get_replicasets(Some(selected_value.clone())).await.unwrap_or_default()
             .into_iter()
             .find(|r| r.metadata.name == replicaset_name)
             .unwrap_or_default();
-        let replicaset_pods = pods_api::get_pods_by_namespace_name(namespace_name.clone()).await.unwrap_or_default()
+        let replicaset_pods = pods_api::get_pods_by_namespace_name(selected_value.clone()).await.unwrap_or_default()
             .into_iter()
             .filter(|p| p.metadata.name.contains(&replicaset_name))
             .collect::<Vec<_>>();
@@ -63,7 +63,7 @@ fn update_page(
 
         let pod_metrics = metrics_api::get_pods().await.unwrap_or_default()
             .into_iter()
-            .filter(|p| p.metadata.namespace == namespace_name && p.metadata.name.contains("drone-runner"))
+            .filter(|p| p.metadata.namespace == selected_value && p.metadata.name.contains("drone-runner"))
             .collect::<Vec<_>>();
 
         pod_cpu_usage.set(get_pods_cpu(&replicaset_pods, &pod_metrics));
