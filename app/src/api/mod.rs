@@ -1,6 +1,7 @@
 pub mod cluster;
 pub mod workloads;
 
+pub mod apply;
 pub mod metrics;
 pub mod service_entries;
 pub mod utils;

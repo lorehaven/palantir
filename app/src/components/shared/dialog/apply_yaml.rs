@@ -1,4 +1,7 @@
 use leptos::prelude::*;
+use leptos::task::spawn_local;
+
+use crate::api::apply as apply_api;
 
 #[component]
 pub fn ApplyYamlDialog(
@@ -17,7 +20,7 @@ pub fn ApplyYamlDialog(
                     </div>
                     <div class="dialog-footer">
                         <Show when=move || !error.get().is_empty()>
-                            <div style="color: red">"Error: " {error.get()}</div>
+                            <div class="dialog-error">"Error: " {error.get()}</div>
                         </Show>
                         <span style="flex: 1" />
                         <button class="btn btn-primary" on:click=move |_| apply(yaml_content, show_dialog, error)>Apply</button>
@@ -45,17 +48,19 @@ fn apply(
     show_dialog: RwSignal<bool>,
     error: RwSignal<String>,
 ) {
-    if !error.get().is_empty() {
-        return;
-    }
+    let yaml_value = serde_yaml::from_str::<serde_yaml::Value>(&yaml_content.get()).unwrap();
+    let json_value = serde_json::to_value(yaml_value).unwrap();
+    let json_str = serde_json::to_string_pretty(&json_value).unwrap();
 
-    let _content = serde_yaml::from_str::<serde_yaml::Value>(&yaml_content.get()).unwrap();
-    // apply_api::apply(content);
-    // react on response
-    // if ok, clean up
-
-    yaml_content.set(String::new());
-    show_dialog.set(false);
+    spawn_local(async move {
+        if let Err(err) = apply_api::apply(json_str.clone()).await { match err {
+            ServerFnError::ServerError(e) => error.set(e),
+            _ => error.set(err.to_string()),
+        } } else {
+            yaml_content.set(String::new());
+            show_dialog.set(false);
+        }
+    });
 }
 
 fn cancel(
