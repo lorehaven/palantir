@@ -26,6 +26,12 @@ pub struct Metadata {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct ResponseMetadata {
+    #[serde(rename = "resourceVersion")]
+    pub resource_version: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct OwnerReference {
     #[serde(default, rename = "apiVersion")]
     pub api_version: String,

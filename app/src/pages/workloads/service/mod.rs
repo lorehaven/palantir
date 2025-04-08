@@ -2,7 +2,6 @@ use leptos::prelude::*;
 use leptos_router::hooks::use_params_map;
 
 use crate::components::events::EventsListComponent;
-use crate::components::prelude::PageContent;
 use crate::components::prelude::*;
 
 pub mod service_info;

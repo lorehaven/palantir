@@ -5,7 +5,7 @@ use leptos::server;
 use crate::api::workloads::pods::get_pods;
 #[allow(unused_imports)]
 use crate::api::utils::kube_api_request;
-use crate::domain::pod::Pod;
+use crate::domain::cluster::pod::Pod;
 use crate::domain::workload::service::{ServiceEntry, ServicesResponse, Service};
 
 const NAME_LABEL: &str = "app.kubernetes.io/name";

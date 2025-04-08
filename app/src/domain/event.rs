@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::domain::shared::metadata::Metadata;
+use crate::domain::shared::metadata::{Metadata, ResponseMetadata};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EventsResponse {
@@ -10,12 +10,6 @@ pub struct EventsResponse {
     pub metadata: ResponseMetadata,
     #[serde(default)]
     pub items: Vec<Event>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct ResponseMetadata {
-    #[serde(rename = "resourceVersion")]
-    pub resource_version: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

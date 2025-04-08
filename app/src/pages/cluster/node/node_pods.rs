@@ -5,7 +5,7 @@ use crate::api::metrics as metrics_api;
 use crate::api::workloads::pods as pods_api;
 use crate::components::prelude::*;
 use crate::domain::metrics::PodMetrics;
-use crate::domain::pod::Pod;
+use crate::domain::cluster::pod::Pod;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::time_until_now;
 use crate::pages::utils::stats::{convert_memory, parse_memory, parse_pod_cpu};

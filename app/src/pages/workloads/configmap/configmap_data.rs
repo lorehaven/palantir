@@ -2,6 +2,7 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use crate::api::workloads::configmaps as configmaps_api;
+use crate::components::shared::info::resource_info_view;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
@@ -20,7 +21,7 @@ pub fn ConfigMapDataComponent(
     ));
     clear_page_effect(interval_handle);
 
-    view(configmap_data)
+    resource_info_view(configmap_data)
 }
 
 fn update_page(
@@ -41,21 +42,4 @@ fn update_page(
 
         configmap_data.set(configmap.data.into_iter().map(|(k, v)| (k, v.replace('\n', " "))).collect());
     });
-}
-
-fn view(
-    configmap_data: RwSignal<Vec<(String, String)>>,
-) -> impl IntoView {
-    view! {
-        <div class="card-container dcc-1">
-            <div class="card-list">
-                {move || configmap_data.get().into_iter().map(|(name, value)| view! {
-                    <div class="card-list-row">
-                        <div class="card-list-row-title">{name}</div>
-                        <div class="card-list-row-content">{value}</div>
-                    </div>
-                }).collect::<Vec<_>>()}
-            </div>
-        </div>
-    }
 }

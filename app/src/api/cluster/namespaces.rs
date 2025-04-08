@@ -3,9 +3,9 @@ use leptos::server;
 
 #[allow(unused_imports)]
 use crate::api::utils::kube_api_request;
-use crate::domain::namespace::Namespace;
+use crate::domain::cluster::namespace::Namespace;
 #[allow(unused_imports)]
-use crate::domain::namespace::NamespacesResponse;
+use crate::domain::cluster::namespace::NamespacesResponse;
 
 #[server(GetNodesResponse, "/api/nodes/response")]
 pub async fn get_namespaces_response() -> Result<NamespacesResponse, ServerFnError> {

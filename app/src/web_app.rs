@@ -26,8 +26,11 @@ use crate::pages::{
         configmaps::WorkloadsConfigMapsPage,
     },
     storage::{
-        StoragePage,
+        StorageClassesPage,
+        storageclass::StorageClassPage,
+        volume::StorageVolumePage,
         volumes::StorageVolumesPage,
+        claim::StorageClaimPage,
         claims::StorageClaimsPage,
     },
     accounts::{
@@ -70,9 +73,12 @@ pub fn WebApp() -> impl IntoView {
                     <Route path=path!("/workloads/:namespace/ingresses/:name") view=WorkloadsIngressPage />
                     <Route path=path!("/workloads/configmaps") view=WorkloadsConfigMapsPage />
                     <Route path=path!("/workloads/:namespace/configmaps/:name") view=WorkloadsConfigMapPage />
-                    <Route path=path!("/storage") view=StoragePage />
+                    <Route path=path!("/storage") view=StorageClassesPage />
+                    <Route path=path!("/storageclasses/:name") view=StorageClassPage />
                     <Route path=path!("/storage/volumes") view=StorageVolumesPage />
+                    <Route path=path!("/storage/volumes/:name") view=StorageVolumePage />
                     <Route path=path!("/storage/claims") view=StorageClaimsPage />
+                    <Route path=path!("/storage/:namespace/claims/:name") view=StorageClaimPage />
                     <Route path=path!("/accounts") view=AccountsPage />
                     <Route path=path!("/accounts/roles") view=AccountsRolesPage />
                     <Route path=path!("/accounts/bindings") view=AccountsBindingsPage />

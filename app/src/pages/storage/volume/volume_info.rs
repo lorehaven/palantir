@@ -1,0 +1,60 @@
+use leptos::prelude::*;
+use leptos::task::spawn_local;
+
+use crate::api::storage::volumes as volumes_api;
+use crate::components::shared::info::resource_info_view;
+use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
+use crate::pages::utils::shared::time::format_timestamp;
+
+#[component]
+pub fn VolumeInfoComponent(
+    volume_name: String,
+) -> impl IntoView {
+    let volume_name = RwSignal::new(volume_name);
+    let volume_data = RwSignal::new(vec![]);
+
+    let interval_handle = update_page_effect(60_000, move || update_page(volume_name, volume_data));
+    clear_page_effect(interval_handle);
+
+    resource_info_view(volume_data)
+}
+
+fn update_page(
+    volume_name: RwSignal<String>,
+    volume_data: RwSignal<Vec<(String, String)>>,
+) {
+    spawn_local(async move {
+        if volume_name.is_disposed() { return; }
+
+        let volume = volumes_api::get_volumes().await
+            .unwrap_or_default()
+            .iter().find(|sc| sc.metadata.name == volume_name.get())
+            .cloned()
+            .unwrap_or_default();
+
+        volume_data.set(vec![
+            ("Name", volume.clone().metadata.name),
+            ("Kind", "PersistentVolume".to_string()),
+            ("Created", format_timestamp(&volume.clone().metadata.creation_timestamp.unwrap_or_default(), None)),
+            ("Labels", volume.clone().metadata.labels.into_iter()
+                .map(|(k, v)| format!("{k} • {v}"))
+                .collect::<Vec<String>>()
+                .join("\n")),
+            ("Annotations", volume.clone().metadata.annotations.into_iter()
+                .map(|(k, v)| format!("{k} • {v}"))
+                .collect::<Vec<String>>()
+                .join("\n")),
+            ("Version", volume.clone().status.phase),
+            ("Status", volume.clone().status.phase),
+            ("Class", String::new()),
+            ("Claim", {
+                let claim_ref = volume.clone().spec.claim_ref;
+                format!("{}/{}", claim_ref.namespace, claim_ref.name)
+            }),
+            ("Access Modes", volume.spec.access_mode.join("\n")),
+            ("Capacity", volume.spec.capacity.storage),
+            ("Reclaim Policy", volume.spec.persistent_volume_reclaim_policy),
+            ("Local Path", String::new()),
+        ].into_iter().map(|(k, v)| (k.to_string(), v)).collect());
+    });
+}

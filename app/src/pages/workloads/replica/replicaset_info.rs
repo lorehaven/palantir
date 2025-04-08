@@ -2,6 +2,7 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use crate::api::workloads::replicasets as replicasets_api;
+use crate::components::shared::info::resource_info_view;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::format_timestamp;
 
@@ -21,13 +22,13 @@ pub fn ReplicaSetInfoComponent(
     ));
     clear_page_effect(interval_handle);
 
-    view(replicaset_data)
+    resource_info_view(replicaset_data)
 }
 
 fn update_page(
     namespace_name: RwSignal<String>,
     replicaset_name: RwSignal<String>,
-    replicaset_data: RwSignal<Vec<(&'static str, String)>>,
+    replicaset_data: RwSignal<Vec<(String, String)>>,
 ) {
     spawn_local(async move {
         if namespace_name.is_disposed() || replicaset_name.is_disposed() { return; }
@@ -58,23 +59,6 @@ fn update_page(
             .map(|or| format!("{}/{namespace_name}/{}", or.kind.to_lowercase(), or.name))
             .collect::<Vec<String>>()
             .join("\n")));
-        replicaset_data.set(items);
+        replicaset_data.set(items.into_iter().map(|(k, v)| (k.to_string(), v)).collect());
     });
-}
-
-fn view(
-    replicaset_data: RwSignal<Vec<(&'static str, String)>>,
-) -> impl IntoView {
-    view! {
-        <div class="card-container dcc-1">
-            <div class="card-list">
-                {move || replicaset_data.get().into_iter().map(|(name, value)| view! {
-                    <div class="card-list-row">
-                        <div class="card-list-row-title">{name}</div>
-                        <div class="card-list-row-content">{value}</div>
-                    </div>
-                }).collect::<Vec<_>>()}
-            </div>
-        </div>
-    }
 }

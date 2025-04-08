@@ -19,8 +19,8 @@ pub mod services;
 
 #[component]
 pub fn WorkloadsPage() -> impl IntoView {
-    let selected = RwSignal::new("All Namespaces".to_string());
     let prompt = RwSignal::new(String::new());
+    let selected = RwSignal::new("All Namespaces".to_string());
 
     view! {
         <Header text=vec!["Workloads"] />

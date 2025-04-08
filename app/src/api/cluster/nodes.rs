@@ -3,7 +3,7 @@ use leptos::server;
 
 #[allow(unused_imports)]
 use crate::api::utils::kube_api_request;
-use crate::domain::node::{Node, NodesResponse};
+use crate::domain::cluster::node::{Node, NodesResponse};
 
 pub async fn get_nodes_filtered(
     node_name: Option<String>,

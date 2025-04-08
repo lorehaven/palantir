@@ -1,7 +1,6 @@
 use leptos::prelude::*;
 use leptos_router::hooks::use_params_map;
 
-use crate::components::prelude::PageContent;
 use crate::components::prelude::*;
 use crate::components::stats::pods::PodsStatComponent;
 

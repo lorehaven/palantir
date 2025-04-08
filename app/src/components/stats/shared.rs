@@ -1,5 +1,5 @@
 use crate::domain::metrics::PodMetrics;
-use crate::domain::pod::Pod;
+use crate::domain::cluster::pod::Pod;
 use crate::pages::utils::stats::{convert_memory, parse_memory, parse_pod_cpu};
 
 pub fn get_pods_cpu(pods: &[Pod], metrics: &[PodMetrics]) -> (f64, f64) {

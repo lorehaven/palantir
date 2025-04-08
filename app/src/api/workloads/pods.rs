@@ -4,7 +4,7 @@ use leptos::server;
 #[allow(unused_imports)]
 use crate::api::utils::kube_api_request;
 #[allow(unused_imports)]
-use crate::domain::pod::{Pod, PodsResponse};
+use crate::domain::cluster::pod::{Pod, PodsResponse};
 
 pub async fn get_pods_filtered(
     namespace_name: Option<String>,

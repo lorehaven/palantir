@@ -39,6 +39,11 @@ pub async fn kube_api_networking_request(endpoint: String) -> Result<String, Ser
 }
 
 #[server]
+pub async fn kube_api_storage_request(endpoint: String) -> Result<String, ServerFnError> {
+    kube_api_request_internal("apis/storage.k8s.io/v1".to_string(), endpoint).await
+}
+
+#[server]
 async fn kube_api_request_internal(path: String, endpoint: String) -> Result<String, ServerFnError> {
     let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
 
