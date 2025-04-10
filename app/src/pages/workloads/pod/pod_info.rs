@@ -3,6 +3,7 @@ use leptos::task::spawn_local;
 
 use crate::api::workloads::pods as pods_api;
 use crate::components::shared::info::resource_info_view;
+use crate::pages::utils::shared::display;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::format_timestamp;
 
@@ -40,33 +41,28 @@ fn update_page(
             .find(|n| n.metadata.name == pod_name)
             .unwrap_or_default();
 
-        let mut items = vec![];
-        items.push(("Name", pod.metadata.name));
-        items.push(("Kind", "Pod".to_string()));
-        items.push(("Namespace", pod.metadata.namespace));
-        items.push(("Created", format_timestamp(&pod.metadata.creation_timestamp.unwrap_or_default(), None)));
-        items.push(("Labels", pod.metadata.labels.into_iter()
-            .map(|(k, v)| format!("{k} • {v}"))
-            .collect::<Vec<String>>()
-            .join("\n")));
-        items.push(("Version", pod.metadata.resource_version));
-        items.push(("Owned By", pod.metadata.owner_references.into_iter()
-            .map(|or| format!("{}/{selected_value}/{}", or.kind.to_lowercase(), or.name))
-            .collect::<Vec<String>>()
-            .join("\n")));
-        items.push(("Host IP", pod.status.host_ip));
-        items.push(("Pod IP", pod.status.pod_ip.unwrap_or_default()));
-        items.push(("QOS", pod.status.qos_class));
-        items.push(("Phase", pod.status.phase));
-        items.push(("Conditions", pod.status.conditions.into_iter()
-            .map(|c| format!("{} • {}", c.r#type, c.status))
-            .collect::<Vec<String>>()
-            .join("\n")));
-        items.push(("Node Name", pod.spec.node_name));
-        items.push(("Selector", pod.spec.selector.into_iter()
-            .map(|(k, v)| format!("{k} • {v}"))
-            .collect::<Vec<String>>()
-            .join("\n")));
-        pod_data.set(items.into_iter().map(|(k, v)| (k.to_string(), v)).collect());
+        pod_data.set(vec![
+            ("Name", pod.clone().metadata.name),
+            ("Kind", "Pod".to_string()),
+            ("Namespace", pod.clone().metadata.namespace),
+            ("Created", format_timestamp(&pod.clone().metadata.creation_timestamp.unwrap_or_default(), None)),
+            ("Labels", display::hashmap(pod.clone().metadata.labels)),
+            ("Annotations", display::hashmap(pod.clone().metadata.annotations)),
+            ("Version", pod.clone().metadata.resource_version),
+            ("Owned By", pod.clone().metadata.owner_references.into_iter()
+                .map(|or| format!("{}/{selected_value}/{}", or.kind.to_lowercase(), or.name))
+                .collect::<Vec<String>>()
+                .join("\n")),
+            ("Host IP", pod.clone().status.host_ip),
+            ("Pod IP", pod.clone().status.pod_ip.unwrap_or_default()),
+            ("QOS", pod.clone().status.qos_class),
+            ("Phase", pod.clone().status.phase),
+            ("Conditions", pod.clone().status.conditions.into_iter()
+                .map(|c| format!("{} • {}", c.r#type, c.status))
+                .collect::<Vec<String>>()
+                .join("\n")),
+            ("Node Name", pod.clone().spec.node_name),
+            ("Selector", display::hashmap(pod.spec.selector)),
+        ].into_iter().map(|(k, v)| (k.to_string(), v)).collect());
     });
 }

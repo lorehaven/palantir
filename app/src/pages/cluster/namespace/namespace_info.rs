@@ -3,6 +3,7 @@ use leptos::task::spawn_local;
 
 use crate::api::cluster::namespaces as namespaces_api;
 use crate::components::shared::info::resource_info_view;
+use crate::pages::utils::shared::display;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::format_timestamp;
 
@@ -34,20 +35,14 @@ fn update_page(
             .find(|n| n.metadata.name == selected_value)
             .unwrap_or_default();
 
-        let mut items = vec![];
-        items.push(("Name", namespace.metadata.name));
-        items.push(("Kind", kind));
-        items.push(("Created", format_timestamp(&namespace.metadata.creation_timestamp.unwrap_or_default(), None)));
-        items.push(("Labels", namespace.metadata.labels.into_iter()
-            .map(|(k, v)| format!("{k} • {v}"))
-            .collect::<Vec<String>>()
-            .join("\n")));
-        items.push(("Annotations", namespace.metadata.annotations.into_iter()
-            .map(|(k, v)| format!("{k} • {v}"))
-            .collect::<Vec<String>>()
-            .join("\n")));
-        items.push(("Version", namespace.metadata.resource_version));
-        items.push(("Status", namespace.status.phase));
-        namespace_data.set(items.into_iter().map(|(k, v)| (k.to_string(), v)).collect());
+        namespace_data.set(vec![
+            ("Name", namespace.clone().metadata.name),
+            ("Kind", kind),
+            ("Created", format_timestamp(&namespace.clone().metadata.creation_timestamp.unwrap_or_default(), None)),
+            ("Labels", display::hashmap(namespace.clone().metadata.labels)),
+            ("Annotations", display::hashmap(namespace.clone().metadata.annotations)),
+            ("Version", namespace.clone().metadata.resource_version),
+            ("Status", namespace.status.phase),
+        ].into_iter().map(|(k, v)| (k.to_string(), v)).collect());
     });
 }

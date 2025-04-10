@@ -3,6 +3,7 @@ use leptos::task::spawn_local;
 
 use crate::api::workloads::services as services_api;
 use crate::components::shared::info::resource_info_view;
+use crate::pages::utils::shared::display;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::format_timestamp;
 
@@ -41,35 +42,26 @@ fn update_page(
             .find(|n| n.metadata.namespace == selected_value && n.metadata.name == service_name)
             .unwrap_or_default();
 
-        let mut items = vec![];
-        items.push(("Name", service.metadata.name));
-        items.push(("Kind", "Service".to_string()));
-        items.push(("Namespace", service.metadata.namespace));
-        items.push(("Created", format_timestamp(&service.metadata.creation_timestamp.unwrap_or_default(), None)));
-        items.push(("Labels", service.metadata.labels.into_iter()
-            .map(|(k, v)| format!("{k} • {v}"))
-            .collect::<Vec<String>>()
-            .join("\n")));
-        items.push(("Annotations", service.metadata.annotations.into_iter()
-            .map(|(k, v)| format!("{k} • {v}"))
-            .collect::<Vec<String>>()
-            .join("\n")));
-        items.push(("Version", service.metadata.resource_version));
-        items.push(("Cluster IP", service.spec.cluster_ip));
-        items.push(("Type", service.spec.r#type));
-        items.push(("Affinity", service.spec.session_affinity));
-        items.push(("Selector", service.spec.selector.into_iter()
-            .map(|(k, v)| format!("{k} • {v}"))
-            .collect::<Vec<String>>()
-            .join("\n")));
-        items.push(("Ports", service.spec.ports.into_iter()
-            .map(|p| {
-                let target_port = p.target_port.as_ref().map_or_else(String::new, |tp| format!(" • {tp}"));
-                let node_port = p.node_port.as_ref().map_or_else(String::new, |tp| format!(" • {tp}"));
-                format!("{} • {}{target_port}{node_port} • {}", p.name, p.port.unwrap_or(0), p.protocol)
-            })
-            .collect::<Vec<String>>()
-            .join("\n")));
-        service_data.set(items.into_iter().map(|(k, v)| (k.to_string(), v)).collect());
+        service_data.set(vec![
+            ("Name", service.clone().metadata.name),
+            ("Kind", "Service".to_string()),
+            ("Namespace", service.clone().metadata.namespace),
+            ("Created", format_timestamp(&service.clone().metadata.creation_timestamp.unwrap_or_default(), None)),
+            ("Labels", display::hashmap(service.clone().metadata.labels)),
+            ("Annotations", display::hashmap(service.clone().metadata.annotations)),
+            ("Version", service.clone().metadata.resource_version),
+            ("Cluster IP", service.clone().spec.cluster_ip),
+            ("Type", service.clone().spec.r#type),
+            ("Affinity", service.clone().spec.session_affinity),
+            ("Selector", display::hashmap(service.clone().spec.selector)),
+            ("Ports", service.spec.ports.into_iter()
+                .map(|p| {
+                    let target_port = p.target_port.as_ref().map_or_else(String::new, |tp| format!(" • {tp}"));
+                    let node_port = p.node_port.as_ref().map_or_else(String::new, |tp| format!(" • {tp}"));
+                    format!("{} • {}{target_port}{node_port} • {}", p.name, p.port.unwrap_or(0), p.protocol)
+                })
+                .collect::<Vec<String>>()
+                .join("\n")),
+        ].into_iter().map(|(k, v)| (k.to_string(), v)).collect());
     });
 }

@@ -14,7 +14,7 @@ pub fn IngressesListComponent(
 
     let interval_handle = update_page_effect(10_000, move || update_page(selected, prompt, ingresses));
     clear_page_effect(interval_handle);
-    view(selected, ingresses)
+    view(ingresses)
 }
 
 fn update_page(
@@ -51,6 +51,7 @@ fn update_page(
 
             ingresses_vec.push(vec![
                 "Ingress".to_string(),
+                ingress.metadata.namespace,
                 ingress.metadata.name,
                 hosts,
                 paths,
@@ -61,18 +62,19 @@ fn update_page(
 }
 
 fn view(
-    namespace_name: RwSignal<String>,
     replicas: RwSignal<Vec<Vec<String>>>,
 ) -> impl IntoView {
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 1),
+        TableColumn::new("Namespace", TableColumnType::Link, 3),
         TableColumn::new("Name", TableColumnType::Link, 3),
         TableColumn::new("Hosts", TableColumnType::StringList, 3),
         TableColumn::new("Paths", TableColumnType::StringList, 3),
     ];
     let styles = vec![""; columns.len()];
-    let mut params = vec![String::new(); columns.len()];
-    params[1] = format!("/workloads/{}/ingresses/", namespace_name.get_untracked());
+    let mut params = vec![""; columns.len()];
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/workloads/:1/ingresses/";
 
     view! {
         <Wrapper>

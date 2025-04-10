@@ -17,7 +17,7 @@ pub fn PodsListComponent(
 
     let interval_handle = update_page_effect(10_000, move || update_page(selected, prompt, pods));
     clear_page_effect(interval_handle);
-    view(selected, pods)
+    view(pods)
 }
 
 fn update_page(
@@ -51,6 +51,7 @@ fn update_page(
 
             pods_vec.push(vec![
                 "Pod".to_string(),
+                pod.clone().metadata.namespace,
                 pod.clone().metadata.name,
                 pod_cpu_actual(&metrics),
                 pod_cpu_request(&pod, &metrics),
@@ -65,11 +66,11 @@ fn update_page(
 }
 
 fn view(
-    namespace_name: RwSignal<String>,
     replicas: RwSignal<Vec<Vec<String>>>,
 ) -> impl IntoView {
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 1),
+        TableColumn::new("Namespace", TableColumnType::Link, 3),
         TableColumn::new("Name", TableColumnType::Link, 3),
         TableColumn::new("CPU actual", TableColumnType::String, 1),
         TableColumn::new("CPU request", TableColumnType::StringTwoLine, 1),
@@ -79,8 +80,9 @@ fn view(
         TableColumn::new("RAM limit", TableColumnType::StringTwoLine, 1),
     ];
     let styles = vec![""; columns.len()];
-    let mut params = vec![String::new(); columns.len()];
-    params[1] = format!("/workloads/{}/pods/", namespace_name.get_untracked());
+    let mut params = vec![""; columns.len()];
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/workloads/:1/pods/";
 
     view! {
         <Wrapper>

@@ -3,6 +3,7 @@ use leptos::task::spawn_local;
 
 use crate::api::workloads::replicasets as replicasets_api;
 use crate::components::shared::info::resource_info_view;
+use crate::pages::utils::shared::display;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::format_timestamp;
 
@@ -41,24 +42,18 @@ fn update_page(
             .find(|n| n.metadata.namespace == selected_value && n.metadata.name == replicaset_name)
             .unwrap_or_default();
 
-        let mut items = vec![];
-        items.push(("Name", replicaset.metadata.name));
-        items.push(("Kind", "ReplicaSet".to_string()));
-        items.push(("Namespace", replicaset.metadata.namespace));
-        items.push(("Created", format_timestamp(&replicaset.metadata.creation_timestamp.unwrap_or_default(), None)));
-        items.push(("Labels", replicaset.metadata.labels.into_iter()
-            .map(|(k, v)| format!("{k} • {v}"))
-            .collect::<Vec<String>>()
-            .join("\n")));
-        items.push(("Annotations", replicaset.metadata.annotations.into_iter()
-            .map(|(k, v)| format!("{k} • {v}"))
-            .collect::<Vec<String>>()
-            .join("\n")));
-        items.push(("Version", replicaset.metadata.resource_version));
-        items.push(("Owned By", replicaset.metadata.owner_references.into_iter()
-            .map(|or| format!("{}/{selected_value}/{}", or.kind.to_lowercase(), or.name))
-            .collect::<Vec<String>>()
-            .join("\n")));
-        replicaset_data.set(items.into_iter().map(|(k, v)| (k.to_string(), v)).collect());
+        replicaset_data.set(vec![
+            ("Name", replicaset.clone().metadata.name),
+            ("Kind", "ReplicaSet".to_string()),
+            ("Namespace", replicaset.clone().metadata.namespace),
+            ("Created", format_timestamp(&replicaset.clone().metadata.creation_timestamp.unwrap_or_default(), None)),
+            ("Labels", display::hashmap(replicaset.clone().metadata.labels)),
+            ("Annotations", display::hashmap(replicaset.clone().metadata.annotations)),
+            ("Version", replicaset.clone().metadata.resource_version),
+            ("Owned By", replicaset.metadata.owner_references.into_iter()
+                .map(|or| format!("{}/{selected_value}/{}", or.kind.to_lowercase(), or.name))
+                .collect::<Vec<String>>()
+                .join("\n")),
+        ].into_iter().map(|(k, v)| (k.to_string(), v)).collect());
     });
 }

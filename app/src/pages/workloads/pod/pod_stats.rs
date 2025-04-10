@@ -71,7 +71,7 @@ fn view(
     view! {
         <Wrapper>
             <WrapperSlot slot>
-                <div class="card-container dcc-3">
+                <div class="card-container dcc-2">
                     <CardCircle
                         label="Pod CPU usage"
                         label_add="actual vs reserved"

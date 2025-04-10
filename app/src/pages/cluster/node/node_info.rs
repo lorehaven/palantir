@@ -3,7 +3,9 @@ use leptos::task::spawn_local;
 
 use crate::api::cluster::nodes as nodes_api;
 use crate::components::shared::info::resource_info_view;
+use crate::pages::utils::shared::display;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
+use crate::pages::utils::shared::time::format_timestamp;
 
 #[component]
 pub fn NodeInfoComponent(
@@ -29,30 +31,23 @@ fn update_page(
         let node = nodes_api::get_nodes_response().await
             .unwrap_or_default();
         let kind = if node.kind == "NodesList" { "Node".to_string() } else { node.kind };
-        let resource_version = node.metadata.resource_version;
         let node = node.items.into_iter()
             .find(|n| n.metadata.name == node_name)
             .unwrap_or_default();
 
-        let mut items = vec![];
-        items.push(("Name", node.metadata.name));
-        items.push(("Kind", kind));
-        items.push(("Created", node.metadata.creation_timestamp.unwrap_or_default()));
-        items.push(("Labels", node.metadata.labels.into_iter()
-            .map(|(k, v)| format!("{k} • {v}"))
-            .collect::<Vec<String>>()
-            .join("\n")));
-        items.push(("Annotations", node.metadata.annotations.into_iter()
-            .map(|(k, v)| format!("{k} • {v}"))
-            .collect::<Vec<String>>()
-            .join("\n")));
-        items.push(("Version", resource_version));
-        items.push(("Kernel Version", node.status.node_info.kernel_version));
-        items.push(("OS", node.status.node_info.os_image));
-        items.push(("Architecture", node.status.node_info.architecture));
-        items.push(("Container Runtime", node.status.node_info.container_runtime_version));
-        items.push(("Kubelet", node.status.node_info.kubelet_version));
-        items.push(("Kube Proxy", node.status.node_info.kube_proxy_version));
-        node_data.set(items.into_iter().map(|(k, v)| (k.to_string(), v)).collect());
+        node_data.set(vec![
+            ("Name", node.clone().metadata.name),
+            ("Kind", kind),
+            ("Created", format_timestamp(&node.clone().metadata.creation_timestamp.unwrap_or_default(), None)),
+            ("Labels", display::hashmap(node.clone().metadata.labels)),
+            ("Annotations", display::hashmap(node.clone().metadata.annotations)),
+            ("Version", node.clone().metadata.resource_version),
+            ("Kernel Version", node.status.node_info.kernel_version),
+            ("OS", node.status.node_info.os_image),
+            ("Architecture", node.status.node_info.architecture),
+            ("Container Runtime", node.status.node_info.container_runtime_version),
+            ("Kubelet", node.status.node_info.kubelet_version),
+            ("Kube Proxy", node.status.node_info.kube_proxy_version),
+        ].into_iter().map(|(k, v)| (k.to_string(), v)).collect());
     });
 }

@@ -3,6 +3,7 @@ use leptos::task::spawn_local;
 
 use crate::api::accounts::roles as roles_api;
 use crate::components::shared::info::resource_info_view;
+use crate::pages::utils::shared::display;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::format_timestamp;
 
@@ -42,14 +43,8 @@ fn update_page(
             ("Name", role.clone().metadata.name),
             ("Kind", "PersistentVolume".to_string()),
             ("Created", format_timestamp(&role.clone().metadata.creation_timestamp.unwrap_or_default(), None)),
-            ("Labels", role.clone().metadata.labels.into_iter()
-                .map(|(k, v)| format!("{k} • {v}"))
-                .collect::<Vec<String>>()
-                .join("\n")),
-            ("Annotations", role.clone().metadata.annotations.into_iter()
-                .map(|(k, v)| format!("{k} • {v}"))
-                .collect::<Vec<String>>()
-                .join("\n")),
+            ("Labels", display::hashmap(role.clone().metadata.labels)),
+            ("Annotations", display::hashmap(role.clone().metadata.annotations)),
             ("Version", role.metadata.resource_version),
         ].into_iter().map(|(k, v)| (k.to_string(), v)).collect());
     });

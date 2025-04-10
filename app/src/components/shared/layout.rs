@@ -57,7 +57,7 @@ pub fn SideNavBar(
             <SideNavBarEntry name="replicas" icon="object-ungroup" url_prefix="/workloads" visible={current_path.starts_with("/workloads")} />
             <SideNavBarEntry name="pods" icon="boxes-stacked" url_prefix="/workloads" visible={current_path.starts_with("/workloads")} />
             <SideNavBarEntry name="ingresses" icon="circle-nodes" url_prefix="/workloads" visible={current_path.starts_with("/workloads")} />
-            <SideNavBarEntry name="config" icon="sliders" url_prefix="/workloads" visible={current_path.starts_with("/workloads")} />
+            <SideNavBarEntry name="configmaps" icon="sliders" url_prefix="/workloads" visible={current_path.starts_with("/workloads")} />
             <div class="separator" />
             <SideNavBarEntry name="storage" icon="warehouse" />
             <SideNavBarEntry name="volumes" icon="hard-drive" url_prefix="/storage" visible={current_path.starts_with("/storage")} />

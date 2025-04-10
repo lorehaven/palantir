@@ -3,6 +3,7 @@ use leptos::task::spawn_local;
 
 use crate::api::workloads::ingresses as ingresses_api;
 use crate::components::shared::info::resource_info_view;
+use crate::pages::utils::shared::display;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::format_timestamp;
 
@@ -41,16 +42,13 @@ fn update_page(
             .find(|n| n.metadata.name == ingress_name)
             .unwrap_or_default();
 
-        let mut items = vec![];
-        items.push(("Name", ingress.metadata.name));
-        items.push(("Kind", "Ingress".to_string()));
-        items.push(("Namespace", ingress.metadata.namespace));
-        items.push(("Created", format_timestamp(&ingress.metadata.creation_timestamp.unwrap_or_default(), None)));
-        items.push(("Annotations", ingress.metadata.annotations.into_iter()
-            .map(|(k, v)| format!("{k} • {v}"))
-            .collect::<Vec<String>>()
-            .join("\n")));
-        items.push(("Version", ingress.metadata.resource_version));
-        ingress_data.set(items.into_iter().map(|(k, v)| (k.to_string(), v)).collect());
+        ingress_data.set(vec![
+            ("Name", ingress.clone().metadata.name),
+            ("Kind", "Ingress".to_string()),
+            ("Namespace", ingress.clone().metadata.namespace),
+            ("Created", format_timestamp(&ingress.clone().metadata.creation_timestamp.unwrap_or_default(), None)),
+            ("Annotations", display::hashmap(ingress.clone().metadata.annotations)),
+            ("Version", ingress.metadata.resource_version),
+        ].into_iter().map(|(k, v)| (k.to_string(), v)).collect());
     });
 }

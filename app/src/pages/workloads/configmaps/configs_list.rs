@@ -14,7 +14,7 @@ pub fn ConfigsListComponent(
 
     let interval_handle = update_page_effect(10_000, move || update_page(selected, prompt, configs));
     clear_page_effect(interval_handle);
-    view(selected, configs)
+    view(configs)
 }
 
 fn update_page(
@@ -37,6 +37,7 @@ fn update_page(
         for config in configs_data {
             configs_vec.push(vec![
                 "ConfigMap".to_string(),
+                config.metadata.namespace,
                 config.metadata.name,
             ]);
         }
@@ -45,16 +46,17 @@ fn update_page(
 }
 
 fn view(
-    namespace_name: RwSignal<String>,
     replicas: RwSignal<Vec<Vec<String>>>,
 ) -> impl IntoView {
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 1),
-        TableColumn::new("Name", TableColumnType::Link, 9),
+        TableColumn::new("Namespace", TableColumnType::Link, 2),
+        TableColumn::new("Name", TableColumnType::Link, 4),
     ];
     let styles = vec![""; columns.len()];
-    let mut params = vec![String::new(); columns.len()];
-    params[1] = format!("/workloads/{}/configmaps/", namespace_name.get_untracked());
+    let mut params = vec![""; columns.len()];
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/workloads/:1/configmaps/";
 
     view! {
         <Wrapper>

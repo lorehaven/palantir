@@ -29,7 +29,7 @@ fn update_page(
             .filter(|r| r.get_name().to_lowercase().contains(&prompt_value.to_lowercase()))
             .map(|r| r.to_model())
             .map(|r| vec![
-                r.r#type, r.name, r.namespace, r.age,
+                r.r#type, r.namespace, r.name, r.age,
             ]).collect::<Vec<_>>();
         list.sort_by(|a, b| a[1].cmp(&b[1]));
         roles.set(list);
@@ -41,13 +41,14 @@ fn view(
 ) -> impl IntoView {
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 2),
+        TableColumn::new("Namespace", TableColumnType::String, 2),
         TableColumn::new("Name", TableColumnType::Link, 3),
-        TableColumn::new("Namespace", TableColumnType::String, 3),
         TableColumn::new("Age", TableColumnType::String, 1),
     ];
     let styles = vec![""; columns.len()];
     let mut params = vec![""; columns.len()];
-    params[1] = "/accounts/:2/:0s/";
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/accounts/:1/:0s/";
 
     view! {
         <Wrapper>

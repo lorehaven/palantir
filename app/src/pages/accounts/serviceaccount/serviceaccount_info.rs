@@ -3,6 +3,7 @@ use leptos::task::spawn_local;
 
 use crate::api::accounts::serviceaccounts as serviceaccounts_api;
 use crate::components::shared::info::resource_info_view;
+use crate::pages::utils::shared::display;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::format_timestamp;
 
@@ -47,14 +48,8 @@ fn update_page(
             ("Kind", "ServiceAccount".to_string()),
             ("Namespace", sa.clone().metadata.namespace),
             ("Created", format_timestamp(&sa.clone().metadata.creation_timestamp.unwrap_or_default(), None)),
-            ("Labels", sa.clone().metadata.labels.into_iter()
-                .map(|(k, v)| format!("{k} • {v}"))
-                .collect::<Vec<String>>()
-                .join("\n")),
-            ("Annotations", sa.clone().metadata.annotations.into_iter()
-                .map(|(k, v)| format!("{k} • {v}"))
-                .collect::<Vec<String>>()
-                .join("\n")),
+            ("Labels", display::hashmap(sa.clone().metadata.labels)),
+            ("Annotations", display::hashmap(sa.clone().metadata.annotations)),
             ("Version", sa.metadata.resource_version),
             ("Secrets", String::new()),
         ].into_iter().map(|(k, v)| (k.to_string(), v)).collect());

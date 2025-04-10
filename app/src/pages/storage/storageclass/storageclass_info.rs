@@ -3,6 +3,7 @@ use leptos::task::spawn_local;
 
 use crate::api::storage as storage_api;
 use crate::components::shared::info::resource_info_view;
+use crate::pages::utils::shared::display;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::format_timestamp;
 
@@ -37,14 +38,8 @@ fn update_page(
             ("Name", storageclass.clone().metadata.name),
             ("Kind", "StorageClass".to_string()),
             ("Created", format_timestamp(&storageclass.clone().metadata.creation_timestamp.unwrap_or_default(), None)),
-            ("Labels", storageclass.clone().metadata.labels.into_iter()
-                .map(|(k, v)| format!("{k} • {v}"))
-                .collect::<Vec<String>>()
-                .join("\n")),
-            ("Annotations", storageclass.clone().metadata.annotations.into_iter()
-                .map(|(k, v)| format!("{k} • {v}"))
-                .collect::<Vec<String>>()
-                .join("\n")),
+            ("Labels", display::hashmap(storageclass.clone().metadata.labels)),
+            ("Annotations", display::hashmap(storageclass.clone().metadata.annotations)),
             ("Version", storageclass.clone().metadata.resource_version),
             ("Provisioner", storageclass.clone().provisioner),
             ("Policy", storageclass.clone().reclaim_policy),

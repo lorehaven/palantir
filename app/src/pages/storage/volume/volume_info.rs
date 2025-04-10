@@ -3,6 +3,7 @@ use leptos::task::spawn_local;
 
 use crate::api::storage::volumes as volumes_api;
 use crate::components::shared::info::resource_info_view;
+use crate::pages::utils::shared::display;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::format_timestamp;
 
@@ -37,21 +38,12 @@ fn update_page(
             ("Name", volume.clone().metadata.name),
             ("Kind", "PersistentVolume".to_string()),
             ("Created", format_timestamp(&volume.clone().metadata.creation_timestamp.unwrap_or_default(), None)),
-            ("Labels", volume.clone().metadata.labels.into_iter()
-                .map(|(k, v)| format!("{k} • {v}"))
-                .collect::<Vec<String>>()
-                .join("\n")),
-            ("Annotations", volume.clone().metadata.annotations.into_iter()
-                .map(|(k, v)| format!("{k} • {v}"))
-                .collect::<Vec<String>>()
-                .join("\n")),
+            ("Labels", display::hashmap(volume.clone().metadata.labels)),
+            ("Annotations", display::hashmap(volume.clone().metadata.annotations)),
             ("Version", volume.clone().status.phase),
             ("Status", volume.clone().status.phase),
             ("Class", String::new()),
-            ("Claim", {
-                let claim_ref = volume.clone().spec.claim_ref;
-                format!("{}/{}", claim_ref.namespace, claim_ref.name)
-            }),
+            ("Claim", format!("{}/{}", volume.clone().spec.claim_ref.namespace, volume.spec.claim_ref.name)),
             ("Access Modes", volume.spec.access_mode.join("\n")),
             ("Capacity", volume.spec.capacity.storage),
             ("Reclaim Policy", volume.spec.persistent_volume_reclaim_policy),

@@ -3,6 +3,7 @@ use leptos::task::spawn_local;
 
 use crate::api::storage::claims as claims_api;
 use crate::components::shared::info::resource_info_view;
+use crate::pages::utils::shared::display;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::format_timestamp;
 
@@ -47,14 +48,8 @@ fn update_page(
             ("Kind", "PersistentVolumeClaim".to_string()),
             ("Namespace", claim.clone().metadata.namespace),
             ("Created", format_timestamp(&claim.clone().metadata.creation_timestamp.unwrap_or_default(), None)),
-            ("Labels", claim.clone().metadata.labels.into_iter()
-                .map(|(k, v)| format!("{k} • {v}"))
-                .collect::<Vec<String>>()
-                .join("\n")),
-            ("Annotations", claim.clone().metadata.annotations.into_iter()
-                .map(|(k, v)| format!("{k} • {v}"))
-                .collect::<Vec<String>>()
-                .join("\n")),
+            ("Labels", display::hashmap(claim.clone().metadata.labels)),
+            ("Annotations", display::hashmap(claim.clone().metadata.annotations)),
             ("Version", claim.clone().metadata.resource_version),
             ("Status", claim.clone().status.phase),
             ("Class", String::new()),

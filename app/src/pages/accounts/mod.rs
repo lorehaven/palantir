@@ -73,8 +73,8 @@ fn update_page_list(
             .filter(|n| n.metadata.name.to_lowercase().contains(&prompt_value.to_lowercase()))
             .map(|sa| vec![
                 "ServiceAccount".to_string(),
-                sa.clone().metadata.name,
                 sa.clone().metadata.namespace,
+                sa.clone().metadata.name,
                 time_until_now(&sa.metadata.creation_timestamp.unwrap_or_default()),
             ])
             .collect());
@@ -86,14 +86,14 @@ fn view_list(
 ) -> impl IntoView {
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 1),
-        TableColumn::new("Name", TableColumnType::Link, 2),
         TableColumn::new("Namespace", TableColumnType::Link, 1),
+        TableColumn::new("Name", TableColumnType::Link, 2),
         TableColumn::new("Age", TableColumnType::String, 1),
     ];
     let styles = vec![""; columns.len()];
     let mut params = vec![""; columns.len()];
-    params[1] = "/accounts/:2/serviceaccounts/";
-    params[2] = "/cluster/namespaces/";
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/accounts/:1/serviceaccounts/";
 
     view! {
         <Wrapper>

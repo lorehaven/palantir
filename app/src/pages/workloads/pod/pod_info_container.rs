@@ -40,24 +40,24 @@ fn update_page(
             .unwrap_or_default();
         let container = pod.spec.containers.first().cloned().unwrap_or_default();
 
-        let mut items = vec![];
-        items.push(("Container", container.name));
-        items.push(("Image", container.image));
-        items.push(("Env", container.env.into_iter()
-            .map(|e| format!("{}: {}", e.name, e.value))
-            .collect::<Vec<String>>()
-            .join("\n")));
-        items.push(("Cpu Request", container.resources.requests.cpu));
-        items.push(("Memory Request", container.resources.requests.memory));
-        items.push(("Cpu Limit", container.resources.limits.cpu));
-        items.push(("Memory Limit", container.resources.limits.memory));
-        items.push(("Ports", container.ports.into_iter()
-            .map(|p| {
-                let name = if p.name.is_empty() { String::new() } else { format!("{} • ", p.name) };
-                format!("{name}{} • {}", p.container_port, p.protocol)
-            })
-            .collect::<Vec<String>>()
-            .join("\n")));
-        pod_data.set(items.into_iter().map(|(k, v)| (k.to_string(), v)).collect());
+        pod_data.set(vec![
+            ("Container", container.name),
+            ("Image", container.image),
+            ("Env", container.env.into_iter()
+                .map(|e| format!("{}: {}", e.name, e.value))
+                .collect::<Vec<String>>()
+                .join("\n")),
+            ("Cpu Request", container.resources.requests.cpu),
+            ("Memory Request", container.resources.requests.memory),
+            ("Cpu Limit", container.resources.limits.cpu),
+            ("Memory Limit", container.resources.limits.memory),
+            ("Ports", container.ports.into_iter()
+                .map(|p| {
+                    let name = if p.name.is_empty() { String::new() } else { format!("{} • ", p.name) };
+                    format!("{name}{} • {}", p.container_port, p.protocol)
+                })
+                .collect::<Vec<String>>()
+                .join("\n")),
+        ].into_iter().map(|(k, v)| (k.to_string(), v)).collect());
     });
 }

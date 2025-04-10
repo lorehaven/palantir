@@ -15,7 +15,7 @@ pub fn ClaimsListComponent(
 
     let interval_handle = update_page_effect(10_000, move || update_page(selected, prompt, claims));
     clear_page_effect(interval_handle);
-    view(selected, claims)
+    view(claims)
 }
 
 fn update_page(
@@ -36,8 +36,8 @@ fn update_page(
             .filter(|n| n.metadata.name.to_lowercase().contains(&prompt_value.to_lowercase()))
             .map(|n| vec![
                 "PersistentVolume".to_string(),
-                n.clone().metadata.name,
                 n.clone().metadata.namespace,
+                n.clone().metadata.name,
                 time_until_now(&n.metadata.creation_timestamp.unwrap_or_default()),
                 n.status.phase,
                 n.spec.storage_class_name,
@@ -49,13 +49,12 @@ fn update_page(
 }
 
 fn view(
-    namespace_name: RwSignal<String>,
     replicas: RwSignal<Vec<Vec<String>>>,
 ) -> impl IntoView {
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 2),
-        TableColumn::new("Name", TableColumnType::Link, 3),
         TableColumn::new("Namespace", TableColumnType::Link, 3),
+        TableColumn::new("Name", TableColumnType::Link, 3),
         TableColumn::new("Age", TableColumnType::String, 3),
         TableColumn::new("Status", TableColumnType::String, 3),
         TableColumn::new("Class Name", TableColumnType::String, 3),
@@ -63,8 +62,9 @@ fn view(
         TableColumn::new("Capacity", TableColumnType::String, 3),
     ];
     let styles = vec![""; columns.len()];
-    let mut params = vec![String::new(); columns.len()];
-    params[1] = format!("/storage/{}/claims/", namespace_name.get_untracked());
+    let mut params = vec![""; columns.len()];
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/storage/:1/claims/";
 
     view! {
         <Wrapper>

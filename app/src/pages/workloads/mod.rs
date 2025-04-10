@@ -138,7 +138,7 @@ fn update_page_list(
             .filter(|w| w.get_name().to_lowercase().contains(&prompt_value.to_lowercase()))
             .map(|w| w.to_model())
             .map(|w| vec![
-            w.r#type, w.name, w.namespace, w.age, w.pods,
+            w.r#type, w.namespace, w.name, w.age, w.pods,
         ]).collect::<Vec<_>>();
         list.sort_by(|a, b| a[1].cmp(&b[1]));
         workloads.set(list);
@@ -150,15 +150,15 @@ fn view_list(
 ) -> impl IntoView {
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 1),
-        TableColumn::new("Name", TableColumnType::Link, 2),
         TableColumn::new("Namespace", TableColumnType::Link, 1),
+        TableColumn::new("Name", TableColumnType::Link, 2),
         TableColumn::new("Age", TableColumnType::String, 1),
         TableColumn::new("Pods", TableColumnType::String, 3),
     ];
     let styles = vec![""; columns.len()];
     let mut params = vec![""; columns.len()];
-    params[1] = "/workloads/:0/:2/";
-    params[2] = "/cluster/namespaces/";
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/workloads/:0/:1/";
 
     view! {
         <Wrapper>
