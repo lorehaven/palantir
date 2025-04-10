@@ -69,8 +69,8 @@ fn update_page_stats(
 
     spawn_local(async move {
         let workloads =
-            if selected_value == "All Namespaces" { workloads_api::get_workloads().await }
-            else { workloads_api::get_workloads_by_namespace_name(selected_value.clone()).await };
+            if selected_value == "All Namespaces" { workloads_api::get_workloads(None).await }
+            else { workloads_api::get_workloads(Some(selected_value.clone())).await };
         let ready_workloads = workloads.iter()
             .filter(|w| w.is_ready()).count();
         workloads_ready.set((workloads.len() as f64, ready_workloads as f64));
@@ -132,8 +132,8 @@ fn update_page_list(
     let prompt_value = prompt.get();
     spawn_local(async move {
         let workloads_list =
-            if selected_value == "All Namespaces" { workloads_api::get_workloads().await }
-            else { workloads_api::get_workloads_by_namespace_name(selected_value.clone()).await };
+            if selected_value == "All Namespaces" { workloads_api::get_workloads(None).await }
+            else { workloads_api::get_workloads(Some(selected_value.clone())).await };
         let mut list = workloads_list.into_iter()
             .filter(|w| w.get_name().to_lowercase().contains(&prompt_value.to_lowercase()))
             .map(|w| w.to_model())

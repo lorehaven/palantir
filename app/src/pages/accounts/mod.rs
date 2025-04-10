@@ -9,6 +9,8 @@ use crate::pages::utils::shared::time::time_until_now;
 pub mod serviceaccount;
 
 pub mod bindings;
+pub mod clusterrole;
+pub mod role;
 pub mod roles;
 pub mod secrets;
 

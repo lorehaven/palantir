@@ -27,10 +27,16 @@ pub fn TableComponent(
                     let param = params[idx % params.len()].to_string();
                     let values_idx = values[idx / values.first().cloned().unwrap_or_else(|| vec![String::new()]).len()].clone();
 
-                    let param = param.split('/')
-                        .map(|p|
-                            if p.starts_with(':') { values_idx[p.replace(':', "").parse::<usize>().unwrap_or(0)].clone().to_lowercase() }
-                            else { p.to_string() })
+                    let re = regex::Regex::new(r":(\d+)").unwrap();
+                    let param = param
+                        .split('/')
+                        .map(|segment| {
+                            re.replace_all(segment, |caps: &regex::Captures<'_>| {
+                                let idx = caps[1].parse::<usize>().unwrap_or(0);
+                                values_idx.get(idx).cloned().unwrap_or_default().to_lowercase()
+                            }).to_string()
+                        })
+                        .filter(|segment| segment != "all namespaces")
                         .collect::<Vec<String>>()
                         .join("/");
 
