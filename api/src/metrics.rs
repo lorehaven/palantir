@@ -1,10 +1,10 @@
+use domain::metrics::{NodeMetrics, PodMetrics};
 use leptos::prelude::ServerFnError;
 use leptos::server;
 use serde_json::Value;
 
 #[allow(unused_imports)]
 use crate::utils::get_api_token;
-use domain::metrics::{NodeMetrics, PodMetrics};
 
 #[server(GetNodesMetrics, "/api/metrics/nodes")]
 pub async fn get_nodes() -> Result<Vec<NodeMetrics>, ServerFnError> {
@@ -29,7 +29,9 @@ async fn get_metrics(path: String) -> Result<Value, ServerFnError> {
         .build()?;
 
     let response = client
-        .get(format!("https://{server_host}:6443/apis/metrics.k8s.io/v1beta1/{path}"))
+        .get(format!(
+            "https://{server_host}:6443/apis/metrics.k8s.io/v1beta1/{path}"
+        ))
         .bearer_auth(get_api_token())
         .send()
         .await?;

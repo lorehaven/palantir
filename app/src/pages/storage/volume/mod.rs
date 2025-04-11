@@ -8,10 +8,16 @@ mod volume_info;
 #[component]
 pub fn StorageVolumePage() -> impl IntoView {
     let params = use_params_map();
-    let volume_name = params.with_untracked(|p| p.get("name"))
+    let volume_name = params
+        .with_untracked(|p| p.get("name"))
         .into_iter()
-        .collect::<Vec<_>>().join("-");
-    let page_title = vec!["Storage".to_string(), "Persistent Volumes".to_string(), volume_name.clone()];
+        .collect::<Vec<_>>()
+        .join("-");
+    let page_title = vec![
+        "Storage".to_string(),
+        "Persistent Volumes".to_string(),
+        volume_name.clone(),
+    ];
 
     view! {
         <Header text=page_title />

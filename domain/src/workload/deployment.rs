@@ -1,5 +1,6 @@
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+
+use serde::{Deserialize, Serialize};
 
 use crate::shared::metadata::Metadata;
 use crate::shared::template::Template;
@@ -65,7 +66,10 @@ pub struct Condition {
 
 impl Workload for Deployment {
     fn is_ready(&self) -> bool {
-        self.status.conditions.iter().any(|c| c.r#type == "Available" && c.status == "True")
+        self.status
+            .conditions
+            .iter()
+            .any(|c| c.r#type == "Available" && c.status == "True")
     }
 
     fn get_name(&self) -> String {
@@ -78,7 +82,10 @@ impl Workload for Deployment {
             name: self.metadata.name.clone(),
             namespace: self.metadata.namespace.clone(),
             age: time_until_now(&self.clone().metadata.creation_timestamp.unwrap_or_default()),
-            pods: format!("{}/{}", self.status.available_replicas, self.status.replicas),
+            pods: format!(
+                "{}/{}",
+                self.status.available_replicas, self.status.replicas
+            ),
         }
     }
 }

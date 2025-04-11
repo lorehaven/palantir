@@ -1,15 +1,13 @@
+use api::cluster::nodes as nodes_api;
+use domain::utils::time::time_until_now;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
-use api::cluster::nodes as nodes_api;
-use domain::utils::time::time_until_now;
 
 #[component]
-pub fn NodeConditionsComponent(
-    node_name: String,
-) -> impl IntoView {
+pub fn NodeConditionsComponent(node_name: String) -> impl IntoView {
     let node_name = RwSignal::new(node_name);
     let conditions = RwSignal::new(vec![]);
 
@@ -28,15 +26,15 @@ pub fn NodeConditionsComponent(
     data_list_view(columns, conditions, styles, params)
 }
 
-fn update_page(
-    node_name: RwSignal<String>,
-    conditions: RwSignal<Vec<Vec<String>>>,
-) {
-    if node_name.is_disposed() { return; }
+fn update_page(node_name: RwSignal<String>, conditions: RwSignal<Vec<Vec<String>>>) {
+    if node_name.is_disposed() {
+        return;
+    }
     let node_name = node_name.get();
 
     spawn_local(async move {
-        let node = nodes_api::get_node_by_name(node_name).await
+        let node = nodes_api::get_node_by_name(node_name)
+            .await
             .unwrap_or_default();
         let mut conditions_vec = vec![];
         for condition in node.status.conditions {

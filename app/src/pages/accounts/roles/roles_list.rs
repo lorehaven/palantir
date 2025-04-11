@@ -1,14 +1,12 @@
+use api::accounts::roles as roles_api;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
-use api::accounts::roles as roles_api;
 
 #[component]
-pub fn RolesListComponent(
-    prompt: RwSignal<String>,
-) -> impl IntoView {
+pub fn RolesListComponent(prompt: RwSignal<String>) -> impl IntoView {
     let roles = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(10_000, move || update_page(roles, prompt));
@@ -27,21 +25,24 @@ pub fn RolesListComponent(
     data_list_view(columns, roles, styles, params)
 }
 
-fn update_page(
-    roles: RwSignal<Vec<Vec<String>>>,
-    prompt: RwSignal<String>,
-) {
-    if prompt.is_disposed() { return; }
+fn update_page(roles: RwSignal<Vec<Vec<String>>>, prompt: RwSignal<String>) {
+    if prompt.is_disposed() {
+        return;
+    }
     let prompt_value = prompt.get();
 
     spawn_local(async move {
         let roles_list = roles_api::get_all_roles().await;
-        let mut list = roles_list.into_iter()
-            .filter(|r| r.get_name().to_lowercase().contains(&prompt_value.to_lowercase()))
+        let mut list = roles_list
+            .into_iter()
+            .filter(|r| {
+                r.get_name()
+                    .to_lowercase()
+                    .contains(&prompt_value.to_lowercase())
+            })
             .map(|r| r.to_model())
-            .map(|r| vec![
-                r.r#type, r.namespace, r.name, r.age,
-            ]).collect::<Vec<_>>();
+            .map(|r| vec![r.r#type, r.namespace, r.name, r.age])
+            .collect::<Vec<_>>();
         list.sort_by(|a, b| a[2].cmp(&b[2]));
         roles.set(list);
     });

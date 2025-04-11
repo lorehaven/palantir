@@ -1,11 +1,7 @@
 use leptos::prelude::*;
 
 #[component]
-pub fn CardString(
-    label: &'static str,
-    label_add: &'static str,
-    value: String,
-) -> impl IntoView {
+pub fn CardString(label: &'static str, label_add: &'static str, value: String) -> impl IntoView {
     view! {
         <div class="card-string">
             <div>

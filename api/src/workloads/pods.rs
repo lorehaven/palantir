@@ -1,11 +1,11 @@
+use domain::cluster::pod::Pod;
+#[allow(unused_imports)]
+use domain::shared::response::Response;
 use leptos::prelude::ServerFnError;
 use leptos::server;
 
 #[allow(unused_imports)]
 use crate::utils::{kube_api_request, ApiType};
-use domain::cluster::pod::Pod;
-#[allow(unused_imports)]
-use domain::shared::response::Response;
 
 #[server(GetPods, "/api/pods")]
 pub async fn get_pods(
@@ -13,10 +13,19 @@ pub async fn get_pods(
     node_name: Option<String>,
 ) -> Result<Vec<Pod>, ServerFnError> {
     let response = kube_api_request(ApiType::Api, "pods".to_string()).await?;
-    let pods = serde_json::from_str::<Response<Pod>>(&response)?.items
+    let pods = serde_json::from_str::<Response<Pod>>(&response)?
+        .items
         .into_iter()
-        .filter(|f| f.metadata.namespace.contains(&namespace_name.clone().unwrap_or_default()))
-        .filter(|f| f.spec.node_name.contains(&node_name.clone().unwrap_or_default()))
+        .filter(|f| {
+            f.metadata
+                .namespace
+                .contains(&namespace_name.clone().unwrap_or_default())
+        })
+        .filter(|f| {
+            f.spec
+                .node_name
+                .contains(&node_name.clone().unwrap_or_default())
+        })
         .collect();
     Ok(pods)
 }

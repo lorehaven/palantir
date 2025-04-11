@@ -1,18 +1,22 @@
+use domain::account::bindings::{BaseRoleBinding, ClusterRoleBinding, RoleBinding};
+#[allow(unused_imports)]
+use domain::shared::response::Response;
 use leptos::prelude::ServerFnError;
 use leptos::server;
 
 #[allow(unused_imports)]
 use crate::utils::{kube_api_request, ApiType};
-use domain::account::bindings::{BaseRoleBinding, ClusterRoleBinding, RoleBinding};
-#[allow(unused_imports)]
-use domain::shared::response::Response;
 
 pub async fn get_all_bindings() -> Vec<Box<dyn BaseRoleBinding>> {
     let mut all_bindings = vec![];
-    let bindings = get_rolebindings(None).await.unwrap_or_default()
+    let bindings = get_rolebindings(None)
+        .await
+        .unwrap_or_default()
         .into_iter()
         .map(|d| Box::new(d) as Box<dyn BaseRoleBinding>);
-    let clusterbindings = get_clusterrolebindings().await.unwrap_or_default()
+    let clusterbindings = get_clusterrolebindings()
+        .await
+        .unwrap_or_default()
         .into_iter()
         .map(|d| Box::new(d) as Box<dyn BaseRoleBinding>);
     all_bindings.extend(bindings);
@@ -21,11 +25,18 @@ pub async fn get_all_bindings() -> Vec<Box<dyn BaseRoleBinding>> {
 }
 
 #[server(GetBindings, "/api/accounts/rolebindings")]
-pub async fn get_rolebindings(namespace_name: Option<String>) -> Result<Vec<RoleBinding>, ServerFnError> {
+pub async fn get_rolebindings(
+    namespace_name: Option<String>,
+) -> Result<Vec<RoleBinding>, ServerFnError> {
     let response = kube_api_request(ApiType::Rbac, "rolebindings".to_string()).await?;
-    let items = serde_json::from_str::<Response<RoleBinding>>(&response)?.items
+    let items = serde_json::from_str::<Response<RoleBinding>>(&response)?
+        .items
         .into_iter()
-        .filter(|f| f.metadata.namespace.contains(&namespace_name.clone().unwrap_or_default()))
+        .filter(|f| {
+            f.metadata
+                .namespace
+                .contains(&namespace_name.clone().unwrap_or_default())
+        })
         .collect();
     Ok(items)
 }

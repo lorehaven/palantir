@@ -1,8 +1,8 @@
+use api::workloads as workloads_api;
+use api::workloads::pods as pods_api;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use api::workloads as workloads_api;
-use api::workloads::pods as pods_api;
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
@@ -43,17 +43,13 @@ pub fn WorkloadsPage() -> impl IntoView {
 }
 
 #[component]
-fn WorkloadsStats(
-    selected: RwSignal<String>,
-) -> impl IntoView {
+fn WorkloadsStats(selected: RwSignal<String>) -> impl IntoView {
     let workloads_ready = RwSignal::new((0., 0.));
     let pods_ready = RwSignal::new((0., 0.));
 
-    let interval_handle = update_page_effect(3_600_000, move || update_page_stats(
-        selected,
-        workloads_ready,
-        pods_ready,
-    ));
+    let interval_handle = update_page_effect(3_600_000, move || {
+        update_page_stats(selected, workloads_ready, pods_ready)
+    });
     clear_page_effect(interval_handle);
 
     view_stats(workloads_ready, pods_ready)
@@ -64,19 +60,33 @@ fn update_page_stats(
     workloads_ready: RwSignal<(f64, f64)>,
     pods_ready: RwSignal<(f64, f64)>,
 ) {
-    if selected.is_disposed() { return; }
+    if selected.is_disposed() {
+        return;
+    }
     let selected_value = selected.get();
 
     spawn_local(async move {
-        let namespace_name = if selected_value == "All Namespaces" { None } else { Some(selected_value) };
+        let namespace_name = if selected_value == "All Namespaces" {
+            None
+        } else {
+            Some(selected_value)
+        };
         let workloads = workloads_api::get_workloads(namespace_name.clone()).await;
-        let ready_workloads = workloads.iter()
-            .filter(|w| w.is_ready()).count();
+        let ready_workloads = workloads.iter().filter(|w| w.is_ready()).count();
         workloads_ready.set((workloads.len() as f64, ready_workloads as f64));
 
-        let pods = pods_api::get_pods(namespace_name, None).await.unwrap_or_default();
-        let ready_pods = pods.iter()
-            .filter(|p| p.status.conditions.iter().any(|pc| pc.r#type == "Ready" && pc.status == "True")).count();
+        let pods = pods_api::get_pods(namespace_name, None)
+            .await
+            .unwrap_or_default();
+        let ready_pods = pods
+            .iter()
+            .filter(|p| {
+                p.status
+                    .conditions
+                    .iter()
+                    .any(|pc| pc.r#type == "Ready" && pc.status == "True")
+            })
+            .count();
         pods_ready.set((pods.len() as f64, ready_pods as f64));
     });
 }
@@ -104,17 +114,12 @@ fn view_stats(
 }
 
 #[component]
-fn WorkloadsList(
-    selected: RwSignal<String>,
-    prompt: RwSignal<String>,
-) -> impl IntoView {
+fn WorkloadsList(selected: RwSignal<String>, prompt: RwSignal<String>) -> impl IntoView {
     let workloads = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(3_600_000, move || update_page_list(
-        selected,
-        prompt,
-        workloads,
-    ));
+    let interval_handle = update_page_effect(3_600_000, move || {
+        update_page_list(selected, prompt, workloads)
+    });
     clear_page_effect(interval_handle);
 
     let columns = vec![
@@ -139,14 +144,22 @@ fn update_page_list(
     let selected_value = selected.get();
     let prompt_value = prompt.get();
     spawn_local(async move {
-        let namespace_name = if selected_value == "All Namespaces" { None } else { Some(selected_value) };
+        let namespace_name = if selected_value == "All Namespaces" {
+            None
+        } else {
+            Some(selected_value)
+        };
         let workloads_list = workloads_api::get_workloads(namespace_name).await;
-        let mut list = workloads_list.into_iter()
-            .filter(|w| w.get_name().to_lowercase().contains(&prompt_value.to_lowercase()))
+        let mut list = workloads_list
+            .into_iter()
+            .filter(|w| {
+                w.get_name()
+                    .to_lowercase()
+                    .contains(&prompt_value.to_lowercase())
+            })
             .map(|w| w.to_model())
-            .map(|w| vec![
-            w.r#type, w.namespace, w.name, w.age, w.pods,
-        ]).collect::<Vec<_>>();
+            .map(|w| vec![w.r#type, w.namespace, w.name, w.age, w.pods])
+            .collect::<Vec<_>>();
         list.sort_by(|a, b| a[1].cmp(&b[1]));
         workloads.set(list);
     });

@@ -25,9 +25,7 @@ pub fn data_list_view(
     }
 }
 
-pub fn resource_info_view(
-    data: RwSignal<Vec<(String, String)>>,
-) -> impl IntoView {
+pub fn resource_info_view(data: RwSignal<Vec<(String, String)>>) -> impl IntoView {
     view! {
         <div class="card-container dcc-1">
             <div class="card-list">
@@ -46,9 +44,7 @@ pub fn resource_info_view(
     }
 }
 
-pub fn obscured_resource_info_view(
-    data: RwSignal<Vec<(String, String)>>,
-) -> impl IntoView {
+pub fn obscured_resource_info_view(data: RwSignal<Vec<(String, String)>>) -> impl IntoView {
     view! {
         <div class="card-container dcc-1">
             <div class="card-list">

@@ -1,20 +1,19 @@
+use api::workloads::ingresses as ingresses_api;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use api::workloads::ingresses as ingresses_api;
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
-pub fn IngressRulesComponent(
-    namespace_name: String,
-    ingress_name: String,
-) -> impl IntoView {
+pub fn IngressRulesComponent(namespace_name: String, ingress_name: String) -> impl IntoView {
     let namespace_name = RwSignal::new(namespace_name);
     let ingress_name = RwSignal::new(ingress_name);
     let rules = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(10_000, move || update_page(namespace_name, ingress_name, rules));
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(namespace_name, ingress_name, rules)
+    });
     clear_page_effect(interval_handle);
 
     let columns = vec![
@@ -33,41 +32,53 @@ fn update_page(
     ingress_name: RwSignal<String>,
     rules: RwSignal<Vec<Vec<String>>>,
 ) {
-    if namespace_name.is_disposed() || ingress_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || ingress_name.is_disposed() {
+        return;
+    }
     let selected_value = namespace_name.get();
     let ingress_name = ingress_name.get();
 
     spawn_local(async move {
-        let selected_value = if selected_value == "All Namespaces" { None } else { Some(selected_value) };
-        let ingress = ingresses_api::get_ingresses(selected_value).await.unwrap_or_default()
+        let selected_value = if selected_value == "All Namespaces" {
+            None
+        } else {
+            Some(selected_value)
+        };
+        let ingress = ingresses_api::get_ingresses(selected_value)
+            .await
+            .unwrap_or_default()
             .into_iter()
             .find(|n| n.metadata.name == ingress_name)
             .unwrap_or_default();
 
         let mut rules_vec = vec![];
         for rule in ingress.spec.rules {
-            let paths = rule.clone()
-                .http.paths.into_iter()
+            let paths = rule
+                .clone()
+                .http
+                .paths
+                .into_iter()
                 .map(|p| p.path)
                 .collect::<Vec<_>>()
                 .join("\n");
-            let service_names = rule.clone()
-                .http.paths.into_iter()
+            let service_names = rule
+                .clone()
+                .http
+                .paths
+                .into_iter()
                 .map(|p| p.backend.service.name)
                 .collect::<Vec<_>>()
                 .join("\n");
-            let service_ports = rule.clone()
-                .http.paths.into_iter()
+            let service_ports = rule
+                .clone()
+                .http
+                .paths
+                .into_iter()
                 .map(|p| p.backend.service.port.number.to_string())
                 .collect::<Vec<_>>()
                 .join("\n");
 
-            rules_vec.push(vec![
-                rule.clone().host,
-                paths,
-                service_names,
-                service_ports,
-            ]);
+            rules_vec.push(vec![rule.clone().host, paths, service_names, service_ports]);
         }
         rules.set(rules_vec);
     });

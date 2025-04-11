@@ -6,7 +6,8 @@ const DEFAULT_TOKEN_PATH: &str = "/var/run/secrets/kubernetes.io/serviceaccount/
 
 #[allow(dead_code)]
 pub fn get_api_token() -> String {
-    let token_path = std::env::var("KUBERNETES_TOKEN_PATH").unwrap_or_else(|_| DEFAULT_TOKEN_PATH.to_string());
+    let token_path =
+        std::env::var("KUBERNETES_TOKEN_PATH").unwrap_or_else(|_| DEFAULT_TOKEN_PATH.to_string());
     std::fs::read_to_string(token_path)
         .expect("token file is missing.")
         .trim()
@@ -31,14 +32,18 @@ pub enum ApiType {
 
 impl std::fmt::Display for ApiType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            Self::Api => "api/v1",
-            Self::Apps => "apis/apps/v1",
-            Self::Batch => "apis/batch/v1",
-            Self::Networking => "apis/networking.k8s.io/v1",
-            Self::Rbac => "apis/rbac.authorization.k8s.io/v1",
-            Self::Storage => "apis/storage.k8s.io/v1",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Api => "api/v1",
+                Self::Apps => "apis/apps/v1",
+                Self::Batch => "apis/batch/v1",
+                Self::Networking => "apis/networking.k8s.io/v1",
+                Self::Rbac => "apis/rbac.authorization.k8s.io/v1",
+                Self::Storage => "apis/storage.k8s.io/v1",
+            }
+        )
     }
 }
 
@@ -65,14 +70,26 @@ pub async fn kube_api_request(path: ApiType, endpoint: String) -> Result<String,
 pub async fn get_url(payload: String) -> Result<String, ServerFnError> {
     let payload = serde_json::from_str::<serde_json::Value>(&payload)?;
     let resource_map = vec![
-        ("apiextensions.k8s.io/v1", "customresourcedefinitions", "CustomResourceDefinition"),
+        (
+            "apiextensions.k8s.io/v1",
+            "customresourcedefinitions",
+            "CustomResourceDefinition",
+        ),
         ("apps/v1", "daemonsets", "DaemonSet"),
         ("apps/v1", "deployments", "Deployment"),
         ("apps/v1", "replicasets", "ReplicaSet"),
         ("apps/v1", "statefulsets", "StatefulSet"),
-        ("autoscaling/v2", "horizontalpodautoscalers", "HorizontalPodAutoscaler"),
+        (
+            "autoscaling/v2",
+            "horizontalpodautoscalers",
+            "HorizontalPodAutoscaler",
+        ),
         ("batch/v1", "cronjobs", "CronJob"),
-        ("certificates.k8s.io/v1", "certificatesigningrequests", "CertificateSigningRequest"),
+        (
+            "certificates.k8s.io/v1",
+            "certificatesigningrequests",
+            "CertificateSigningRequest",
+        ),
         ("networking.k8s.io/v1", "ingresses", "Ingress"),
         ("networking.k8s.io/v1", "networkpolicies", "NetworkPolicy"),
         ("policy/v1", "poddisruptionbudgets", "PodDisruptionBudget"),
@@ -96,11 +113,18 @@ pub async fn get_url(payload: String) -> Result<String, ServerFnError> {
 
     let kind = payload.get("kind").unwrap().as_str().unwrap().to_string();
     let metadata = payload.get("metadata").unwrap();
-    let namespace = metadata.get("namespace").unwrap().as_str().unwrap().to_string();
+    let namespace = metadata
+        .get("namespace")
+        .unwrap()
+        .as_str()
+        .unwrap()
+        .to_string();
     if let Some((u, k, _)) = resource_map.iter().find(|(_, _, k)| k == &kind) {
         let prefix = if u.starts_with("v1") { "api" } else { "apis" };
         Ok(format!("{prefix}/{u}/namespaces/{namespace}/{k}"))
     } else {
-        Err(ServerFnError::ServerError("invalid resource - cannot build url".to_string()))
+        Err(ServerFnError::ServerError(
+            "invalid resource - cannot build url".to_string(),
+        ))
     }
 }

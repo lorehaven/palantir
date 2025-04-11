@@ -5,13 +5,8 @@ use crate::components::shared::dialog::apply_yaml::ApplyYamlDialog;
 use crate::utils::shared::text::capitalize;
 
 #[component]
-pub fn Header(
-    #[prop(optional)]
-    text: Vec<impl Into<String>>,
-) -> impl IntoView {
-    let text = text.into_iter()
-        .map(Into::into)
-        .collect::<Vec<String>>();
+pub fn Header(#[prop(optional)] text: Vec<impl Into<String>>) -> impl IntoView {
+    let text = text.into_iter().map(Into::into).collect::<Vec<String>>();
     let mut links = text
         .iter()
         .filter(|t| !t.is_empty())
@@ -21,29 +16,36 @@ pub fn Header(
                 view! {
                     <span class="header-separator"> / </span>
                     <span class="header-link">{ t.to_string() }</span>
-                }.into_any()
+                }
+                .into_any()
             } else {
-                let href = format!("/{}", text[0..=idx].iter()
-                    .map(|t| t.to_lowercase())
-                    .collect::<Vec<String>>()
-                    .join("/"));
+                let href = format!(
+                    "/{}",
+                    text[0..=idx]
+                        .iter()
+                        .map(|t| t.to_lowercase())
+                        .collect::<Vec<String>>()
+                        .join("/")
+                );
                 view! {
                     <span class="header-separator"> / </span>
                     <a href=href class="header-link">{ t.to_string() }</a>
-                }.into_any()
+                }
+                .into_any()
             }
         })
         .collect::<Vec<_>>();
-    links.insert(0, view! { <a href="/" class="header-link">Palantir</a> }.into_any());
+    links.insert(
+        0,
+        view! { <a href="/" class="header-link">Palantir</a> }.into_any(),
+    );
     view! {
         <div class="header"> { links } </div>
     }
 }
 
 #[component]
-pub fn SideNavBar(
-    show_dialog: RwSignal<bool>,
-) -> impl IntoView {
+pub fn SideNavBar(show_dialog: RwSignal<bool>) -> impl IntoView {
     let current_path = use_location().pathname.get_untracked();
 
     view! {
@@ -79,14 +81,10 @@ pub fn SideNavBar(
 pub fn SideNavBarEntry(
     name: &'static str,
     icon: &'static str,
-    #[prop(default = "solid")]
-    icon_type: &'static str,
-    #[prop(optional)]
-    url_prefix: &'static str,
-    #[prop(default = true)]
-    visible: bool,
-    #[prop(optional)]
-    action: Option<Box<dyn Fn() + Send + Sync + 'static>>,
+    #[prop(default = "solid")] icon_type: &'static str,
+    #[prop(optional)] url_prefix: &'static str,
+    #[prop(default = true)] visible: bool,
+    #[prop(optional)] action: Option<Box<dyn Fn() + Send + Sync + 'static>>,
 ) -> impl IntoView {
     let class = format!(
         "side-nav-bar-entry {}",
@@ -128,8 +126,7 @@ pub struct PageContentSlot {
 #[component]
 pub fn PageContent(
     page_content_slot: PageContentSlot,
-    #[prop(optional)]
-    additional_classes: &'static str,
+    #[prop(optional)] additional_classes: &'static str,
 ) -> impl IntoView {
     let show_dialog = RwSignal::new(false);
 

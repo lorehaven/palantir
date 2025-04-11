@@ -1,24 +1,19 @@
+use api::workloads::configmaps as configmaps_api;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use crate::components::shared::data::resource_info_view;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
-use api::workloads::configmaps as configmaps_api;
 
 #[component]
-pub fn ConfigMapDataComponent(
-    namespace_name: String,
-    configmap_name: String,
-) -> impl IntoView {
+pub fn ConfigMapDataComponent(namespace_name: String, configmap_name: String) -> impl IntoView {
     let namespace_name = RwSignal::new(namespace_name);
     let configmap_name = RwSignal::new(configmap_name);
     let configmap_data = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(60_000, move || update_page(
-        namespace_name,
-        configmap_name,
-        configmap_data,
-    ));
+    let interval_handle = update_page_effect(60_000, move || {
+        update_page(namespace_name, configmap_name, configmap_data)
+    });
     clear_page_effect(interval_handle);
 
     resource_info_view(configmap_data)
@@ -29,17 +24,31 @@ fn update_page(
     configmap_name: RwSignal<String>,
     configmap_data: RwSignal<Vec<(String, String)>>,
 ) {
-    if namespace_name.is_disposed() || configmap_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || configmap_name.is_disposed() {
+        return;
+    }
     let namespace_name = namespace_name.get();
     let configmap_name = configmap_name.get();
 
     spawn_local(async move {
-        let selected_value = if namespace_name == "All Namespaces" { None } else { Some(namespace_name) };
-        let configmap = configmaps_api::get_configmaps(selected_value).await.unwrap_or_default()
+        let selected_value = if namespace_name == "All Namespaces" {
+            None
+        } else {
+            Some(namespace_name)
+        };
+        let configmap = configmaps_api::get_configmaps(selected_value)
+            .await
+            .unwrap_or_default()
             .into_iter()
             .find(|n| n.metadata.name == configmap_name)
             .unwrap_or_default();
 
-        configmap_data.set(configmap.data.into_iter().map(|(k, v)| (k, v.replace('\n', " "))).collect());
+        configmap_data.set(
+            configmap
+                .data
+                .into_iter()
+                .map(|(k, v)| (k, v.replace('\n', " ")))
+                .collect(),
+        );
     });
 }

@@ -1,18 +1,22 @@
+use domain::account::roles::{BaseRole, ClusterRole, Role};
+#[allow(unused_imports)]
+use domain::shared::response::Response;
 use leptos::prelude::ServerFnError;
 use leptos::server;
 
 #[allow(unused_imports)]
 use crate::utils::{kube_api_request, ApiType};
-use domain::account::roles::{BaseRole, ClusterRole, Role};
-#[allow(unused_imports)]
-use domain::shared::response::Response;
 
 pub async fn get_all_roles() -> Vec<Box<dyn BaseRole>> {
     let mut all_roles = vec![];
-    let roles = get_roles(None).await.unwrap_or_default()
+    let roles = get_roles(None)
+        .await
+        .unwrap_or_default()
         .into_iter()
         .map(|d| Box::new(d) as Box<dyn BaseRole>);
-    let clusterroles = get_clusterroles().await.unwrap_or_default()
+    let clusterroles = get_clusterroles()
+        .await
+        .unwrap_or_default()
         .into_iter()
         .map(|d| Box::new(d) as Box<dyn BaseRole>);
     all_roles.extend(roles);
@@ -23,9 +27,14 @@ pub async fn get_all_roles() -> Vec<Box<dyn BaseRole>> {
 #[server(GetRoles, "/api/accounts/roles")]
 pub async fn get_roles(namespace_name: Option<String>) -> Result<Vec<Role>, ServerFnError> {
     let response = kube_api_request(ApiType::Rbac, "roles".to_string()).await?;
-    let items = serde_json::from_str::<Response<Role>>(&response)?.items
+    let items = serde_json::from_str::<Response<Role>>(&response)?
+        .items
         .into_iter()
-        .filter(|f| f.metadata.namespace.contains(&namespace_name.clone().unwrap_or_default()))
+        .filter(|f| {
+            f.metadata
+                .namespace
+                .contains(&namespace_name.clone().unwrap_or_default())
+        })
         .collect();
     Ok(items)
 }

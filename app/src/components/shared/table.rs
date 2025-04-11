@@ -7,9 +7,11 @@ pub fn TableComponent(
     styles: Vec<&'static str>,
     params: Vec<impl Into<String> + ToString + Clone + Send + Sync + 'static>,
 ) -> impl IntoView {
-    let grid_template_columns = columns.iter()
+    let grid_template_columns = columns
+        .iter()
         .map(|column| format!("{}fr", column.width))
-        .collect::<Vec<String>>().join(" ");
+        .collect::<Vec<String>>()
+        .join(" ");
 
     view! {
         <div class="table-header" style=format!("grid-template-columns: {grid_template_columns};")>
@@ -74,7 +76,11 @@ pub struct TableColumn {
 
 impl TableColumn {
     pub fn new(header: &'static str, r#type: TableColumnType, width: usize) -> Self {
-        Self { header: header.to_string(), r#type, width, }
+        Self {
+            header: header.to_string(),
+            r#type,
+            width,
+        }
     }
 }
 

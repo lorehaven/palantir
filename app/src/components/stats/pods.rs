@@ -1,22 +1,19 @@
+use api::metrics as metrics_api;
+use api::workloads::pods as pods_api;
+use domain::cluster::pod::Pod;
+use domain::metrics::PodMetrics;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use crate::components::prelude::*;
 use crate::components::stats::shared::{get_pods_cpu, get_pods_memory};
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
-use api::metrics as metrics_api;
-use api::workloads::pods as pods_api;
-use domain::cluster::pod::Pod;
-use domain::metrics::PodMetrics;
 
 #[component]
 pub fn PodsStatComponent(
-    #[prop(default = None)]
-    namespace_name: Option<String>,
-    #[prop(default = None)]
-    node_name: Option<String>,
-    #[prop(default = true)]
-    expandable: bool,
+    #[prop(default = None)] namespace_name: Option<String>,
+    #[prop(default = None)] node_name: Option<String>,
+    #[prop(default = true)] expandable: bool,
 ) -> impl IntoView {
     let namespace_name = RwSignal::new(namespace_name);
     let node_name = RwSignal::new(node_name);
@@ -26,13 +23,16 @@ pub fn PodsStatComponent(
     let pods_memory_labels = RwSignal::new((String::new(), String::new()));
     let expandable = RwSignal::new(expandable);
 
-    let interval_handle = update_page_effect(10_000, move || update_page(
-        namespace_name,
-        node_name,
-        pods_ready,
-        pods_cpu,
-        pods_memory_values,
-        pods_memory_labels,));
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(
+            namespace_name,
+            node_name,
+            pods_ready,
+            pods_cpu,
+            pods_memory_values,
+            pods_memory_labels,
+        )
+    });
     clear_page_effect(interval_handle);
 
     view(
@@ -40,7 +40,8 @@ pub fn PodsStatComponent(
         pods_cpu,
         pods_memory_values,
         pods_memory_labels,
-        expandable,)
+        expandable,
+    )
 }
 
 fn update_page(
@@ -51,15 +52,23 @@ fn update_page(
     pods_memory_values: RwSignal<(f64, f64)>,
     pods_memory_labels: RwSignal<(String, String)>,
 ) {
-    if namespace_name.is_disposed() || node_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || node_name.is_disposed() {
+        return;
+    }
     let namespace_name = namespace_name.get();
     let node_name = node_name.get();
 
-
     spawn_local(async move {
-        let pods = pods_api::get_pods(namespace_name, node_name).await.unwrap_or_default();
-        let pod_names = pods.iter().map(|p| p.metadata.name.clone()).collect::<Vec<String>>();
-        let pods_metrics = metrics_api::get_pods().await.unwrap_or_default()
+        let pods = pods_api::get_pods(namespace_name, node_name)
+            .await
+            .unwrap_or_default();
+        let pod_names = pods
+            .iter()
+            .map(|p| p.metadata.name.clone())
+            .collect::<Vec<String>>();
+        let pods_metrics = metrics_api::get_pods()
+            .await
+            .unwrap_or_default()
             .into_iter()
             .filter(|pm| pod_names.contains(&pm.metadata.name))
             .collect::<Vec<PodMetrics>>();
@@ -131,8 +140,14 @@ fn view_internal(
 
 fn get_pods_ready(pods: &[Pod]) -> (f64, f64) {
     let pcount = pods.len();
-    let pready = pods.iter()
-        .filter(|s| s.status.conditions.iter().any(|c| c.r#type == "Ready" && c.status == "True"))
+    let pready = pods
+        .iter()
+        .filter(|s| {
+            s.status
+                .conditions
+                .iter()
+                .any(|c| c.r#type == "Ready" && c.status == "True")
+        })
         .count();
     (pcount as f64, pready as f64)
 }

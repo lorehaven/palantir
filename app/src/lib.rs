@@ -24,7 +24,7 @@
 
 mod pages;
 
-pub mod shell;
-pub mod web_app;
 pub mod components;
+pub mod shell;
 pub mod utils;
+pub mod web_app;

@@ -8,8 +8,16 @@ pub fn CardCircle(
     #[prop(default = (String::new(), String::new()))] value_labels: (String, String),
     #[prop(default = true)] decimal: bool,
 ) -> impl IntoView {
-    let used_format = if decimal { format!("{:.0}", values.1) } else { format!("{:.2}", values.1) };
-    let total_format = if decimal { format!("{:.0}", values.0) } else { format!("{:.2}", values.0) };
+    let used_format = if decimal {
+        format!("{:.0}", values.1)
+    } else {
+        format!("{:.2}", values.1)
+    };
+    let total_format = if decimal {
+        format!("{:.0}", values.0)
+    } else {
+        format!("{:.2}", values.0)
+    };
 
     view! {
         <div class="card-circle">

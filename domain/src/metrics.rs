@@ -1,5 +1,6 @@
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub struct NodeMetrics {
@@ -11,7 +12,11 @@ pub struct NodeMetrics {
 
 impl NodeMetrics {
     pub fn get_node_name(&self) -> String {
-        self.metadata.labels.get("kubernetes.io/hostname").unwrap().to_string()
+        self.metadata
+            .labels
+            .get("kubernetes.io/hostname")
+            .unwrap()
+            .to_string()
     }
 }
 

@@ -1,11 +1,11 @@
+#[allow(unused_imports)]
+use domain::shared::response::Response;
+use domain::storage::volume::PersistentVolume;
 use leptos::prelude::ServerFnError;
 use leptos::server;
 
 #[allow(unused_imports)]
 use crate::utils::{kube_api_request, ApiType};
-#[allow(unused_imports)]
-use domain::shared::response::Response;
-use domain::storage::volume::PersistentVolume;
 
 #[server(GetVolumes, "/api/storage/volumes")]
 pub async fn get_volumes() -> Result<Vec<PersistentVolume>, ServerFnError> {

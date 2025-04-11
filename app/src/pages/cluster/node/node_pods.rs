@@ -1,19 +1,17 @@
+use api::metrics as metrics_api;
+use api::workloads::pods as pods_api;
+use domain::cluster::pod::Pod;
+use domain::metrics::PodMetrics;
+use domain::utils::time::time_until_now;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::utils::stats::{convert_memory, parse_memory, parse_pod_cpu};
-use api::metrics as metrics_api;
-use api::workloads::pods as pods_api;
-use domain::cluster::pod::Pod;
-use domain::metrics::PodMetrics;
-use domain::utils::time::time_until_now;
 
 #[component]
-pub fn NodePodsComponent(
-    node_name: String,
-) -> impl IntoView {
+pub fn NodePodsComponent(node_name: String) -> impl IntoView {
     let node_name = RwSignal::new(node_name);
     let pods = RwSignal::new(vec![]);
 
@@ -39,26 +37,33 @@ pub fn NodePodsComponent(
     data_list_view(columns, pods, styles, params)
 }
 
-fn update_page(
-    node_name: RwSignal<String>,
-    pods: RwSignal<Vec<Vec<String>>>,
-) {
-    if node_name.is_disposed() { return; }
+fn update_page(node_name: RwSignal<String>, pods: RwSignal<Vec<Vec<String>>>) {
+    if node_name.is_disposed() {
+        return;
+    }
     let node_name = node_name.get();
 
     spawn_local(async move {
-        let mut pods_data = pods_api::get_pods(None, Some(node_name)).await
+        let mut pods_data = pods_api::get_pods(None, Some(node_name))
+            .await
             .unwrap_or_default();
         pods_data.sort_by(|a, b| a.metadata.name.cmp(&b.metadata.name));
-        let pod_names = pods_data.iter().map(|p| p.metadata.name.clone()).collect::<Vec<String>>();
-        let pods_metrics = metrics_api::get_pods().await.unwrap_or_default()
+        let pod_names = pods_data
+            .iter()
+            .map(|p| p.metadata.name.clone())
+            .collect::<Vec<String>>();
+        let pods_metrics = metrics_api::get_pods()
+            .await
+            .unwrap_or_default()
             .into_iter()
             .filter(|pm| pod_names.contains(&pm.metadata.name))
             .collect::<Vec<PodMetrics>>();
 
         let mut pods_vec = vec![];
         for pod in pods_data {
-            let metrics = pods_metrics.clone().into_iter()
+            let metrics = pods_metrics
+                .clone()
+                .into_iter()
                 .find(|p| p.metadata.name == pod.metadata.name)
                 .unwrap_or_default();
 
@@ -67,7 +72,13 @@ fn update_page(
                 pod.clone().metadata.name,
                 pod.clone().metadata.namespace,
                 time_until_now(&pod.clone().metadata.creation_timestamp.unwrap_or_default()),
-                pod.clone().status.container_statuses.iter().map(|c| c.restart_count).sum::<i32>().to_string(),
+                pod.clone()
+                    .status
+                    .container_statuses
+                    .iter()
+                    .map(|c| c.restart_count)
+                    .sum::<i32>()
+                    .to_string(),
                 pod_cpu_actual(&metrics),
                 pod_cpu_request(&pod, &metrics),
                 pod_cpu_limit(&pod, &metrics),
@@ -82,64 +93,106 @@ fn update_page(
 
 fn pod_cpu_actual(metrics: &PodMetrics) -> String {
     let usage = parse_pod_cpu_actual_f64(metrics);
-    if usage == 0. { "0m".to_string() }
-    else { format!("{:.2}m", parse_pod_cpu_actual_f64(metrics) / 1_000_000.) }
+    if usage == 0. {
+        "0m".to_string()
+    } else {
+        format!("{:.2}m", parse_pod_cpu_actual_f64(metrics) / 1_000_000.)
+    }
 }
 
 fn pod_cpu_request(pod: &Pod, metrics: &PodMetrics) -> String {
-    let request = pod.spec.containers.iter()
+    let request = pod
+        .spec
+        .containers
+        .iter()
         .fold(0., |acc, c| acc + parse_pod_cpu(&c.resources.requests.cpu));
     let usage = parse_pod_cpu_actual_f64(metrics);
-    let usage_percentage =
-        if request == 0. { "-".to_string() }
-        else { format!("{:.2}%", usage / 10_000_000. / request) };
+    let usage_percentage = if request == 0. {
+        "-".to_string()
+    } else {
+        format!("{:.2}%", usage / 10_000_000. / request)
+    };
     format!("{usage_percentage}\n{}m", request * 1000.)
 }
 
 fn pod_cpu_limit(pod: &Pod, metrics: &PodMetrics) -> String {
-    let request = pod.spec.containers.iter()
+    let request = pod
+        .spec
+        .containers
+        .iter()
         .fold(0., |acc, c| acc + parse_pod_cpu(&c.resources.limits.cpu));
     let usage = parse_pod_cpu_actual_f64(metrics);
-    if request == 0. { "-".to_string() }
-    else { format!("{:.2}%\n{}m", usage / 10_000_000. / request, request * 1000.) }
+    if request == 0. {
+        "-".to_string()
+    } else {
+        format!(
+            "{:.2}%\n{}m",
+            usage / 10_000_000. / request,
+            request * 1000.
+        )
+    }
 }
 
 fn parse_pod_cpu_actual_f64(metrics: &PodMetrics) -> f64 {
-    metrics
-        .containers.iter()
-        .fold(0., |acc, c| acc + c.usage.cpu.trim_end_matches('n').parse::<f64>().unwrap_or(0.))
+    metrics.containers.iter().fold(0., |acc, c| {
+        acc + c
+            .usage
+            .cpu
+            .trim_end_matches('n')
+            .parse::<f64>()
+            .unwrap_or(0.)
+    })
 }
 
 fn pod_memory_actual(metrics: &PodMetrics) -> String {
     let (value, suffix) = convert_memory(parse_pod_memory_actual_f64(metrics));
-    if value == 0. { "0Bi".to_string() }
-    else { format!("{value:.2}{suffix}") }
+    if value == 0. {
+        "0Bi".to_string()
+    } else {
+        format!("{value:.2}{suffix}")
+    }
 }
 
 fn pod_memory_request(pod: &Pod, metrics: &PodMetrics) -> String {
-    let request = pod.spec.containers.iter()
+    let request = pod
+        .spec
+        .containers
+        .iter()
         .filter(|c| !c.resources.requests.memory.is_empty())
-        .fold(0., |acc, c| acc + parse_memory(&c.resources.requests.memory).unwrap_or_default());
+        .fold(0., |acc, c| {
+            acc + parse_memory(&c.resources.requests.memory).unwrap_or_default()
+        });
     let actual = parse_pod_memory_actual_f64(metrics);
     let request_percentage = actual / request * 100.;
     let (request, suffix) = convert_memory(request);
-    if request == 0. { "-".to_string() }
-    else { format!("{request_percentage:.2}%\n{request}{suffix}") }
+    if request == 0. {
+        "-".to_string()
+    } else {
+        format!("{request_percentage:.2}%\n{request}{suffix}")
+    }
 }
 
 fn pod_memory_limit(pod: &Pod, metrics: &PodMetrics) -> String {
-    let limit = pod.spec.containers.iter()
+    let limit = pod
+        .spec
+        .containers
+        .iter()
         .filter(|c| !c.resources.limits.memory.is_empty())
-        .fold(0., |acc, c| acc + parse_memory(&c.resources.limits.memory).unwrap_or_default());
+        .fold(0., |acc, c| {
+            acc + parse_memory(&c.resources.limits.memory).unwrap_or_default()
+        });
     let actual = parse_pod_memory_actual_f64(metrics);
     let limit_percentage = actual / limit * 100.;
     let (limit, suffix) = convert_memory(limit);
-    if limit == 0. { "-".to_string() }
-    else { format!("{limit_percentage:.2}%\n{limit}{suffix}") }
+    if limit == 0. {
+        "-".to_string()
+    } else {
+        format!("{limit_percentage:.2}%\n{limit}{suffix}")
+    }
 }
 
 fn parse_pod_memory_actual_f64(metrics: &PodMetrics) -> f64 {
-    metrics
-        .containers.iter()
-        .fold(0., |acc, c| acc + parse_memory(&c.usage.memory).unwrap_or_default())
+    metrics.containers.iter().fold(0., |acc, c| {
+        acc + parse_memory(&c.usage.memory).unwrap_or_default()
+    })
 }

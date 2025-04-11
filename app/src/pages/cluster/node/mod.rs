@@ -15,10 +15,16 @@ mod node_pods;
 #[component]
 pub fn ClusterNodePage() -> impl IntoView {
     let params = use_params_map();
-    let node_name = params.with_untracked(|p| p.get("name"))
+    let node_name = params
+        .with_untracked(|p| p.get("name"))
         .into_iter()
-        .collect::<Vec<_>>().join("-");
-    let page_title = vec!["Cluster".to_string(), "Nodes".to_string(), node_name.clone()];
+        .collect::<Vec<_>>()
+        .join("-");
+    let page_title = vec![
+        "Cluster".to_string(),
+        "Nodes".to_string(),
+        node_name.clone(),
+    ];
 
     view! {
         <Header text=page_title />

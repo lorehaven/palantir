@@ -1,21 +1,19 @@
+use api::cluster::nodes as nodes_api;
+use api::metrics as metrics_api;
+use domain::cluster::node::Node;
+use domain::metrics::NodeMetrics;
+use domain::utils::time::time_until_now;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::utils::stats::convert_memory;
-use api::cluster::nodes as nodes_api;
-use api::metrics as metrics_api;
-use domain::cluster::node::Node;
-use domain::metrics::NodeMetrics;
-use domain::utils::time::time_until_now;
 
 #[component]
 pub fn NodesStatComponent(
-    #[prop(default = None)]
-    node_name: Option<String>,
-    #[prop(default = true)]
-    expandable: bool,
+    #[prop(default = None)] node_name: Option<String>,
+    #[prop(default = true)] expandable: bool,
 ) -> impl IntoView {
     let node_name = RwSignal::new(node_name);
     let nodes_age = RwSignal::new(String::new());
@@ -25,13 +23,16 @@ pub fn NodesStatComponent(
     let nodes_memory_labels = RwSignal::new((String::new(), String::new()));
     let expandable = RwSignal::new(expandable);
 
-    let interval_handle = update_page_effect(10_000, move || update_page(
-        node_name,
-        nodes_age,
-        nodes_ready,
-        nodes_cpu,
-        nodes_memory_values,
-        nodes_memory_labels,));
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(
+            node_name,
+            nodes_age,
+            nodes_ready,
+            nodes_cpu,
+            nodes_memory_values,
+            nodes_memory_labels,
+        )
+    });
     clear_page_effect(interval_handle);
 
     view(
@@ -41,7 +42,8 @@ pub fn NodesStatComponent(
         nodes_cpu,
         nodes_memory_values,
         nodes_memory_labels,
-        expandable,)
+        expandable,
+    )
 }
 
 fn update_page(
@@ -52,17 +54,27 @@ fn update_page(
     nodes_memory_values: RwSignal<(f64, f64)>,
     nodes_memory_labels: RwSignal<(String, String)>,
 ) {
-    if node_name.is_disposed() { return; }
+    if node_name.is_disposed() {
+        return;
+    }
     let node_name = node_name.get();
 
     spawn_local(async move {
         let nodes = nodes_api::get_nodes_filtered(node_name).await;
-        let nodes_metrics = metrics_api::get_nodes().await.unwrap_or_default()
+        let nodes_metrics = metrics_api::get_nodes()
+            .await
+            .unwrap_or_default()
             .into_iter()
             .filter(|n| nodes.iter().any(|s| s.metadata.name == n.metadata.name))
             .collect::<Vec<NodeMetrics>>();
 
-        nodes_age.set(time_until_now(&nodes.iter().map(|n| n.clone().metadata.creation_timestamp.unwrap_or_default()).min().unwrap_or_default()));
+        nodes_age.set(time_until_now(
+            &nodes
+                .iter()
+                .map(|n| n.clone().metadata.creation_timestamp.unwrap_or_default())
+                .min()
+                .unwrap_or_default(),
+        ));
         nodes_ready.set(get_nodes_ready(&nodes));
         nodes_cpu.set(get_nodes_cpu(&nodes, &nodes_metrics));
         let nodes_memory = get_nodes_memory(&nodes, &nodes_metrics);
@@ -146,23 +158,41 @@ fn view_internal(
     }
 }
 
-
 fn get_nodes_ready(nodes: &[Node]) -> (f64, f64) {
     let ncount = nodes.len();
-    let nready = nodes.iter()
-        .filter(|s| s.status.conditions.iter().any(|c| c.r#type == "Ready" && c.status == "True"))
+    let nready = nodes
+        .iter()
+        .filter(|s| {
+            s.status
+                .conditions
+                .iter()
+                .any(|c| c.r#type == "Ready" && c.status == "True")
+        })
         .count();
     (ncount as f64, nready as f64)
 }
 
 fn get_nodes_cpu(nodes: &[Node], metrics: &[NodeMetrics]) -> (f64, f64) {
-    let ncap = nodes.iter().fold(0., |acc, node| acc + node.status.capacity.cpu.parse::<f64>().unwrap_or(0.));
-    let nuse = metrics.iter().fold(0., |acc, node| acc + node.usage.cpu.trim_end_matches('n').parse::<f64>().unwrap_or(0.));
+    let ncap = nodes.iter().fold(0., |acc, node| {
+        acc + node.status.capacity.cpu.parse::<f64>().unwrap_or(0.)
+    });
+    let nuse = metrics.iter().fold(0., |acc, node| {
+        acc + node
+            .usage
+            .cpu
+            .trim_end_matches('n')
+            .parse::<f64>()
+            .unwrap_or(0.)
+    });
     (ncap, nuse / 1_000_000_000.)
 }
 
 fn get_nodes_memory(nodes: &[Node], metrics: &[NodeMetrics]) -> ((f64, f64), (String, String)) {
-    let ncap = convert_memory(nodes.iter().fold(0., |acc, node| acc + crate::utils::stats::parse_memory(&node.status.capacity.memory).unwrap_or(0.)));
-    let nuse = convert_memory(metrics.iter().fold(0., |acc, node| acc + crate::utils::stats::parse_memory(&node.usage.memory).unwrap_or(0.)));
+    let ncap = convert_memory(nodes.iter().fold(0., |acc, node| {
+        acc + crate::utils::stats::parse_memory(&node.status.capacity.memory).unwrap_or(0.)
+    }));
+    let nuse = convert_memory(metrics.iter().fold(0., |acc, node| {
+        acc + crate::utils::stats::parse_memory(&node.usage.memory).unwrap_or(0.)
+    }));
     ((ncap.0, nuse.0), (ncap.1, nuse.1))
 }

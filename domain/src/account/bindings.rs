@@ -74,7 +74,9 @@ macro_rules! impl_base_binding {
                     r#type: $kind.to_string(),
                     name: self.metadata.name.clone(),
                     namespace,
-                    age: time_until_now(&self.metadata.creation_timestamp.clone().unwrap_or_default()),
+                    age: time_until_now(
+                        &self.metadata.creation_timestamp.clone().unwrap_or_default(),
+                    ),
                 }
             }
         }

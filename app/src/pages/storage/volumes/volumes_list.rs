@@ -1,14 +1,12 @@
+use api::storage::volumes as volumes_api;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use api::storage::volumes as volumes_api;
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
-pub fn VolumesListComponent(
-    prompt: RwSignal<String>,
-) -> impl IntoView {
+pub fn VolumesListComponent(prompt: RwSignal<String>) -> impl IntoView {
     let volumes = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(10_000, move || update_page(volumes, prompt));
@@ -26,25 +24,33 @@ pub fn VolumesListComponent(
     data_list_view(columns, volumes, styles, params)
 }
 
-fn update_page(
-    volumes: RwSignal<Vec<Vec<String>>>,
-    prompt: RwSignal<String>,
-) {
-    if prompt.is_disposed() { return; }
+fn update_page(volumes: RwSignal<Vec<Vec<String>>>, prompt: RwSignal<String>) {
+    if prompt.is_disposed() {
+        return;
+    }
     let prompt_value = prompt.get();
 
     spawn_local(async move {
         let volumes_data = volumes_api::get_volumes().await.unwrap_or_default();
 
-        volumes.set(volumes_data
-            .into_iter()
-            .filter(|n| n.metadata.name.to_lowercase().contains(&prompt_value.to_lowercase()))
-            .map(|n| vec![
-                "PersistentVolume".to_string(),
-                n.clone().metadata.name,
-                n.status.phase,
-                n.spec.capacity.storage,
-            ])
-            .collect());
+        volumes.set(
+            volumes_data
+                .into_iter()
+                .filter(|n| {
+                    n.metadata
+                        .name
+                        .to_lowercase()
+                        .contains(&prompt_value.to_lowercase())
+                })
+                .map(|n| {
+                    vec![
+                        "PersistentVolume".to_string(),
+                        n.clone().metadata.name,
+                        n.status.phase,
+                        n.spec.capacity.storage,
+                    ]
+                })
+                .collect(),
+        );
     });
 }

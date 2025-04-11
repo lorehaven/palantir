@@ -1,8 +1,8 @@
+use api::workloads::ingresses as ingresses_api;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use crate::components::prelude::*;
-use api::workloads::ingresses as ingresses_api;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
@@ -12,7 +12,8 @@ pub fn IngressesListComponent(
 ) -> impl IntoView {
     let ingresses = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(10_000, move || update_page(selected, prompt, ingresses));
+    let interval_handle =
+        update_page_effect(10_000, move || update_page(selected, prompt, ingresses));
     clear_page_effect(interval_handle);
 
     let columns = vec![
@@ -34,30 +35,48 @@ fn update_page(
     ingress_name: RwSignal<String>,
     ingresses: RwSignal<Vec<Vec<String>>>,
 ) {
-    if namespace_name.is_disposed() || ingress_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || ingress_name.is_disposed() {
+        return;
+    }
     let selected_value = namespace_name.get();
     let ingress_name = ingress_name.get();
 
     spawn_local(async move {
-        let selected_value = if selected_value == "All Namespaces" { None } else { Some(selected_value) };
-        let ingresses_data = ingresses_api::get_ingresses(selected_value).await.unwrap_or_default()
+        let selected_value = if selected_value == "All Namespaces" {
+            None
+        } else {
+            Some(selected_value)
+        };
+        let ingresses_data = ingresses_api::get_ingresses(selected_value)
+            .await
+            .unwrap_or_default()
             .into_iter()
             .filter(|i| i.metadata.name.contains(&ingress_name))
             .collect::<Vec<_>>();
 
         let mut ingresses_vec = vec![];
         for ingress in ingresses_data {
-            let hosts = ingress.clone()
-                .spec.rules.into_iter()
+            let hosts = ingress
+                .clone()
+                .spec
+                .rules
+                .into_iter()
                 .map(|r| r.host)
                 .collect::<Vec<_>>()
                 .join("\n");
-            let paths = ingress.clone()
-                .spec.rules.into_iter()
-                .map(|r| r.http.paths.into_iter()
-                    .map(|p| p.path)
-                    .collect::<Vec<_>>()
-                    .join("\n"))
+            let paths = ingress
+                .clone()
+                .spec
+                .rules
+                .into_iter()
+                .map(|r| {
+                    r.http
+                        .paths
+                        .into_iter()
+                        .map(|p| p.path)
+                        .collect::<Vec<_>>()
+                        .join("\n")
+                })
                 .collect::<Vec<_>>()
                 .join("\n");
 

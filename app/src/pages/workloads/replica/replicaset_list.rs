@@ -1,23 +1,25 @@
-use leptos::prelude::*;
-use leptos::task::spawn_local;
-
 use api::metrics as metrics_api;
 use api::workloads::pods as pods_api;
 use domain::metrics::PodMetrics;
+use leptos::prelude::*;
+use leptos::task::spawn_local;
+
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
-use crate::utils::stats::pod_stats::{pod_cpu_actual, pod_cpu_limit, pod_cpu_request, pod_memory_actual, pod_memory_limit, pod_memory_request};
+use crate::utils::stats::pod_stats::{
+    pod_cpu_actual, pod_cpu_limit, pod_cpu_request, pod_memory_actual, pod_memory_limit,
+    pod_memory_request,
+};
 
 #[component]
-pub fn ReplicaSetListComponent(
-    namespace_name: String,
-    replicaset_name: String,
-) -> impl IntoView {
+pub fn ReplicaSetListComponent(namespace_name: String, replicaset_name: String) -> impl IntoView {
     let namespace_name = RwSignal::new(namespace_name);
     let replicaset_name = RwSignal::new(replicaset_name);
     let replicas = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(10_000, move || update_page(namespace_name, replicaset_name, replicas));
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(namespace_name, replicaset_name, replicas)
+    });
     clear_page_effect(interval_handle);
 
     let columns = vec![
@@ -41,25 +43,40 @@ fn update_page(
     replicaset_name: RwSignal<String>,
     replicas: RwSignal<Vec<Vec<String>>>,
 ) {
-    if namespace_name.is_disposed() || replicaset_name.is_disposed() { return; }
+    if namespace_name.is_disposed() || replicaset_name.is_disposed() {
+        return;
+    }
     let selected_value = namespace_name.get();
     let replicaset_name = replicaset_name.get();
 
     spawn_local(async move {
-        let namespace_name = if selected_value.clone() == "All Namespaces" { None } else { Some(selected_value.clone()) };
-        let pods = pods_api::get_pods(namespace_name, None).await.unwrap_or_default()
+        let namespace_name = if selected_value.clone() == "All Namespaces" {
+            None
+        } else {
+            Some(selected_value.clone())
+        };
+        let pods = pods_api::get_pods(namespace_name, None)
+            .await
+            .unwrap_or_default()
             .into_iter()
             .filter(|p| p.metadata.name.contains(&replicaset_name))
             .collect::<Vec<_>>();
-        let pod_names = pods.iter().map(|p| p.metadata.name.clone()).collect::<Vec<String>>();
-        let pods_metrics = metrics_api::get_pods().await.unwrap_or_default()
+        let pod_names = pods
+            .iter()
+            .map(|p| p.metadata.name.clone())
+            .collect::<Vec<String>>();
+        let pods_metrics = metrics_api::get_pods()
+            .await
+            .unwrap_or_default()
             .into_iter()
             .filter(|pm| pod_names.contains(&pm.metadata.name))
             .collect::<Vec<PodMetrics>>();
 
         let mut pods_vec = vec![];
         for pod in pods {
-            let metrics = pods_metrics.clone().into_iter()
+            let metrics = pods_metrics
+                .clone()
+                .into_iter()
                 .find(|p| p.metadata.name == pod.metadata.name)
                 .unwrap_or_default();
 

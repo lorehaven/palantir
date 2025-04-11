@@ -96,9 +96,16 @@ pub enum NodeType {
 
 impl NodeType {
     pub fn from_node(node: &Node) -> Self {
-        if node.metadata.labels.get("node-role.kubernetes.io/control-plane") == Some(&"true".to_string()) {
+        if node
+            .metadata
+            .labels
+            .get("node-role.kubernetes.io/control-plane")
+            == Some(&"true".to_string())
+        {
             Self::ControlPlane
-        } else if node.metadata.labels.get("node-role.kubernetes.io/master") == Some(&"true".to_string()) {
+        } else if node.metadata.labels.get("node-role.kubernetes.io/master")
+            == Some(&"true".to_string())
+        {
             Self::Master
         } else {
             Self::Worker

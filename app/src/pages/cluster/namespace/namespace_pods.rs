@@ -1,17 +1,18 @@
+use api::metrics as metrics_api;
+use api::workloads::pods as pods_api;
+use domain::metrics::PodMetrics;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
-use crate::utils::stats::pod_stats::{pod_cpu_actual, pod_cpu_limit, pod_cpu_request, pod_memory_actual, pod_memory_limit, pod_memory_request};
-use api::metrics as metrics_api;
-use api::workloads::pods as pods_api;
-use domain::metrics::PodMetrics;
+use crate::utils::stats::pod_stats::{
+    pod_cpu_actual, pod_cpu_limit, pod_cpu_request, pod_memory_actual, pod_memory_limit,
+    pod_memory_request,
+};
 
 #[component]
-pub fn NamespacePodsComponent(
-    namespace_name: String,
-) -> impl IntoView {
+pub fn NamespacePodsComponent(namespace_name: String) -> impl IntoView {
     let namespace_name = RwSignal::new(namespace_name);
     let pods = RwSignal::new(vec![]);
 
@@ -34,27 +35,38 @@ pub fn NamespacePodsComponent(
     data_list_view(columns, pods, styles, params)
 }
 
-fn update_page(
-    namespace_name: RwSignal<String>,
-    pods: RwSignal<Vec<Vec<String>>>,
-) {
-    if namespace_name.is_disposed() { return; }
+fn update_page(namespace_name: RwSignal<String>, pods: RwSignal<Vec<Vec<String>>>) {
+    if namespace_name.is_disposed() {
+        return;
+    }
     let selected_value = namespace_name.get();
 
     spawn_local(async move {
-        let namespace_name = if selected_value.clone() == "All Namespaces" { None } else { Some(selected_value.clone()) };
-        let mut pods_data = pods_api::get_pods(namespace_name, None).await
+        let namespace_name = if selected_value.clone() == "All Namespaces" {
+            None
+        } else {
+            Some(selected_value.clone())
+        };
+        let mut pods_data = pods_api::get_pods(namespace_name, None)
+            .await
             .unwrap_or_default();
         pods_data.sort_by(|a, b| a.metadata.name.cmp(&b.metadata.name));
-        let pod_names = pods_data.iter().map(|p| p.metadata.name.clone()).collect::<Vec<String>>();
-        let pods_metrics = metrics_api::get_pods().await.unwrap_or_default()
+        let pod_names = pods_data
+            .iter()
+            .map(|p| p.metadata.name.clone())
+            .collect::<Vec<String>>();
+        let pods_metrics = metrics_api::get_pods()
+            .await
+            .unwrap_or_default()
             .into_iter()
             .filter(|pm| pod_names.contains(&pm.metadata.name))
             .collect::<Vec<PodMetrics>>();
 
         let mut pods_vec = vec![];
         for pod in pods_data {
-            let metrics = pods_metrics.clone().into_iter()
+            let metrics = pods_metrics
+                .clone()
+                .into_iter()
                 .find(|p| p.metadata.name == pod.metadata.name)
                 .unwrap_or_default();
 

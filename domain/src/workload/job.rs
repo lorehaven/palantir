@@ -51,7 +51,10 @@ pub struct Condition {
 
 impl Workload for Job {
     fn is_ready(&self) -> bool {
-        self.status.conditions.iter().any(|c| c.r#type == "Complete" && c.status == "True")
+        self.status
+            .conditions
+            .iter()
+            .any(|c| c.r#type == "Complete" && c.status == "True")
     }
 
     fn get_name(&self) -> String {

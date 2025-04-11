@@ -1,52 +1,43 @@
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, Link, Stylesheet, Title};
-use leptos_router::{components::{Route, Router, Routes}, path};
+use leptos_router::components::{Route, Router, Routes};
+use leptos_router::path;
 
-use crate::pages::{
-    accounts::{
-        binding::AccountsRoleBindingPage,
-        bindings::AccountsRoleBindingsPage,
-        clusterbinding::AccountsClusterRoleBindingPage,
-        clusterrole::AccountsClusterRolePage,
-        role::AccountsRolePage,
-        roles::AccountsRolesPage,
-        secret::AccountsSecretPage,
-        secrets::AccountsSecretsPage,
-        serviceaccount::ServiceAccountPage,
-        AccountsPage,
-    },
-    cluster::{
-        namespace::ClusterNamespacePage,
-        namespaces::ClusterNamespacesPage,
-        node::ClusterNodePage,
-        nodes::ClusterNodesPage,
-        ClusterPage,
-    },
-    dashboard::DashboardPage,
-    facade::FacadePage,
-    profile::ProfilePage,
-    storage::{
-        claim::StorageClaimPage,
-        claims::StorageClaimsPage,
-        storageclass::StorageClassPage,
-        volume::StorageVolumePage,
-        volumes::StorageVolumesPage,
-        StorageClassesPage,
-    },
-    workloads::{
-        configmap::WorkloadsConfigMapPage,
-        configmaps::WorkloadsConfigMapsPage,
-        ingress::WorkloadsIngressPage,
-        ingresses::WorkloadsIngressesPage,
-        pod::WorkloadsPodPage,
-        pods::WorkloadsPodsPage,
-        replica::WorkloadsReplicaSetPage,
-        replicas::WorkloadsReplicaSetsPage,
-        service::WorkloadsServicePage,
-        services::WorkloadsServicesPage,
-        WorkloadsPage,
-    },
-};
+use crate::pages::accounts::binding::AccountsRoleBindingPage;
+use crate::pages::accounts::bindings::AccountsRoleBindingsPage;
+use crate::pages::accounts::clusterbinding::AccountsClusterRoleBindingPage;
+use crate::pages::accounts::clusterrole::AccountsClusterRolePage;
+use crate::pages::accounts::role::AccountsRolePage;
+use crate::pages::accounts::roles::AccountsRolesPage;
+use crate::pages::accounts::secret::AccountsSecretPage;
+use crate::pages::accounts::secrets::AccountsSecretsPage;
+use crate::pages::accounts::serviceaccount::ServiceAccountPage;
+use crate::pages::accounts::AccountsPage;
+use crate::pages::cluster::namespace::ClusterNamespacePage;
+use crate::pages::cluster::namespaces::ClusterNamespacesPage;
+use crate::pages::cluster::node::ClusterNodePage;
+use crate::pages::cluster::nodes::ClusterNodesPage;
+use crate::pages::cluster::ClusterPage;
+use crate::pages::dashboard::DashboardPage;
+use crate::pages::facade::FacadePage;
+use crate::pages::profile::ProfilePage;
+use crate::pages::storage::claim::StorageClaimPage;
+use crate::pages::storage::claims::StorageClaimsPage;
+use crate::pages::storage::storageclass::StorageClassPage;
+use crate::pages::storage::volume::StorageVolumePage;
+use crate::pages::storage::volumes::StorageVolumesPage;
+use crate::pages::storage::StorageClassesPage;
+use crate::pages::workloads::configmap::WorkloadsConfigMapPage;
+use crate::pages::workloads::configmaps::WorkloadsConfigMapsPage;
+use crate::pages::workloads::ingress::WorkloadsIngressPage;
+use crate::pages::workloads::ingresses::WorkloadsIngressesPage;
+use crate::pages::workloads::pod::WorkloadsPodPage;
+use crate::pages::workloads::pods::WorkloadsPodsPage;
+use crate::pages::workloads::replica::WorkloadsReplicaSetPage;
+use crate::pages::workloads::replicas::WorkloadsReplicaSetsPage;
+use crate::pages::workloads::service::WorkloadsServicePage;
+use crate::pages::workloads::services::WorkloadsServicesPage;
+use crate::pages::workloads::WorkloadsPage;
 
 #[component]
 pub fn WebApp() -> impl IntoView {

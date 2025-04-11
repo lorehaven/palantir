@@ -1,2 +1,2 @@
-pub mod stats;
 pub mod shared;
+pub mod stats;

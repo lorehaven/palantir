@@ -3,9 +3,7 @@ use leptos::prelude::*;
 use crate::components::prelude::*;
 
 #[component]
-pub fn PromptFilter(
-    prompt: RwSignal<String>,
-) -> impl IntoView {
+pub fn PromptFilter(prompt: RwSignal<String>) -> impl IntoView {
     view! {
         <Wrapper>
             <WrapperSlot slot>

@@ -1,8 +1,8 @@
+use api::service_entries::get_service_entries;
+use domain::workload::service::ServiceEntry;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use api::service_entries::get_service_entries;
-use domain::workload::service::ServiceEntry;
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 

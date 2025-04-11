@@ -1,5 +1,6 @@
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+
+use serde::{Deserialize, Serialize};
 
 use crate::shared::metadata::Metadata;
 
@@ -68,7 +69,6 @@ pub struct Container {
     #[serde(rename = "imagePullPolicy")]
     pub image_pull_policy: String,
 }
-
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Port {
@@ -146,4 +146,3 @@ pub struct ContainerStatus {
     pub container_id: String,
     pub started: bool,
 }
-

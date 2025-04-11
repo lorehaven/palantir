@@ -3,19 +3,28 @@ use leptos_router::hooks::use_params_map;
 
 use crate::components::prelude::*;
 
-pub mod configmap_info;
 pub mod configmap_data;
+pub mod configmap_info;
 
 #[component]
 pub fn WorkloadsConfigMapPage() -> impl IntoView {
     let params = use_params_map();
-    let namespace_name = params.with_untracked(|p| p.get("namespace"))
+    let namespace_name = params
+        .with_untracked(|p| p.get("namespace"))
         .into_iter()
-        .collect::<Vec<_>>().join("-");
-    let configmap_name = params.with_untracked(|p| p.get("name"))
+        .collect::<Vec<_>>()
+        .join("-");
+    let configmap_name = params
+        .with_untracked(|p| p.get("name"))
         .into_iter()
-        .collect::<Vec<_>>().join("-");
-    let page_title = vec!["Workloads".to_string(), namespace_name.clone(), "ConfigMaps".to_string(), configmap_name.clone()];
+        .collect::<Vec<_>>()
+        .join("-");
+    let page_title = vec![
+        "Workloads".to_string(),
+        namespace_name.clone(),
+        "ConfigMaps".to_string(),
+        configmap_name.clone(),
+    ];
 
     view! {
         <Header text=page_title />

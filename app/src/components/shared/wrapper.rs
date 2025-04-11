@@ -7,8 +7,7 @@ pub struct WrapperSlot {
 
 #[component]
 pub fn Wrapper(
-    #[prop(default = "")]
-    label: &'static str,
+    #[prop(default = "")] label: &'static str,
     wrapper_slot: WrapperSlot,
 ) -> impl IntoView {
     view! {

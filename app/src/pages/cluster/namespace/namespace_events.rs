@@ -1,15 +1,13 @@
+use api::cluster::events as events_api;
+use domain::utils::time::time_until_now;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
-use api::cluster::events as events_api;
-use domain::utils::time::time_until_now;
 
 #[component]
-pub fn NamespaceEventsComponent(
-    namespace_name: String,
-) -> impl IntoView {
+pub fn NamespaceEventsComponent(namespace_name: String) -> impl IntoView {
     let namespace_name = RwSignal::new(namespace_name);
     let events = RwSignal::new(vec![]);
 
@@ -28,17 +26,26 @@ pub fn NamespaceEventsComponent(
     data_list_view(columns, events, styles, params)
 }
 
-fn update_page(
-    namespace_name: RwSignal<String>,
-    events: RwSignal<Vec<Vec<String>>>,
-) {
-    if namespace_name.is_disposed() { return; }
+fn update_page(namespace_name: RwSignal<String>, events: RwSignal<Vec<Vec<String>>>) {
+    if namespace_name.is_disposed() {
+        return;
+    }
     let selected_value = namespace_name.get();
 
     spawn_local(async move {
-        let selected_value = if selected_value == "All Namespaces" { None } else { Some(selected_value) };
-        let mut events_data = events_api::get_events(selected_value).await.unwrap_or_default();
-        events_data.sort_by(|a, b| a.metadata.creation_timestamp.cmp(&b.metadata.creation_timestamp));
+        let selected_value = if selected_value == "All Namespaces" {
+            None
+        } else {
+            Some(selected_value)
+        };
+        let mut events_data = events_api::get_events(selected_value)
+            .await
+            .unwrap_or_default();
+        events_data.sort_by(|a, b| {
+            a.metadata
+                .creation_timestamp
+                .cmp(&b.metadata.creation_timestamp)
+        });
 
         let mut events_vec = vec![];
         for event in events_data {

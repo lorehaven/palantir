@@ -1,9 +1,10 @@
-use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
-use crate::utils::shared::text::decode_jwt_token;
 use api::utils::get_api_token_wasm;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use serde_json::Value;
+
+use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
+use crate::utils::shared::text::decode_jwt_token;
 
 #[component]
 pub fn CurrentUserComponent() -> impl IntoView {
@@ -15,9 +16,7 @@ pub fn CurrentUserComponent() -> impl IntoView {
     view(token)
 }
 
-fn update_page(
-    token: RwSignal<String>,
-) {
+fn update_page(token: RwSignal<String>) {
     spawn_local(async move {
         let encoded = get_api_token_wasm().await.unwrap_or_default();
         let decoded = serde_json::from_str::<Value>(&decode_jwt_token(&encoded)).unwrap();
@@ -26,9 +25,7 @@ fn update_page(
     });
 }
 
-fn view(
-    token: RwSignal<String>,
-) -> impl IntoView {
+fn view(token: RwSignal<String>) -> impl IntoView {
     view! {
         <div class="card-container dcc-1">
             <div class="card-list">

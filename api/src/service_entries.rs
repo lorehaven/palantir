@@ -1,27 +1,36 @@
-#[allow(unused_imports)]
-use crate::utils::kube_api_request;
-#[allow(unused_imports)]
-use crate::utils::ApiType;
-#[allow(unused_imports)]
-use crate::workloads::pods::get_pods;
 use domain::cluster::pod::Pod;
 use domain::shared::response::Response;
 use domain::workload::service::{Service, ServiceEntry};
 use leptos::prelude::ServerFnError;
 use leptos::server;
 
+#[allow(unused_imports)]
+use crate::utils::kube_api_request;
+#[allow(unused_imports)]
+use crate::utils::ApiType;
+#[allow(unused_imports)]
+use crate::workloads::pods::get_pods;
+
 const NAME_LABEL: &str = "app.kubernetes.io/name";
 
 #[server(GetServiceEntries, "/api/services/entries")]
 pub async fn get_service_entries() -> Result<Vec<ServiceEntry>, ServerFnError> {
     let services = kube_api_request(ApiType::Api, "services".to_string()).await?;
-    Ok(parse_entries_response(&services, &get_pods(None, None).await?).await.unwrap_or_default())
+    Ok(
+        parse_entries_response(&services, &get_pods(None, None).await?)
+            .await
+            .unwrap_or_default(),
+    )
 }
 
 #[allow(dead_code)]
-async fn parse_entries_response(response: &str, pods: &[Pod]) -> Result<Vec<ServiceEntry>, Box<dyn std::error::Error>> {
+async fn parse_entries_response(
+    response: &str,
+    pods: &[Pod],
+) -> Result<Vec<ServiceEntry>, Box<dyn std::error::Error>> {
     let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
-    let server_dns_name = std::env::var("SERVER_DNS_NAME").unwrap_or_else(|_| "ossiriand.arda".to_string());
+    let server_dns_name =
+        std::env::var("SERVER_DNS_NAME").unwrap_or_else(|_| "ossiriand.arda".to_string());
 
     let mut services = serde_json::from_str::<Response<Service>>(response)?
         .items
@@ -41,11 +50,17 @@ async fn parse_entries_response(response: &str, pods: &[Pod]) -> Result<Vec<Serv
         })
         .collect::<Vec<ServiceEntry>>();
 
-    let additional_services_json = std::env::var("ADDITIONAL_SERVICES").unwrap_or_else(|_| "[]".to_string());
-    let mut additional_entries = serde_json::from_str::<Vec<ServiceEntry>>(&additional_services_json)?;
+    let additional_services_json =
+        std::env::var("ADDITIONAL_SERVICES").unwrap_or_else(|_| "[]".to_string());
+    let mut additional_entries =
+        serde_json::from_str::<Vec<ServiceEntry>>(&additional_services_json)?;
     for s in &mut additional_entries.iter_mut() {
-        if s.available { continue; }
-        s.available = reqwest::get(&s.url).await.is_ok_and(|r| r.status().is_success());
+        if s.available {
+            continue;
+        }
+        s.available = reqwest::get(&s.url)
+            .await
+            .is_ok_and(|r| r.status().is_success());
     }
 
     services.extend(additional_entries);
@@ -53,7 +68,10 @@ async fn parse_entries_response(response: &str, pods: &[Pod]) -> Result<Vec<Serv
     Ok(services
         .into_iter()
         .filter(|s| s.name.to_lowercase().contains("web ui"))
-        .map(|mut s| { s.name = s.name.replace(" Web UI", ""); s })
+        .map(|mut s| {
+            s.name = s.name.replace(" Web UI", "");
+            s
+        })
         .collect())
 }
 
@@ -63,9 +81,16 @@ fn format_service_name(service_name: &str) -> String {
         .split('-')
         .map(|word| {
             let mut chars = word.chars();
-            chars.next()
+            chars
+                .next()
                 .map(|first| format!("{}{}", first.to_uppercase(), chars.as_str()))
-                .map(|word| if word.to_lowercase().ends_with("ui") { format!("{}UI", &word[..word.len() - 2]) } else { word })
+                .map(|word| {
+                    if word.to_lowercase().ends_with("ui") {
+                        format!("{}UI", &word[..word.len() - 2])
+                    } else {
+                        word
+                    }
+                })
                 .unwrap_or_default()
         })
         .collect::<Vec<_>>()
@@ -74,7 +99,9 @@ fn format_service_name(service_name: &str) -> String {
 
 #[allow(dead_code)]
 fn get_service_selector(service: &Service) -> String {
-    service.metadata.labels
+    service
+        .metadata
+        .labels
         .get(NAME_LABEL)
         .cloned()
         .unwrap_or(String::new())
@@ -82,11 +109,8 @@ fn get_service_selector(service: &Service) -> String {
 
 #[allow(dead_code)]
 fn get_pod_by_label(pods: &[Pod], label: &str) -> Option<Pod> {
-    pods
-        .iter()
-        .find(|p| p.metadata.labels
-            .get(NAME_LABEL)
-            .unwrap_or(&String::new()) == label)
+    pods.iter()
+        .find(|p| p.metadata.labels.get(NAME_LABEL).unwrap_or(&String::new()) == label)
         .cloned()
 }
 

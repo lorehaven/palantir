@@ -53,4 +53,3 @@ impl Workload for ReplicaSet {
         }
     }
 }
-
