@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::api::apply as apply_api;
+use api::apply as apply_api;
 
 #[component]
 pub fn ApplyYamlDialog(

@@ -1,10 +1,10 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::api::cluster::events as events_api;
+use api::cluster::events as events_api;
 use crate::components::prelude::*;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
-use crate::pages::utils::shared::time::time_until_now;
+use domain::utils::time::time_until_now;
 
 #[component]
 pub fn EventsListComponent(

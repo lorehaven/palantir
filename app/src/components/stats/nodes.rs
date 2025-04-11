@@ -1,13 +1,13 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::api::cluster::nodes as nodes_api;
-use crate::api::metrics as metrics_api;
-use crate::domain::metrics::NodeMetrics;
-use crate::domain::cluster::node::Node;
+use api::cluster::nodes as nodes_api;
+use api::metrics as metrics_api;
+use domain::metrics::NodeMetrics;
+use domain::cluster::node::Node;
+use domain::utils::time::time_until_now;
 use crate::components::prelude::*;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
-use crate::pages::utils::shared::time::time_until_now;
 use crate::pages::utils::stats::convert_memory;
 
 #[component]

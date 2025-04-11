@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::api::workloads::ingresses as ingresses_api;
+use api::workloads::ingresses as ingresses_api;
 use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 

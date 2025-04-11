@@ -21,8 +21,6 @@
 #![allow(clippy::needless_pass_by_value)]
 #![cfg_attr(test, deny(rust_2018_idioms))]
 
-mod api;
-mod domain;
 mod pages;
 
 pub mod shell;

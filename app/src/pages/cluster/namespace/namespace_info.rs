@@ -1,11 +1,11 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::api::cluster::namespaces as namespaces_api;
 use crate::components::shared::info::resource_info_view;
 use crate::pages::utils::shared::display;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::time::format_timestamp;
+use api::cluster::namespaces as namespaces_api;
 
 #[component]
 pub fn NamespaceInfoComponent(

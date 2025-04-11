@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::api::accounts::bindings as bindings_api;
+use api::accounts::bindings as bindings_api;
 use crate::components::shared::info::resource_info_view;
 use crate::pages::utils::shared::display;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};

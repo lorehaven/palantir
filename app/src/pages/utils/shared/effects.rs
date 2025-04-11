@@ -1,6 +1,6 @@
+use leptos::prelude::*;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use leptos::prelude::*;
 
 pub fn update_page_effect<F>(timeout: u32, callback: F) -> Arc<Mutex<Option<IntervalHandle>>>
 where

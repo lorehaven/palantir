@@ -1,8 +1,8 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::api::metrics as metrics_api;
-use crate::api::workloads::pods as pods_api;
+use api::metrics as metrics_api;
+use api::workloads::pods as pods_api;
 use crate::components::prelude::*;
 use crate::components::stats::shared::{get_pods_cpu, get_pods_memory};
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};

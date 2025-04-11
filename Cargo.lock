@@ -60,23 +60,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dcfed56ad506cb2c684a14971b8861fdc3baaaae314b9e5f9bb532cbe3ba7a4f"
 
 [[package]]
-name = "app"
+name = "api"
 version = "0.1.0"
 dependencies = [
- "base64",
- "chrono",
- "js-sys",
+ "domain",
  "leptos",
- "leptos_axum",
- "leptos_meta",
- "leptos_router",
- "regex",
  "reqwest",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "app"
+version = "0.1.0"
+dependencies = [
+ "api",
+ "base64",
+ "chrono",
+ "domain",
+ "leptos",
+ "leptos_meta",
+ "leptos_router",
+ "regex",
+ "serde_json",
  "serde_yaml",
- "wasm-bindgen",
- "web-sys",
 ]
 
 [[package]]
@@ -432,6 +439,14 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "domain"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "serde",
 ]
 
 [[package]]

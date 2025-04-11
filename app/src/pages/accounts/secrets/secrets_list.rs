@@ -1,10 +1,10 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::api::accounts::secrets as secrets_api;
+use api::accounts::secrets as secrets_api;
 use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
-use crate::pages::utils::shared::time::time_until_now;
+use domain::utils::time::time_until_now;
 
 #[component]
 pub fn SecretsListComponent(

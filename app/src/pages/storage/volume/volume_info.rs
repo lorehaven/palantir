@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::api::storage::volumes as volumes_api;
+use api::storage::volumes as volumes_api;
 use crate::components::shared::info::resource_info_view;
 use crate::pages::utils::shared::display;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};

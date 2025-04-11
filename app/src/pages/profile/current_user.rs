@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use serde_json::Value;
-use crate::api::utils::get_api_token_wasm;
+use api::utils::get_api_token_wasm;
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::pages::utils::shared::text::decode_jwt_token;
 
