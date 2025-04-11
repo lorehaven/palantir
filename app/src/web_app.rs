@@ -36,10 +36,12 @@ use crate::pages::{
     accounts::{
         AccountsPage,
         serviceaccount::ServiceAccountPage,
-        clusterrole::ClusterRolePage,
-        role::RolePage,
+        clusterrole::AccountsClusterRolePage,
+        role::AccountsRolePage,
         roles::AccountsRolesPage,
-        bindings::AccountsBindingsPage,
+        clusterbinding::AccountsClusterRoleBindingPage,
+        binding::AccountsRoleBindingPage,
+        bindings::AccountsRoleBindingsPage,
         secrets::AccountsSecretsPage,
     },
     profile::ProfilePage,
@@ -85,9 +87,11 @@ pub fn WebApp() -> impl IntoView {
                     <Route path=path!("/accounts") view=AccountsPage />
                     <Route path=path!("/accounts/:namespace/serviceaccounts/:name") view=ServiceAccountPage />
                     <Route path=path!("/accounts/roles") view=AccountsRolesPage />
-                    <Route path=path!("/accounts/:namespace/roles/:name") view=RolePage />
-                    <Route path=path!("/accounts/clusterroles/:name") view=ClusterRolePage />
-                    <Route path=path!("/accounts/bindings") view=AccountsBindingsPage />
+                    <Route path=path!("/accounts/:namespace/roles/:name") view=AccountsRolePage />
+                    <Route path=path!("/accounts/clusterroles/:name") view=AccountsClusterRolePage />
+                    <Route path=path!("/accounts/bindings") view=AccountsRoleBindingsPage />
+                    <Route path=path!("/accounts/:namespace/rolebindings/:name") view=AccountsRoleBindingPage />
+                    <Route path=path!("/accounts/clusterrolebindings/:name") view=AccountsClusterRoleBindingPage />
                     <Route path=path!("/accounts/secrets") view=AccountsSecretsPage />
                     <Route path=path!("/profile") view=ProfilePage />
                 </Routes>

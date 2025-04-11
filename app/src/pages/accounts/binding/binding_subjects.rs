@@ -1,48 +1,45 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::api::accounts::roles as roles_api;
+use crate::api::accounts::bindings as bindings_api;
 use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
-pub fn RoleRulesComponent(
+pub fn RoleBindingSubjectsComponent(
     namespace_name: String,
-    role_name: String,
+    binding_name: String,
 ) -> impl IntoView {
     let namespace_name = RwSignal::new(namespace_name);
-    let role_name = RwSignal::new(role_name);
-    let role_data = RwSignal::new(vec![]);
+    let binding_name = RwSignal::new(binding_name);
+    let binding_data = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(60_000, move || update_page(namespace_name, role_name, role_data));
+    let interval_handle = update_page_effect(60_000, move || update_page(namespace_name, binding_name, binding_data));
     clear_page_effect(interval_handle);
-    view(role_data)
+    view(binding_data)
 }
 
 fn update_page(
     namespace_name: RwSignal<String>,
-    role_name: RwSignal<String>,
-    role_data: RwSignal<Vec<Vec<String>>>,
+    binding_name: RwSignal<String>,
+    binding_data: RwSignal<Vec<Vec<String>>>,
 ) {
-    if role_name.is_disposed() || namespace_name.is_disposed() { return; }
+    if binding_name.is_disposed() || namespace_name.is_disposed() { return; }
     let namespace_name = namespace_name.get();
-    let role_name = role_name.get();
+    let binding_name = binding_name.get();
 
     spawn_local(async move {
         let selected_value = if namespace_name == "All Namespaces" { None } else { Some(namespace_name) };
-        let role = roles_api::get_roles(selected_value).await
+        let binding = bindings_api::get_rolebindings(selected_value).await
             .unwrap_or_default()
-            .iter().find(|sc| sc.metadata.name == role_name)
+            .iter().find(|sc| sc.metadata.name == binding_name)
             .cloned()
             .unwrap_or_default();
 
-        role_data.set(role.rules
+        binding_data.set(binding.subjects
             .into_iter()
             .map(|r| vec![
-                r.api_groups.join("\n"),
-                r.resources.join("\n"),
-                r.verbs.join("\n"),
-                r.resource_names.join("\n"),
+                r.kind, r.name, r.namespace, r.api_group,
             ])
             .collect());
     });
@@ -52,10 +49,10 @@ fn view(
     resources: RwSignal<Vec<Vec<String>>>,
 ) -> impl IntoView {
     let columns = vec![
-        TableColumn::new("Groups", TableColumnType::StringList, 3),
-        TableColumn::new("Resources", TableColumnType::StringList, 3),
-        TableColumn::new("Verbs", TableColumnType::StringList, 3),
-        TableColumn::new("Names", TableColumnType::StringList, 3),
+        TableColumn::new("Type", TableColumnType::String, 3),
+        TableColumn::new("Name", TableColumnType::String, 3),
+        TableColumn::new("Namespace", TableColumnType::String, 3),
+        TableColumn::new("Api Group", TableColumnType::String, 3),
     ];
     let styles = vec![""; columns.len()];
     let params = vec![""; columns.len()];

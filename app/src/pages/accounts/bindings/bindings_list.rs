@@ -1,43 +1,43 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::api::accounts::roles as roles_api;
+use crate::api::accounts::bindings as bindings_api;
 use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
 use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
-pub fn RolesListComponent(
+pub fn BindingsListComponent(
     prompt: RwSignal<String>,
 ) -> impl IntoView {
-    let roles = RwSignal::new(vec![]);
+    let bindings = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(10_000, move || update_page(roles, prompt));
+    let interval_handle = update_page_effect(10_000, move || update_page(bindings, prompt));
     clear_page_effect(interval_handle);
-    view(roles)
+    view(bindings)
 }
 
 fn update_page(
-    roles: RwSignal<Vec<Vec<String>>>,
+    bindings: RwSignal<Vec<Vec<String>>>,
     prompt: RwSignal<String>,
 ) {
     if prompt.is_disposed() { return; }
     let prompt_value = prompt.get();
 
     spawn_local(async move {
-        let roles_list = roles_api::get_all_roles().await;
-        let mut list = roles_list.into_iter()
+        let bindings_list = bindings_api::get_all_bindings().await;
+        let mut list = bindings_list.into_iter()
             .filter(|r| r.get_name().to_lowercase().contains(&prompt_value.to_lowercase()))
             .map(|r| r.to_model())
             .map(|r| vec![
                 r.r#type, r.namespace, r.name, r.age,
             ]).collect::<Vec<_>>();
         list.sort_by(|a, b| a[2].cmp(&b[2]));
-        roles.set(list);
+        bindings.set(list);
     });
 }
 
 fn view(
-    roles: RwSignal<Vec<Vec<String>>>,
+    bindings: RwSignal<Vec<Vec<String>>>,
 ) -> impl IntoView {
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 2),
@@ -57,7 +57,7 @@ fn view(
                     <div class="card-table">
                         <TableComponent
                             columns=columns.clone()
-                            values=roles.get()
+                            values=bindings.get()
                             styles=styles.clone()
                             params=params.clone() />
                     </div>
