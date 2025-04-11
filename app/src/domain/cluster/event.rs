@@ -1,16 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::domain::shared::metadata::{Metadata, ResponseMetadata};
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct EventsResponse {
-    pub kind: String,
-    #[serde(default, rename = "apiVersion")]
-    pub api_version: String,
-    pub metadata: ResponseMetadata,
-    #[serde(default)]
-    pub items: Vec<Event>,
-}
+use crate::domain::shared::metadata::Metadata;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Event {

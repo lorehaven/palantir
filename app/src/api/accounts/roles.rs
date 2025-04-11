@@ -4,11 +4,8 @@ use leptos::server;
 #[allow(unused_imports)]
 use crate::api::utils::kube_api_rbac_request;
 #[allow(unused_imports)]
-use crate::domain::account::roles::{
-    BaseRole,
-    role::{Role, RolesResponse},
-    clusterrole::{ClusterRole, ClusterRolesResponse},
-};
+use crate::domain::shared::response::Response;
+use crate::domain::account::roles::{BaseRole, role::Role, clusterrole::ClusterRole};
 
 pub async fn get_all_roles() -> Vec<Box<dyn BaseRole>> {
     let mut all_roles = vec![];
@@ -26,7 +23,7 @@ pub async fn get_all_roles() -> Vec<Box<dyn BaseRole>> {
 #[server(GetRoles, "/api/accounts/roles")]
 pub async fn get_roles(namespace_name: Option<String>) -> Result<Vec<Role>, ServerFnError> {
     let response = kube_api_rbac_request("roles".to_string()).await?;
-    let items = serde_json::from_str::<RolesResponse>(&response)?.items
+    let items = serde_json::from_str::<Response<Role>>(&response)?.items
         .into_iter()
         .filter(|f| f.metadata.namespace.contains(&namespace_name.clone().unwrap_or_default()))
         .collect();
@@ -36,5 +33,5 @@ pub async fn get_roles(namespace_name: Option<String>) -> Result<Vec<Role>, Serv
 #[server(GetClusterRoles, "/api/accounts/clusterroles")]
 pub async fn get_clusterroles() -> Result<Vec<ClusterRole>, ServerFnError> {
     let response = kube_api_rbac_request("clusterroles".to_string()).await?;
-    Ok(serde_json::from_str::<ClusterRolesResponse>(&response)?.items)
+    Ok(serde_json::from_str::<Response<ClusterRole>>(&response)?.items)
 }

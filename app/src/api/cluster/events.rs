@@ -4,20 +4,17 @@ use leptos::server;
 #[allow(unused_imports)]
 use crate::api::utils::kube_api_request;
 #[allow(unused_imports)]
-use crate::domain::cluster::event::{Event, EventsResponse};
+use crate::domain::shared::response::Response;
+use crate::domain::cluster::event::Event;
 
 #[server(GetEvents, "/api/events")]
-pub async fn get_events() -> Result<Vec<Event>, ServerFnError> {
+pub async fn get_events(
+    namespace_name: Option<String>,
+) -> Result<Vec<Event>, ServerFnError> {
     let response = kube_api_request("events".to_string()).await?;
-    Ok(serde_json::from_str::<EventsResponse>(&response)?.items)
-}
-
-#[server(GetEventsByNamespaceName, "/api/events/by-namespace/:namespace_name")]
-pub async fn get_events_by_namespace_name(namespace_name: String) -> Result<Vec<Event>, ServerFnError> {
-    let response = kube_api_request("events".to_string()).await?;
-    let pods = serde_json::from_str::<EventsResponse>(&response)?.items
+    let items = serde_json::from_str::<Response<Event>>(&response)?.items
         .into_iter()
-        .filter(|e| e.metadata.namespace == namespace_name)
+        .filter(|f| f.metadata.namespace.contains(&namespace_name.clone().unwrap_or_default()))
         .collect();
-    Ok(pods)
+    Ok(items)
 }

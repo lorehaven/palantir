@@ -2,17 +2,8 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::domain::account::roles::{BaseRole, RoleModel};
-use crate::domain::shared::metadata::{Metadata, ResponseMetadata};
+use crate::domain::shared::metadata::Metadata;
 use crate::pages::utils::shared::time::time_until_now;
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct ClusterRolesResponse {
-    pub kind: String,
-    #[serde(rename = "apiVersion")]
-    pub api_version: String,
-    pub metadata: ResponseMetadata,
-    pub items: Vec<ClusterRole>,
-}
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct ClusterRole {

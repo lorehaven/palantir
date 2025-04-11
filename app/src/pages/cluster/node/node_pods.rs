@@ -31,7 +31,7 @@ fn update_page(
     let node_name = node_name.get();
 
     spawn_local(async move {
-        let mut pods_data = pods_api::get_pods_by_node_name(node_name).await
+        let mut pods_data = pods_api::get_pods(None, Some(node_name)).await
             .unwrap_or_default();
         pods_data.sort_by(|a, b| a.metadata.name.cmp(&b.metadata.name));
         let pod_names = pods_data.iter().map(|p| p.metadata.name.clone()).collect::<Vec<String>>();

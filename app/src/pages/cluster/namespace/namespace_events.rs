@@ -27,7 +27,8 @@ fn update_page(
     let selected_value = namespace_name.get();
 
     spawn_local(async move {
-        let mut events_data = events_api::get_events_by_namespace_name(selected_value).await.unwrap_or_default();
+        let selected_value = if selected_value == "All Namespaces" { None } else { Some(selected_value) };
+        let mut events_data = events_api::get_events(selected_value).await.unwrap_or_default();
         events_data.sort_by(|a, b| a.metadata.creation_timestamp.cmp(&b.metadata.creation_timestamp));
 
         let mut events_vec = vec![];

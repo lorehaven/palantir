@@ -32,7 +32,8 @@ fn update_page(
     let replicaset_name = replicaset_name.get();
 
     spawn_local(async move {
-        let pods = pods_api::get_pods_by_namespace_name(selected_value).await.unwrap_or_default()
+        let namespace_name = if selected_value.clone() == "All Namespaces" { None } else { Some(selected_value.clone()) };
+        let pods = pods_api::get_pods(namespace_name, None).await.unwrap_or_default()
             .into_iter()
             .filter(|p| p.metadata.name.contains(&replicaset_name))
             .collect::<Vec<_>>();

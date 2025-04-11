@@ -1,17 +1,8 @@
 use serde::{Deserialize, Serialize};
 
 use crate::domain::account::bindings::{BaseRoleBinding, RoleBindingModel};
-use crate::domain::shared::metadata::{Metadata, ResponseMetadata};
+use crate::domain::shared::metadata::Metadata;
 use crate::pages::utils::shared::time::time_until_now;
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct ClusterRoleBindingsResponse {
-    pub kind: String,
-    #[serde(rename = "apiVersion")]
-    pub api_version: String,
-    pub metadata: ResponseMetadata,
-    pub items: Vec<ClusterRoleBinding>,
-}
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct ClusterRoleBinding {

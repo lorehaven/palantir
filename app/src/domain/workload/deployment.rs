@@ -7,11 +7,6 @@ use crate::domain::workload::{Workload, WorkloadModel};
 use crate::pages::utils::shared::time::time_until_now;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct DeploymentsResponse {
-    pub items: Vec<Deployment>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Deployment {
     pub metadata: Metadata,
     pub spec: DeploymentSpec,

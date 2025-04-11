@@ -6,11 +6,6 @@ use crate::domain::workload::{Workload, WorkloadModel};
 use crate::pages::utils::shared::time::time_until_now;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct DaemonSetsResponse {
-    pub items: Vec<DaemonSet>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DaemonSet {
     pub metadata: Metadata,
     pub spec: DaemonSetSpec,

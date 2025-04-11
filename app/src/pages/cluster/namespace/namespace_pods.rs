@@ -29,7 +29,8 @@ fn update_page(
     let selected_value = namespace_name.get();
 
     spawn_local(async move {
-        let mut pods_data = pods_api::get_pods_by_namespace_name(selected_value).await
+        let namespace_name = if selected_value.clone() == "All Namespaces" { None } else { Some(selected_value.clone()) };
+        let mut pods_data = pods_api::get_pods(namespace_name, None).await
             .unwrap_or_default();
         pods_data.sort_by(|a, b| a.metadata.name.cmp(&b.metadata.name));
         let pod_names = pods_data.iter().map(|p| p.metadata.name.clone()).collect::<Vec<String>>();

@@ -1,15 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::domain::shared::metadata::{Metadata, ResponseMetadata};
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct PersistentVolumeClaimsResponse {
-    pub kind: String,
-    #[serde(rename = "apiVersion")]
-    pub api_version: String,
-    pub metadata: ResponseMetadata,
-    pub items: Vec<PersistentVolumeClaim>,
-}
+use crate::domain::shared::metadata::Metadata;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct PersistentVolumeClaim {

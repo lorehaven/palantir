@@ -40,7 +40,8 @@ fn update_page(
     let object_name = object_name.get();
 
     spawn_local(async move {
-        let mut events_data = events_api::get_events_by_namespace_name(namespace_name).await
+        let namespace_name = if namespace_name == "All Namespaces" { None } else { Some(namespace_name) };
+        let mut events_data = events_api::get_events(namespace_name).await
             .unwrap_or_default()
             .into_iter()
             .filter(|e| e.involved_object.kind == object_type && e.involved_object.name == object_name)

@@ -24,7 +24,7 @@ fn update_page(
 ) {
     let prompt_value = prompt.get();
     spawn_local(async move {
-        let events_list = events_api::get_events().await
+        let events_list = events_api::get_events(None).await
             .unwrap_or_default()
             .into_iter()
             .filter(|e| e.involved_object.name.to_lowercase().contains(&prompt_value.to_lowercase()));

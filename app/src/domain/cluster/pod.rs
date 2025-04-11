@@ -4,11 +4,6 @@ use serde::{Deserialize, Serialize};
 use crate::domain::shared::metadata::Metadata;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct PodsResponse {
-    pub items: Vec<Pod>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Pod {
     pub metadata: Metadata,
     pub spec: Spec,

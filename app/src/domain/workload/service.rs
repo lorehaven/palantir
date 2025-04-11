@@ -4,11 +4,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::domain::shared::metadata::Metadata;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ServicesResponse {
-    pub items: Vec<Service>,
-}
-
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Service {
     pub metadata: Metadata,

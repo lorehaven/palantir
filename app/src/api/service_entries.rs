@@ -6,14 +6,15 @@ use crate::api::workloads::pods::get_pods;
 #[allow(unused_imports)]
 use crate::api::utils::kube_api_request;
 use crate::domain::cluster::pod::Pod;
-use crate::domain::workload::service::{ServiceEntry, ServicesResponse, Service};
+use crate::domain::shared::response::Response;
+use crate::domain::workload::service::{ServiceEntry, Service};
 
 const NAME_LABEL: &str = "app.kubernetes.io/name";
 
 #[server(GetServiceEntries, "/api/services/entries")]
 pub async fn get_service_entries() -> Result<Vec<ServiceEntry>, ServerFnError> {
     let services = kube_api_request("services".to_string()).await?;
-    Ok(parse_entries_response(&services, &get_pods().await?).await.unwrap_or_default())
+    Ok(parse_entries_response(&services, &get_pods(None, None).await?).await.unwrap_or_default())
 }
 
 #[allow(dead_code)]
@@ -21,7 +22,7 @@ async fn parse_entries_response(response: &str, pods: &[Pod]) -> Result<Vec<Serv
     let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
     let server_dns_name = std::env::var("SERVER_DNS_NAME").unwrap_or_else(|_| "ossiriand.arda".to_string());
 
-    let mut services = serde_json::from_str::<ServicesResponse>(response)?
+    let mut services = serde_json::from_str::<Response<Service>>(response)?
         .items
         .into_iter()
         .filter(|service| service.metadata.namespace != "default")

@@ -5,11 +5,6 @@ use crate::domain::workload::{Workload, WorkloadModel};
 use crate::pages::utils::shared::time::time_until_now;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct JobsResponse {
-    pub items: Vec<Job>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Job {
     pub metadata: Metadata,
     pub spec: JobSpec,

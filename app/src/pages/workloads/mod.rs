@@ -68,16 +68,13 @@ fn update_page_stats(
     let selected_value = selected.get();
 
     spawn_local(async move {
-        let workloads =
-            if selected_value == "All Namespaces" { workloads_api::get_workloads(None).await }
-            else { workloads_api::get_workloads(Some(selected_value.clone())).await };
+        let namespace_name = if selected_value == "All Namespaces" { None } else { Some(selected_value) };
+        let workloads = workloads_api::get_workloads(namespace_name.clone()).await;
         let ready_workloads = workloads.iter()
             .filter(|w| w.is_ready()).count();
         workloads_ready.set((workloads.len() as f64, ready_workloads as f64));
 
-        let pods =
-            if selected_value == "All Namespaces" { pods_api::get_pods().await.unwrap_or_default() }
-            else { pods_api::get_pods_by_namespace_name(selected_value).await.unwrap_or_default() };
+        let pods = pods_api::get_pods(namespace_name, None).await.unwrap_or_default();
         let ready_pods = pods.iter()
             .filter(|p| p.status.conditions.iter().any(|pc| pc.r#type == "Ready" && pc.status == "True")).count();
         pods_ready.set((pods.len() as f64, ready_pods as f64));
@@ -131,9 +128,8 @@ fn update_page_list(
     let selected_value = selected.get();
     let prompt_value = prompt.get();
     spawn_local(async move {
-        let workloads_list =
-            if selected_value == "All Namespaces" { workloads_api::get_workloads(None).await }
-            else { workloads_api::get_workloads(Some(selected_value.clone())).await };
+        let namespace_name = if selected_value == "All Namespaces" { None } else { Some(selected_value) };
+        let workloads_list = workloads_api::get_workloads(namespace_name).await;
         let mut list = workloads_list.into_iter()
             .filter(|w| w.get_name().to_lowercase().contains(&prompt_value.to_lowercase()))
             .map(|w| w.to_model())

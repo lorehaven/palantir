@@ -30,10 +30,9 @@ fn update_page(
     let pod_name = pod_name.get();
 
     spawn_local(async move {
-        let pods_data =
-            if namespace_name.get_untracked() == "All Namespaces" { pods_api::get_pods().await }
-            else { pods_api::get_pods_by_namespace_name(selected_value.clone()).await };
-        let pods_data = pods_data.unwrap_or_default()
+        let namespace_name = if selected_value == "All Namespaces" { None } else { Some(selected_value) };
+        let pods_data = pods_api::get_pods(namespace_name, None).await
+            .unwrap_or_default()
             .into_iter()
             .filter(|p| p.metadata.name.contains(&pod_name))
             .collect::<Vec<_>>();

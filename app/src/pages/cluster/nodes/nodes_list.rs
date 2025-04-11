@@ -40,7 +40,7 @@ fn update_page(
             .into_iter()
             .filter(|n| nodes_data.iter().any(|s| s.metadata.name == n.metadata.name))
             .collect::<Vec<NodeMetrics>>();
-        let pods_data = pods_api::get_pods().await.unwrap_or_default();
+        let pods_data = pods_api::get_pods(None, None).await.unwrap_or_default();
 
         let mut nodes_vec = vec![];
         for node in nodes_data {

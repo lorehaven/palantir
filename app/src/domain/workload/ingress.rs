@@ -2,12 +2,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::domain::shared::metadata::Metadata;
 
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct IngressesResponse {
-    pub items: Vec<Ingress>,
-}
-
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Ingress {
     pub metadata: Metadata,
