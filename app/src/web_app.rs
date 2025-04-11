@@ -42,6 +42,7 @@ use crate::pages::{
         clusterbinding::AccountsClusterRoleBindingPage,
         binding::AccountsRoleBindingPage,
         bindings::AccountsRoleBindingsPage,
+        secret::AccountsSecretPage,
         secrets::AccountsSecretsPage,
     },
     profile::ProfilePage,
@@ -93,6 +94,7 @@ pub fn WebApp() -> impl IntoView {
                     <Route path=path!("/accounts/:namespace/rolebindings/:name") view=AccountsRoleBindingPage />
                     <Route path=path!("/accounts/clusterrolebindings/:name") view=AccountsClusterRoleBindingPage />
                     <Route path=path!("/accounts/secrets") view=AccountsSecretsPage />
+                    <Route path=path!("/accounts/:namespace/secrets/:name") view=AccountsSecretPage />
                     <Route path=path!("/profile") view=ProfilePage />
                 </Routes>
             </main>

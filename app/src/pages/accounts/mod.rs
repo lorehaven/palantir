@@ -14,6 +14,7 @@ pub mod bindings;
 pub mod clusterrole;
 pub mod role;
 pub mod roles;
+pub mod secret;
 pub mod secrets;
 
 #[component]

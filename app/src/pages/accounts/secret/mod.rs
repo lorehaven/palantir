@@ -1,0 +1,32 @@
+use leptos::prelude::*;
+use leptos_router::hooks::use_params_map;
+
+use crate::components::prelude::*;
+
+mod secret_info;
+mod secret_data;
+
+#[component]
+pub fn AccountsSecretPage() -> impl IntoView {
+    let params = use_params_map();
+    let namespace_name = params.with_untracked(|p| p.get("namespace"))
+        .into_iter()
+        .collect::<Vec<_>>().join("-");
+    let name = params.with_untracked(|p| p.get("name"))
+        .into_iter()
+        .collect::<Vec<_>>().join("-");
+    let page_title = vec!["Accounts".to_string(), namespace_name.clone(), "Secrets".to_string(), name.clone()];
+
+    view! {
+        <Header text=page_title />
+        <PageContent>
+            <PageContentSlot slot>
+                <div class="accounts-secret main-page">
+                    <secret_info::SecretInfoComponent namespace_name=namespace_name.clone() secret_name=name.clone() />
+                    <secret_data::SecretDataComponent namespace_name=namespace_name.clone() secret_name=name.clone() />
+                </div>
+            </PageContentSlot>
+        </PageContent>
+        <Footer />
+    }
+}

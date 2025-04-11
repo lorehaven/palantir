@@ -11,7 +11,8 @@
     padding: 2rem 1rem;
     gap: 1rem;
 
-    .card-list-row {
+    .card-list-row,
+    .card-list-row-obscured {
       display: flex;
       flex-direction: row;
       align-items: center;
@@ -21,16 +22,46 @@
       .card-list-row-title {
         display: flex;
         justify-content: right;
-        width: 15%;
         font-weight: bold;
         text-align: right;
         font-size: 0.9rem;
       }
-      .card-list-row-content {
+      .card-list-row-content,
+      .card-list-row-content-obscured {
         white-space: pre-line;
         word-break: break-all;
-        width: 85%;
         font-size: 0.8rem;
+      }
+    }
+
+    .card-list-row {
+      .card-list-row-title {
+        width: 15%;
+      }
+      .card-list-row-content {
+        width: 85%;
+      }
+    }
+
+    .card-list-row-obscured {
+      .card-list-row-title {
+        width: 15%;
+      }
+      .card-list-row-button {
+        width: 2%;
+        cursor: pointer;
+
+        i {
+          font-size: 1.4rem;
+        }
+      }
+      .card-list-row-content {
+        width: 83%;
+      }
+      .card-list-row-content-obscured {
+        width: 83%;
+        filter: blur(5px);
+        user-select: none;
       }
     }
   }
