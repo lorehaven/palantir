@@ -1,10 +1,10 @@
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 use crate::shared::metadata::Metadata;
 use crate::shared::template::Template;
-use crate::workload::{Workload, WorkloadModel};
 use crate::utils::time::time_until_now;
+use crate::workload::{Workload, WorkloadModel};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Deployment {

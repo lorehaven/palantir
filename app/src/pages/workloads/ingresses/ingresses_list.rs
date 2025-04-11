@@ -1,8 +1,8 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
+use crate::components::prelude::*;
 use api::workloads::ingresses as ingresses_api;
-use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
@@ -14,7 +14,19 @@ pub fn IngressesListComponent(
 
     let interval_handle = update_page_effect(10_000, move || update_page(selected, prompt, ingresses));
     clear_page_effect(interval_handle);
-    view(ingresses)
+
+    let columns = vec![
+        TableColumn::new("Type", TableColumnType::String, 1),
+        TableColumn::new("Namespace", TableColumnType::Link, 3),
+        TableColumn::new("Name", TableColumnType::Link, 3),
+        TableColumn::new("Hosts", TableColumnType::StringList, 3),
+        TableColumn::new("Paths", TableColumnType::StringList, 3),
+    ];
+    let styles = vec![""; columns.len()];
+    let mut params = vec![""; columns.len()];
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/workloads/:1/ingresses/";
+    data_list_view(columns, ingresses, styles, params)
 }
 
 fn update_page(
@@ -59,36 +71,4 @@ fn update_page(
         }
         ingresses.set(ingresses_vec);
     });
-}
-
-fn view(
-    replicas: RwSignal<Vec<Vec<String>>>,
-) -> impl IntoView {
-    let columns = vec![
-        TableColumn::new("Type", TableColumnType::String, 1),
-        TableColumn::new("Namespace", TableColumnType::Link, 3),
-        TableColumn::new("Name", TableColumnType::Link, 3),
-        TableColumn::new("Hosts", TableColumnType::StringList, 3),
-        TableColumn::new("Paths", TableColumnType::StringList, 3),
-    ];
-    let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/cluster/namespaces/";
-    params[2] = "/workloads/:1/ingresses/";
-
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="card-container dcc-1">
-                    <div class="card-table">
-                        <TableComponent
-                            columns=columns.clone()
-                            values=replicas.get()
-                            styles=styles.clone()
-                            params=params.clone() />
-                    </div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
-    }
 }

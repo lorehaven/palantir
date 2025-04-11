@@ -1,9 +1,9 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use api::cluster::events as events_api;
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
+use api::cluster::events as events_api;
 use domain::utils::time::time_until_now;
 
 #[component]
@@ -16,7 +16,16 @@ pub fn NamespaceEventsComponent(
     let interval_handle = update_page_effect(60_000, move || update_page(namespace_name, events));
     clear_page_effect(interval_handle);
 
-    view(events)
+    let columns = vec![
+        TableColumn::new("Type", TableColumnType::String, 1),
+        TableColumn::new("Name", TableColumnType::Link, 2),
+        TableColumn::new("Time", TableColumnType::String, 1),
+        TableColumn::new("Reason", TableColumnType::String, 1),
+        TableColumn::new("Event", TableColumnType::String, 3),
+    ];
+    let styles = vec![""; columns.len()];
+    let params = vec![""; columns.len()];
+    data_list_view(columns, events, styles, params)
 }
 
 fn update_page(
@@ -43,34 +52,4 @@ fn update_page(
         }
         events.set(events_vec);
     });
-}
-
-fn view(
-    events: RwSignal<Vec<Vec<String>>>,
-) -> impl IntoView {
-    let columns = vec![
-        TableColumn::new("Type", TableColumnType::String, 1),
-        TableColumn::new("Name", TableColumnType::Link, 2),
-        TableColumn::new("Time", TableColumnType::String, 1),
-        TableColumn::new("Reason", TableColumnType::String, 1),
-        TableColumn::new("Event", TableColumnType::String, 3),
-    ];
-    let styles = vec![""; columns.len()];
-    let params = vec![""; columns.len()];
-
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="card-container dcc-1">
-                    <div class="card-table">
-                        <TableComponent
-                            columns=columns.clone()
-                            values=events.get()
-                            styles=styles.clone()
-                            params=params.clone() />
-                    </div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
-    }
 }

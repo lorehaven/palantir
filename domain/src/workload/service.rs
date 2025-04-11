@@ -1,6 +1,6 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
-use serde::{Deserialize, Serialize};
 
 use crate::shared::metadata::Metadata;
 

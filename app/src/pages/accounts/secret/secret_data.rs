@@ -1,9 +1,9 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use api::accounts::secrets as secrets_api;
-use crate::components::shared::info::obscured_resource_info_view;
+use crate::components::shared::data::obscured_resource_info_view;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
+use api::accounts::secrets as secrets_api;
 
 #[component]
 pub fn SecretDataComponent(

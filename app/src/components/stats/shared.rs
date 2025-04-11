@@ -1,5 +1,5 @@
-use domain::metrics::PodMetrics;
 use domain::cluster::pod::Pod;
+use domain::metrics::PodMetrics;
 
 use crate::utils::stats::{convert_memory, parse_memory, parse_pod_cpu};
 

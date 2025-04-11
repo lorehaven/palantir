@@ -3,12 +3,12 @@ use leptos::task::spawn_local;
 
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
-use domain::utils::time::time_until_now;
 use crate::utils::stats::{convert_memory, parse_memory, parse_pod_cpu};
 use api::metrics as metrics_api;
 use api::workloads::pods as pods_api;
-use domain::metrics::PodMetrics;
 use domain::cluster::pod::Pod;
+use domain::metrics::PodMetrics;
+use domain::utils::time::time_until_now;
 
 #[component]
 pub fn NodePodsComponent(
@@ -20,7 +20,23 @@ pub fn NodePodsComponent(
     let interval_handle = update_page_effect(60_000, move || update_page(node_name, pods));
     clear_page_effect(interval_handle);
 
-    view(pods)
+    let columns = vec![
+        TableColumn::new("Type", TableColumnType::String, 1),
+        TableColumn::new("Name", TableColumnType::Link, 3),
+        TableColumn::new("Namespace", TableColumnType::String, 2),
+        TableColumn::new("Age", TableColumnType::String, 1),
+        TableColumn::new("Restarts", TableColumnType::String, 1),
+        TableColumn::new("CPU actual", TableColumnType::String, 1),
+        TableColumn::new("CPU request", TableColumnType::StringTwoLine, 1),
+        TableColumn::new("CPU limit", TableColumnType::StringTwoLine, 1),
+        TableColumn::new("RAM actual", TableColumnType::String, 1),
+        TableColumn::new("RAM request", TableColumnType::StringTwoLine, 1),
+        TableColumn::new("RAM limit", TableColumnType::StringTwoLine, 1),
+    ];
+    let styles = vec![""; columns.len()];
+    let mut params = vec![""; columns.len()];
+    params[1] = "/workloads/:2/pods/";
+    data_list_view(columns, pods, styles, params)
 }
 
 fn update_page(
@@ -62,43 +78,6 @@ fn update_page(
         }
         pods.set(pods_vec);
     });
-}
-
-fn view(
-    pods: RwSignal<Vec<Vec<String>>>,
-) -> impl IntoView {
-    let columns = vec![
-        TableColumn::new("Type", TableColumnType::String, 1),
-        TableColumn::new("Name", TableColumnType::Link, 3),
-        TableColumn::new("Namespace", TableColumnType::String, 2),
-        TableColumn::new("Age", TableColumnType::String, 1),
-        TableColumn::new("Restarts", TableColumnType::String, 1),
-        TableColumn::new("CPU actual", TableColumnType::String, 1),
-        TableColumn::new("CPU request", TableColumnType::StringTwoLine, 1),
-        TableColumn::new("CPU limit", TableColumnType::StringTwoLine, 1),
-        TableColumn::new("RAM actual", TableColumnType::String, 1),
-        TableColumn::new("RAM request", TableColumnType::StringTwoLine, 1),
-        TableColumn::new("RAM limit", TableColumnType::StringTwoLine, 1),
-    ];
-    let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/workloads/:2/pods/";
-
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="card-container dcc-1">
-                    <div class="card-table">
-                        <TableComponent
-                            columns=columns.clone()
-                            values=pods.get()
-                            styles=styles.clone()
-                            params=params.clone() />
-                    </div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
-    }
 }
 
 fn pod_cpu_actual(metrics: &PodMetrics) -> String {

@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use leptos_meta::{MetaTags};
+use leptos_meta::MetaTags;
 
 use crate::web_app::WebApp;
 

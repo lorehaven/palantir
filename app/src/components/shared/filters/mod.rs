@@ -7,9 +7,9 @@ pub mod spacer;
 pub mod namespace;
 pub mod prompt;
 
-use api::cluster::namespaces as namespaces_api;
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
+use api::cluster::namespaces as namespaces_api;
 
 #[component]
 pub fn Filter(

@@ -1,9 +1,9 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use api::accounts::secrets as secrets_api;
-use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
+use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
+use api::accounts::secrets as secrets_api;
 use domain::utils::time::time_until_now;
 
 #[component]
@@ -15,7 +15,19 @@ pub fn SecretsListComponent(
 
     let interval_handle = update_page_effect(10_000, move || update_page(selected, prompt, secrets));
     clear_page_effect(interval_handle);
-    view(secrets)
+
+    let columns = vec![
+        TableColumn::new("Type", TableColumnType::String, 1),
+        TableColumn::new("Namespace", TableColumnType::Link, 2),
+        TableColumn::new("Name", TableColumnType::Link, 4),
+        TableColumn::new("Age", TableColumnType::String, 1),
+        TableColumn::new("Type", TableColumnType::String, 2),
+    ];
+    let styles = vec![""; columns.len()];
+    let mut params = vec![""; columns.len()];
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/accounts/:1/secrets/";
+    data_list_view(columns, secrets, styles, params)
 }
 
 fn update_page(
@@ -44,36 +56,4 @@ fn update_page(
             ])
             .collect());
     });
-}
-
-fn view(
-    secrets: RwSignal<Vec<Vec<String>>>,
-) -> impl IntoView {
-    let columns = vec![
-        TableColumn::new("Type", TableColumnType::String, 1),
-        TableColumn::new("Namespace", TableColumnType::Link, 2),
-        TableColumn::new("Name", TableColumnType::Link, 4),
-        TableColumn::new("Age", TableColumnType::String, 1),
-        TableColumn::new("Type", TableColumnType::String, 2),
-    ];
-    let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/cluster/namespaces/";
-    params[2] = "/accounts/:1/secrets/";
-
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="card-container dcc-1">
-                    <div class="card-table">
-                        <TableComponent
-                            columns=columns.clone()
-                            values=secrets.get()
-                            styles=styles.clone()
-                            params=params.clone() />
-                    </div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
-    }
 }

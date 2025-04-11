@@ -3,8 +3,8 @@ use leptos::task::spawn_local;
 
 use api::metrics as metrics_api;
 use api::workloads::pods as pods_api;
-use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
 use domain::metrics::PodMetrics;
+use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::utils::stats::pod_stats::{pod_cpu_actual, pod_cpu_limit, pod_cpu_request, pod_memory_actual, pod_memory_limit, pod_memory_request};
 
@@ -17,7 +17,23 @@ pub fn PodsListComponent(
 
     let interval_handle = update_page_effect(10_000, move || update_page(selected, prompt, pods));
     clear_page_effect(interval_handle);
-    view(pods)
+
+    let columns = vec![
+        TableColumn::new("Type", TableColumnType::String, 1),
+        TableColumn::new("Namespace", TableColumnType::Link, 3),
+        TableColumn::new("Name", TableColumnType::Link, 3),
+        TableColumn::new("CPU actual", TableColumnType::String, 1),
+        TableColumn::new("CPU request", TableColumnType::StringTwoLine, 1),
+        TableColumn::new("CPU limit", TableColumnType::StringTwoLine, 1),
+        TableColumn::new("RAM actual", TableColumnType::String, 1),
+        TableColumn::new("RAM request", TableColumnType::StringTwoLine, 1),
+        TableColumn::new("RAM limit", TableColumnType::StringTwoLine, 1),
+    ];
+    let styles = vec![""; columns.len()];
+    let mut params = vec![""; columns.len()];
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/workloads/:1/pods/";
+    data_list_view(columns, pods, styles, params)
 }
 
 fn update_page(
@@ -62,40 +78,4 @@ fn update_page(
         }
         pods.set(pods_vec);
     });
-}
-
-fn view(
-    replicas: RwSignal<Vec<Vec<String>>>,
-) -> impl IntoView {
-    let columns = vec![
-        TableColumn::new("Type", TableColumnType::String, 1),
-        TableColumn::new("Namespace", TableColumnType::Link, 3),
-        TableColumn::new("Name", TableColumnType::Link, 3),
-        TableColumn::new("CPU actual", TableColumnType::String, 1),
-        TableColumn::new("CPU request", TableColumnType::StringTwoLine, 1),
-        TableColumn::new("CPU limit", TableColumnType::StringTwoLine, 1),
-        TableColumn::new("RAM actual", TableColumnType::String, 1),
-        TableColumn::new("RAM request", TableColumnType::StringTwoLine, 1),
-        TableColumn::new("RAM limit", TableColumnType::StringTwoLine, 1),
-    ];
-    let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/cluster/namespaces/";
-    params[2] = "/workloads/:1/pods/";
-
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="card-container dcc-1">
-                    <div class="card-table">
-                        <TableComponent
-                            columns=columns.clone()
-                            values=replicas.get()
-                            styles=styles.clone()
-                            params=params.clone() />
-                    </div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
-    }
 }

@@ -1,9 +1,9 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use api::accounts::serviceaccounts as accounts_api;
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
+use api::accounts::serviceaccounts as accounts_api;
 use domain::utils::time::time_until_now;
 
 pub mod serviceaccount;
@@ -55,7 +55,17 @@ fn AccountsList(
     ));
     clear_page_effect(interval_handle);
 
-    view_list(accounts)
+    let columns = vec![
+        TableColumn::new("Type", TableColumnType::String, 1),
+        TableColumn::new("Namespace", TableColumnType::Link, 1),
+        TableColumn::new("Name", TableColumnType::Link, 2),
+        TableColumn::new("Age", TableColumnType::String, 1),
+    ];
+    let styles = vec![""; columns.len()];
+    let mut params = vec![""; columns.len()];
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/accounts/:1/serviceaccounts/";
+    data_list_view(columns, accounts, styles, params)
 }
 
 fn update_page_list(
@@ -82,35 +92,4 @@ fn update_page_list(
             ])
             .collect());
     });
-}
-
-fn view_list(
-    accounts: RwSignal<Vec<Vec<String>>>,
-) -> impl IntoView {
-    let columns = vec![
-        TableColumn::new("Type", TableColumnType::String, 1),
-        TableColumn::new("Namespace", TableColumnType::Link, 1),
-        TableColumn::new("Name", TableColumnType::Link, 2),
-        TableColumn::new("Age", TableColumnType::String, 1),
-    ];
-    let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/cluster/namespaces/";
-    params[2] = "/accounts/:1/serviceaccounts/";
-
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="card-container dcc-1">
-                    <div class="card-table">
-                        <TableComponent
-                            columns=columns.clone()
-                            values=accounts.get()
-                            styles=styles.clone()
-                            params=params.clone() />
-                    </div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
-    }
 }

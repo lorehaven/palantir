@@ -1,8 +1,8 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use api::workloads::pods as pods_api;
 use api::workloads as workloads_api;
+use api::workloads::pods as pods_api;
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
@@ -117,7 +117,18 @@ fn WorkloadsList(
     ));
     clear_page_effect(interval_handle);
 
-    view_list(workloads)
+    let columns = vec![
+        TableColumn::new("Type", TableColumnType::String, 1),
+        TableColumn::new("Namespace", TableColumnType::Link, 1),
+        TableColumn::new("Name", TableColumnType::Link, 2),
+        TableColumn::new("Age", TableColumnType::String, 1),
+        TableColumn::new("Pods", TableColumnType::String, 3),
+    ];
+    let styles = vec![""; columns.len()];
+    let mut params = vec![""; columns.len()];
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/workloads/:0/:1/";
+    data_list_view(columns, workloads, styles, params)
 }
 
 fn update_page_list(
@@ -139,36 +150,4 @@ fn update_page_list(
         list.sort_by(|a, b| a[1].cmp(&b[1]));
         workloads.set(list);
     });
-}
-
-fn view_list(
-    workloads: RwSignal<Vec<Vec<String>>>,
-) -> impl IntoView {
-    let columns = vec![
-        TableColumn::new("Type", TableColumnType::String, 1),
-        TableColumn::new("Namespace", TableColumnType::Link, 1),
-        TableColumn::new("Name", TableColumnType::Link, 2),
-        TableColumn::new("Age", TableColumnType::String, 1),
-        TableColumn::new("Pods", TableColumnType::String, 3),
-    ];
-    let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/cluster/namespaces/";
-    params[2] = "/workloads/:0/:1/";
-
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="card-container dcc-1">
-                    <div class="card-table">
-                        <TableComponent
-                            columns=columns.clone()
-                            values=workloads.get()
-                            styles=styles.clone()
-                            params=params.clone() />
-                    </div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
-    }
 }

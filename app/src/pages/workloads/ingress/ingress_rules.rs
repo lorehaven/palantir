@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use api::workloads::ingresses as ingresses_api;
-use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
+use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
@@ -16,7 +16,16 @@ pub fn IngressRulesComponent(
 
     let interval_handle = update_page_effect(10_000, move || update_page(namespace_name, ingress_name, rules));
     clear_page_effect(interval_handle);
-    view(rules)
+
+    let columns = vec![
+        TableColumn::new("Host", TableColumnType::String, 2),
+        TableColumn::new("Path", TableColumnType::StringList, 2),
+        TableColumn::new("Service Name", TableColumnType::String, 2),
+        TableColumn::new("Service Port", TableColumnType::String, 2),
+    ];
+    let styles = vec![""; columns.len()];
+    let params = vec![""; columns.len()];
+    data_list_view(columns, rules, styles, params)
 }
 
 fn update_page(
@@ -62,33 +71,4 @@ fn update_page(
         }
         rules.set(rules_vec);
     });
-}
-
-fn view(
-    rules: RwSignal<Vec<Vec<String>>>,
-) -> impl IntoView {
-    let columns = vec![
-        TableColumn::new("Host", TableColumnType::String, 2),
-        TableColumn::new("Path", TableColumnType::StringList, 2),
-        TableColumn::new("Service Name", TableColumnType::String, 2),
-        TableColumn::new("Service Port", TableColumnType::String, 2),
-    ];
-    let styles = vec![""; columns.len()];
-    let params = vec![""; columns.len()];
-
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="card-container dcc-1">
-                    <div class="card-table">
-                        <TableComponent
-                            columns=columns.clone()
-                            values=rules.get()
-                            styles=styles.clone()
-                            params=params.clone() />
-                    </div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
-    }
 }

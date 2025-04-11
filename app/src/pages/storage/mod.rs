@@ -42,7 +42,16 @@ fn StorageClassesListComponent(
     let interval_handle = update_page_effect(3_600_000, move || update_page_list(prompt, classes));
     clear_page_effect(interval_handle);
 
-    view_list(classes)
+    let columns = vec![
+        TableColumn::new("Type", TableColumnType::String, 2),
+        TableColumn::new("Name", TableColumnType::Link, 3),
+        TableColumn::new("Reclaim Policy", TableColumnType::String, 3),
+        TableColumn::new("Mode", TableColumnType::String, 3),
+    ];
+    let styles = vec![""; columns.len()];
+    let mut params = vec![""; columns.len()];
+    params[1] = "/storageclasses/";
+    data_list_view(columns, classes, styles, params)
 }
 
 fn update_page_list(
@@ -66,34 +75,4 @@ fn update_page_list(
             ])
             .collect());
     });
-}
-
-fn view_list(
-    classes: RwSignal<Vec<Vec<String>>>,
-) -> impl IntoView {
-    let columns = vec![
-        TableColumn::new("Type", TableColumnType::String, 2),
-        TableColumn::new("Name", TableColumnType::Link, 3),
-        TableColumn::new("Reclaim Policy", TableColumnType::String, 3),
-        TableColumn::new("Mode", TableColumnType::String, 3),
-    ];
-    let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/storageclasses/";
-
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="card-container dcc-1">
-                    <div class="card-table">
-                        <TableComponent
-                            columns=columns.clone()
-                            values=classes.get()
-                            styles=styles.clone()
-                            params=params.clone() />
-                    </div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
-    }
 }

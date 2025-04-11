@@ -2,9 +2,9 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use api::storage::claims as claims_api;
-use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
-use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use domain::utils::time::time_until_now;
+use crate::components::prelude::*;
+use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
 pub fn ClaimsListComponent(
@@ -15,7 +15,22 @@ pub fn ClaimsListComponent(
 
     let interval_handle = update_page_effect(10_000, move || update_page(selected, prompt, claims));
     clear_page_effect(interval_handle);
-    view(claims)
+
+    let columns = vec![
+        TableColumn::new("Type", TableColumnType::String, 2),
+        TableColumn::new("Namespace", TableColumnType::Link, 3),
+        TableColumn::new("Name", TableColumnType::Link, 3),
+        TableColumn::new("Age", TableColumnType::String, 3),
+        TableColumn::new("Status", TableColumnType::String, 3),
+        TableColumn::new("Class Name", TableColumnType::String, 3),
+        TableColumn::new("Volume", TableColumnType::String, 3),
+        TableColumn::new("Capacity", TableColumnType::String, 3),
+    ];
+    let styles = vec![""; columns.len()];
+    let mut params = vec![""; columns.len()];
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/storage/:1/claims/";
+    data_list_view(columns, claims, styles, params)
 }
 
 fn update_page(
@@ -46,39 +61,4 @@ fn update_page(
             ])
             .collect());
     });
-}
-
-fn view(
-    replicas: RwSignal<Vec<Vec<String>>>,
-) -> impl IntoView {
-    let columns = vec![
-        TableColumn::new("Type", TableColumnType::String, 2),
-        TableColumn::new("Namespace", TableColumnType::Link, 3),
-        TableColumn::new("Name", TableColumnType::Link, 3),
-        TableColumn::new("Age", TableColumnType::String, 3),
-        TableColumn::new("Status", TableColumnType::String, 3),
-        TableColumn::new("Class Name", TableColumnType::String, 3),
-        TableColumn::new("Volume", TableColumnType::String, 3),
-        TableColumn::new("Capacity", TableColumnType::String, 3),
-    ];
-    let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/cluster/namespaces/";
-    params[2] = "/storage/:1/claims/";
-
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="card-container dcc-1">
-                    <div class="card-table">
-                        <TableComponent
-                            columns=columns.clone()
-                            values=replicas.get()
-                            styles=styles.clone()
-                            params=params.clone() />
-                    </div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
-    }
 }

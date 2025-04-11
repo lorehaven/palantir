@@ -1,8 +1,8 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
+use crate::components::prelude::*;
 use api::workloads::replicasets as replicasets_api;
-use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
@@ -14,7 +14,20 @@ pub fn ReplicaSetsListComponent(
 
     let interval_handle = update_page_effect(10_000, move || update_page(selected, prompt, replicasets));
     clear_page_effect(interval_handle);
-    view(replicasets)
+
+    let columns = vec![
+        TableColumn::new("Type", TableColumnType::String, 1),
+        TableColumn::new("Namespace", TableColumnType::Link, 2),
+        TableColumn::new("Name", TableColumnType::Link, 4),
+        TableColumn::new("Generations", TableColumnType::String, 1),
+        TableColumn::new("Replicas", TableColumnType::String, 2),
+        // TableColumn::new("Active", TableColumnType::Switch, 2),
+    ];
+    let styles = vec![""; columns.len()];
+    let mut params = vec![""; columns.len()];
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/workloads/:1/replicasets/";
+    data_list_view(columns, replicasets, styles, params)
 }
 
 fn update_page(
@@ -42,37 +55,4 @@ fn update_page(
             ])
             .collect());
     });
-}
-
-fn view(
-    replicasets: RwSignal<Vec<Vec<String>>>,
-) -> impl IntoView {
-    let columns = vec![
-        TableColumn::new("Type", TableColumnType::String, 1),
-        TableColumn::new("Namespace", TableColumnType::Link, 2),
-        TableColumn::new("Name", TableColumnType::Link, 4),
-        TableColumn::new("Generations", TableColumnType::String, 1),
-        TableColumn::new("Replicas", TableColumnType::String, 2),
-        // TableColumn::new("Active", TableColumnType::Switch, 2),
-    ];
-    let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/cluster/namespaces/";
-    params[2] = "/workloads/:1/replicasets/";
-
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="card-container dcc-1">
-                    <div class="card-table">
-                        <TableComponent
-                            columns=columns.clone()
-                            values=replicasets.get()
-                            styles=styles.clone()
-                            params=params.clone() />
-                    </div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
-    }
 }

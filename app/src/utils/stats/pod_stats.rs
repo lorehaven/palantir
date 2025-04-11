@@ -1,6 +1,6 @@
 use crate::utils::stats::{convert_memory, parse_memory, parse_pod_cpu};
-use domain::metrics::PodMetrics;
 use domain::cluster::pod::Pod;
+use domain::metrics::PodMetrics;
 
 pub fn pod_cpu_actual(metrics: &PodMetrics) -> String {
     let usage = parse_pod_cpu_actual_f64(metrics);

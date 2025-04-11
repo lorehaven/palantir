@@ -1,5 +1,30 @@
 use leptos::prelude::*;
 
+use crate::components::prelude::*;
+
+pub fn data_list_view(
+    columns: Vec<TableColumn>,
+    data: RwSignal<Vec<Vec<String>>>,
+    styles: Vec<&'static str>,
+    params: Vec<impl Into<String> + ToString + Clone + Send + Sync + 'static>,
+) -> impl IntoView {
+    view! {
+        <Wrapper>
+            <WrapperSlot slot>
+                <div class="card-container dcc-1">
+                    <div class="card-table">
+                        <TableComponent
+                            columns=columns.clone()
+                            values=data.get()
+                            styles=styles.clone()
+                            params=params.clone() />
+                    </div>
+                </div>
+            </WrapperSlot>
+        </Wrapper>
+    }
+}
+
 pub fn resource_info_view(
     data: RwSignal<Vec<(String, String)>>,
 ) -> impl IntoView {

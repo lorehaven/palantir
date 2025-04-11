@@ -1,11 +1,11 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use api::accounts::roles as roles_api;
-use crate::components::shared::info::resource_info_view;
+use crate::components::shared::data::resource_info_view;
 use crate::utils::shared::display;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::utils::shared::time::format_timestamp;
+use api::accounts::roles as roles_api;
 
 #[component]
 pub fn RoleInfoComponent(

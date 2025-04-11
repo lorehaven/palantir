@@ -1,9 +1,9 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use api::accounts::bindings as bindings_api;
-use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
+use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
+use api::accounts::bindings as bindings_api;
 
 #[component]
 pub fn RoleBindingSubjectsComponent(
@@ -16,7 +16,16 @@ pub fn RoleBindingSubjectsComponent(
 
     let interval_handle = update_page_effect(60_000, move || update_page(namespace_name, binding_name, binding_data));
     clear_page_effect(interval_handle);
-    view(binding_data)
+
+    let columns = vec![
+        TableColumn::new("Type", TableColumnType::String, 3),
+        TableColumn::new("Name", TableColumnType::String, 3),
+        TableColumn::new("Namespace", TableColumnType::String, 3),
+        TableColumn::new("Api Group", TableColumnType::String, 3),
+    ];
+    let styles = vec![""; columns.len()];
+    let params = vec![""; columns.len()];
+    data_list_view(columns, binding_data, styles, params)
 }
 
 fn update_page(
@@ -43,33 +52,4 @@ fn update_page(
             ])
             .collect());
     });
-}
-
-fn view(
-    resources: RwSignal<Vec<Vec<String>>>,
-) -> impl IntoView {
-    let columns = vec![
-        TableColumn::new("Type", TableColumnType::String, 3),
-        TableColumn::new("Name", TableColumnType::String, 3),
-        TableColumn::new("Namespace", TableColumnType::String, 3),
-        TableColumn::new("Api Group", TableColumnType::String, 3),
-    ];
-    let styles = vec![""; columns.len()];
-    let params = vec![""; columns.len()];
-
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="card-container dcc-1">
-                    <div class="card-table">
-                        <TableComponent
-                            columns=columns.clone()
-                            values=resources.get()
-                            styles=styles.clone()
-                            params=params.clone() />
-                    </div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
-    }
 }

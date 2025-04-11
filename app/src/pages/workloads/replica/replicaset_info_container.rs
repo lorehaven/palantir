@@ -1,8 +1,8 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use api::workloads::replicasets as replicasets_api;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
+use api::workloads::replicasets as replicasets_api;
 
 #[component]
 pub fn ReplicaSetInfoContainerComponent(

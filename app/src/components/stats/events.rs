@@ -15,7 +15,19 @@ pub fn EventsComponent(
     let interval_handle = update_page_effect(10_000, move || update_page(events, prompt));
     clear_page_effect(interval_handle);
 
-    view(events)
+    let columns = vec![
+        TableColumn::new("Type", TableColumnType::String, 1),
+        TableColumn::new("Namespace", TableColumnType::Link, 2),
+        TableColumn::new("Name", TableColumnType::Link, 2),
+        TableColumn::new("Time", TableColumnType::String, 1),
+        TableColumn::new("Reason", TableColumnType::String, 2),
+        TableColumn::new("Event", TableColumnType::String, 12),
+    ];
+    let styles = vec![""; columns.len()];
+    let mut params = vec![""; columns.len()];
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/workloads/:1/";
+    data_list_view(columns, events, styles, params)
 }
 
 fn update_page(
@@ -37,37 +49,4 @@ fn update_page(
             e.message,
         ]).collect());
     });
-}
-
-fn view(
-    events: RwSignal<Vec<Vec<String>>>,
-) -> impl IntoView {
-    let columns = vec![
-        TableColumn::new("Type", TableColumnType::String, 1),
-        TableColumn::new("Namespace", TableColumnType::Link, 2),
-        TableColumn::new("Name", TableColumnType::Link, 2),
-        TableColumn::new("Time", TableColumnType::String, 1),
-        TableColumn::new("Reason", TableColumnType::String, 2),
-        TableColumn::new("Event", TableColumnType::String, 12),
-    ];
-    let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/cluster/namespaces/";
-    params[2] = "/workloads/:1/";
-
-    view! {
-        <Expandable label="Events" expanded=true>
-            <ExpandableSlot slot>
-                <div class="card-container dcc-1">
-                    <div class="card-table">
-                        <TableComponent
-                            columns=columns.clone()
-                            values=events.get()
-                            styles=styles.clone()
-                            params=params.clone() />
-                    </div>
-                </div>
-            </ExpandableSlot>
-        </Expandable>
-    }
 }

@@ -5,7 +5,7 @@ pub fn TableComponent(
     columns: Vec<TableColumn>,
     values: Vec<Vec<String>>,
     styles: Vec<&'static str>,
-    params: Vec<impl Into<String> + ToString>,
+    params: Vec<impl Into<String> + ToString + Clone + Send + Sync + 'static>,
 ) -> impl IntoView {
     let grid_template_columns = columns.iter()
         .map(|column| format!("{}fr", column.width))

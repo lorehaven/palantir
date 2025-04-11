@@ -1,9 +1,9 @@
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use api::accounts::bindings as bindings_api;
-use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
+use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
+use api::accounts::bindings as bindings_api;
 
 #[component]
 pub fn BindingsListComponent(
@@ -13,7 +13,18 @@ pub fn BindingsListComponent(
 
     let interval_handle = update_page_effect(10_000, move || update_page(bindings, prompt));
     clear_page_effect(interval_handle);
-    view(bindings)
+
+    let columns = vec![
+        TableColumn::new("Type", TableColumnType::String, 2),
+        TableColumn::new("Namespace", TableColumnType::String, 2),
+        TableColumn::new("Name", TableColumnType::Link, 3),
+        TableColumn::new("Age", TableColumnType::String, 1),
+    ];
+    let styles = vec![""; columns.len()];
+    let mut params = vec![""; columns.len()];
+    params[1] = "/cluster/namespaces/";
+    params[2] = "/accounts/:1/:0s/";
+    data_list_view(columns, bindings, styles, params)
 }
 
 fn update_page(
@@ -34,35 +45,4 @@ fn update_page(
         list.sort_by(|a, b| a[2].cmp(&b[2]));
         bindings.set(list);
     });
-}
-
-fn view(
-    bindings: RwSignal<Vec<Vec<String>>>,
-) -> impl IntoView {
-    let columns = vec![
-        TableColumn::new("Type", TableColumnType::String, 2),
-        TableColumn::new("Namespace", TableColumnType::String, 2),
-        TableColumn::new("Name", TableColumnType::Link, 3),
-        TableColumn::new("Age", TableColumnType::String, 1),
-    ];
-    let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/cluster/namespaces/";
-    params[2] = "/accounts/:1/:0s/";
-
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="card-container dcc-1">
-                    <div class="card-table">
-                        <TableComponent
-                            columns=columns.clone()
-                            values=bindings.get()
-                            styles=styles.clone()
-                            params=params.clone() />
-                    </div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
-    }
 }

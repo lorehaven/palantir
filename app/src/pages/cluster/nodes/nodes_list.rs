@@ -3,14 +3,14 @@ use leptos::task::spawn_local;
 
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
-use domain::utils::time::time_until_now;
 use crate::utils::stats::{convert_memory, parse_memory};
 use api::cluster::nodes as nodes_api;
 use api::metrics as metrics_api;
 use api::workloads::pods as pods_api;
-use domain::metrics::NodeMetrics;
 use domain::cluster::node::{Node, NodeType};
 use domain::cluster::pod::Pod;
+use domain::metrics::NodeMetrics;
+use domain::utils::time::time_until_now;
 
 #[component]
 pub fn NodesListComponent(
@@ -20,7 +20,25 @@ pub fn NodesListComponent(
 
     let interval_handle = update_page_effect(10_000, move || update_page(nodes, prompt));
     clear_page_effect(interval_handle);
-    view(nodes)
+
+    let columns = vec![
+        TableColumn::new("Type", TableColumnType::String, 1),
+        TableColumn::new("Name", TableColumnType::Link, 2),
+        TableColumn::new("Age", TableColumnType::String, 1),
+        TableColumn::new("Labels", TableColumnType::StringList, 4),
+        TableColumn::new("Ready", TableColumnType::Bool, 1),
+        TableColumn::new("CPU actual", TableColumnType::StringTwoLine, 2),
+        TableColumn::new("CPU requested", TableColumnType::StringTwoLine, 2),
+        TableColumn::new("CPU limits", TableColumnType::StringTwoLine, 2),
+        TableColumn::new("RAM actual", TableColumnType::StringTwoLine, 2),
+        TableColumn::new("RAM requested", TableColumnType::StringTwoLine, 2),
+        TableColumn::new("RAM limits", TableColumnType::StringTwoLine, 2),
+    ];
+    let mut styles = vec![""; columns.len()];
+    styles[4] = "font-size: 1.6rem;";
+    let mut params = vec![""; columns.len()];
+    params[1] = "/cluster/nodes/";
+    data_list_view(columns, nodes, styles, params)
 }
 
 fn update_page(
@@ -64,44 +82,6 @@ fn update_page(
         }
         nodes.set(nodes_vec);
     });
-}
-
-fn view(
-    nodes: RwSignal<Vec<Vec<String>>>,
-) -> impl IntoView {
-    let columns = vec![
-        TableColumn::new("Type", TableColumnType::String, 1),
-        TableColumn::new("Name", TableColumnType::Link, 2),
-        TableColumn::new("Age", TableColumnType::String, 1),
-        TableColumn::new("Labels", TableColumnType::StringList, 4),
-        TableColumn::new("Ready", TableColumnType::Bool, 1),
-        TableColumn::new("CPU actual", TableColumnType::StringTwoLine, 2),
-        TableColumn::new("CPU requested", TableColumnType::StringTwoLine, 2),
-        TableColumn::new("CPU limits", TableColumnType::StringTwoLine, 2),
-        TableColumn::new("RAM actual", TableColumnType::StringTwoLine, 2),
-        TableColumn::new("RAM requested", TableColumnType::StringTwoLine, 2),
-        TableColumn::new("RAM limits", TableColumnType::StringTwoLine, 2),
-    ];
-    let mut styles = vec![""; columns.len()];
-    styles[4] = "font-size: 1.6rem;";
-    let mut params = vec![""; columns.len()];
-    params[1] = "/cluster/nodes/";
-
-    view! {
-        <Expandable label="" expanded=true>
-            <ExpandableSlot slot>
-                <div class="card-container dcc-1">
-                    <div class="card-table">
-                        <TableComponent
-                            columns=columns.clone()
-                            values=nodes.get()
-                            styles=styles.clone()
-                            params=params.clone() />
-                    </div>
-                </div>
-            </ExpandableSlot>
-        </Expandable>
-    }
 }
 
 fn get_node_cpu_actual(node: &Node, metrics: &NodeMetrics) -> String {
