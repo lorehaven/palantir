@@ -1,5 +1,6 @@
 use leptos::prelude::ServerFnError;
 use leptos::server;
+use serde::{Deserialize, Serialize};
 
 const DEFAULT_TOKEN_PATH: &str = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
@@ -18,38 +19,31 @@ pub async fn get_api_token_wasm() -> Result<String, ServerFnError> {
     Ok(get_api_token())
 }
 
-#[server]
-pub async fn kube_api_request(endpoint: String) -> Result<String, ServerFnError> {
-    kube_api_request_internal("api/v1".to_string(), endpoint).await
+#[derive(Debug, Clone, Copy, Deserialize, Serialize)]
+pub enum ApiType {
+    Api,
+    Apps,
+    Batch,
+    Networking,
+    Rbac,
+    Storage,
+}
+
+impl std::fmt::Display for ApiType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", match self {
+            Self::Api => "api/v1",
+            Self::Apps => "apis/apps/v1",
+            Self::Batch => "apis/batch/v1",
+            Self::Networking => "apis/networking.k8s.io/v1",
+            Self::Rbac => "apis/rbac.authorization.k8s.io/v1",
+            Self::Storage => "apis/storage.k8s.io/v1",
+        })
+    }
 }
 
 #[server]
-pub async fn kube_api_apps_request(endpoint: String) -> Result<String, ServerFnError> {
-    kube_api_request_internal("apis/apps/v1".to_string(), endpoint).await
-}
-
-#[server]
-pub async fn kube_api_batch_request(endpoint: String) -> Result<String, ServerFnError> {
-    kube_api_request_internal("apis/batch/v1".to_string(), endpoint).await
-}
-
-#[server]
-pub async fn kube_api_networking_request(endpoint: String) -> Result<String, ServerFnError> {
-    kube_api_request_internal("apis/networking.k8s.io/v1".to_string(), endpoint).await
-}
-
-#[server]
-pub async fn kube_api_rbac_request(endpoint: String) -> Result<String, ServerFnError> {
-    kube_api_request_internal("apis/rbac.authorization.k8s.io/v1".to_string(), endpoint).await
-}
-
-#[server]
-pub async fn kube_api_storage_request(endpoint: String) -> Result<String, ServerFnError> {
-    kube_api_request_internal("apis/storage.k8s.io/v1".to_string(), endpoint).await
-}
-
-#[server]
-async fn kube_api_request_internal(path: String, endpoint: String) -> Result<String, ServerFnError> {
+pub async fn kube_api_request(path: ApiType, endpoint: String) -> Result<String, ServerFnError> {
     let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
 
     let client = reqwest::ClientBuilder::new()

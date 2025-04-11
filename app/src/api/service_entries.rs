@@ -1,6 +1,7 @@
 use leptos::prelude::ServerFnError;
 use leptos::server;
-
+#[allow(unused_imports)]
+use crate::api::utils::ApiType;
 #[allow(unused_imports)]
 use crate::api::workloads::pods::get_pods;
 #[allow(unused_imports)]
@@ -13,7 +14,7 @@ const NAME_LABEL: &str = "app.kubernetes.io/name";
 
 #[server(GetServiceEntries, "/api/services/entries")]
 pub async fn get_service_entries() -> Result<Vec<ServiceEntry>, ServerFnError> {
-    let services = kube_api_request("services".to_string()).await?;
+    let services = kube_api_request(ApiType::Api, "services".to_string()).await?;
     Ok(parse_entries_response(&services, &get_pods(None, None).await?).await.unwrap_or_default())
 }
 
