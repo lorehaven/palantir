@@ -5,7 +5,7 @@ use leptos::server;
 use crate::api::utils::kube_api_rbac_request;
 #[allow(unused_imports)]
 use crate::domain::shared::response::Response;
-use crate::domain::account::bindings::{BaseRoleBinding, binding::RoleBinding, clusterbinding::ClusterRoleBinding};
+use crate::domain::account::bindings::{BaseRoleBinding, RoleBinding, ClusterRoleBinding};
 
 pub async fn get_all_bindings() -> Vec<Box<dyn BaseRoleBinding>> {
     let mut all_bindings = vec![];
