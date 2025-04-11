@@ -22,7 +22,7 @@ pub fn PodStatsComponent(namespace_name: String, pod_name: String) -> impl IntoV
             pod_cpu_usage,
             pod_memory_values,
             pod_memory_labels,
-        )
+        );
     });
     clear_page_effect(interval_handle);
 

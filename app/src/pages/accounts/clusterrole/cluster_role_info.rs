@@ -13,7 +13,7 @@ pub fn ClusterRoleInfoComponent(cluster_role_name: String) -> impl IntoView {
     let cluster_role_data = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(60_000, move || {
-        update_page(cluster_role_name, cluster_role_data)
+        update_page(cluster_role_name, cluster_role_data);
     });
     clear_page_effect(interval_handle);
 

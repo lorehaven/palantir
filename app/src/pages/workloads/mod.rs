@@ -48,7 +48,7 @@ fn WorkloadsStats(selected: RwSignal<String>) -> impl IntoView {
     let pods_ready = RwSignal::new((0., 0.));
 
     let interval_handle = update_page_effect(3_600_000, move || {
-        update_page_stats(selected, workloads_ready, pods_ready)
+        update_page_stats(selected, workloads_ready, pods_ready);
     });
     clear_page_effect(interval_handle);
 
@@ -118,7 +118,7 @@ fn WorkloadsList(selected: RwSignal<String>, prompt: RwSignal<String>) -> impl I
     let workloads = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(3_600_000, move || {
-        update_page_list(selected, prompt, workloads)
+        update_page_list(selected, prompt, workloads);
     });
     clear_page_effect(interval_handle);
 

@@ -12,7 +12,7 @@ pub fn IngressRulesComponent(namespace_name: String, ingress_name: String) -> im
     let rules = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(10_000, move || {
-        update_page(namespace_name, ingress_name, rules)
+        update_page(namespace_name, ingress_name, rules);
     });
     clear_page_effect(interval_handle);
 

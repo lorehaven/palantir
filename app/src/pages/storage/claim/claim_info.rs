@@ -14,7 +14,7 @@ pub fn ClaimInfoComponent(namespace_name: String, claim_name: String) -> impl In
     let claim_data = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(60_000, move || {
-        update_page(namespace_name, claim_name, claim_data)
+        update_page(namespace_name, claim_name, claim_data);
     });
     clear_page_effect(interval_handle);
 

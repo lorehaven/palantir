@@ -31,7 +31,7 @@ pub fn NodesStatComponent(
             nodes_cpu,
             nodes_memory_values,
             nodes_memory_labels,
-        )
+        );
     });
     clear_page_effect(interval_handle);
 

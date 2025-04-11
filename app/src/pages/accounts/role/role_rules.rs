@@ -12,7 +12,7 @@ pub fn RoleRulesComponent(namespace_name: String, role_name: String) -> impl Int
     let role_data = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(60_000, move || {
-        update_page(namespace_name, role_name, role_data)
+        update_page(namespace_name, role_name, role_data);
     });
     clear_page_effect(interval_handle);
 

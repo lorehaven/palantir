@@ -12,7 +12,7 @@ pub fn RoleBindingSubjectsComponent(namespace_name: String, binding_name: String
     let binding_data = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(60_000, move || {
-        update_page(namespace_name, binding_name, binding_data)
+        update_page(namespace_name, binding_name, binding_data);
     });
     clear_page_effect(interval_handle);
 

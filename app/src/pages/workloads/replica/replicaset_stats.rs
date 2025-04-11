@@ -24,7 +24,7 @@ pub fn ReplicaSetsStatsComponent(namespace_name: String, replicaset_name: String
             pod_cpu_usage,
             pod_memory_values,
             pod_memory_labels,
-        )
+        );
     });
     clear_page_effect(interval_handle);
 

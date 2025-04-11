@@ -14,7 +14,7 @@ pub fn ServiceInfoComponent(namespace_name: String, service_name: String) -> imp
     let service_data = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(60_000, move || {
-        update_page(namespace_name, service_name, service_data)
+        update_page(namespace_name, service_name, service_data);
     });
     clear_page_effect(interval_handle);
 

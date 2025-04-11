@@ -31,7 +31,7 @@ pub fn PodsStatComponent(
             pods_cpu,
             pods_memory_values,
             pods_memory_labels,
-        )
+        );
     });
     clear_page_effect(interval_handle);
 

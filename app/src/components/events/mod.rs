@@ -18,7 +18,7 @@ pub fn EventsListComponent(
     let events = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(60_000, move || {
-        update_page(object_type, namespace_name, object_name, events)
+        update_page(object_type, namespace_name, object_name, events);
     });
     clear_page_effect(interval_handle);
 

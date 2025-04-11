@@ -12,7 +12,7 @@ pub fn SecretDataComponent(namespace_name: String, secret_name: String) -> impl 
     let secret_data = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(60_000, move || {
-        update_page(namespace_name, secret_name, secret_data)
+        update_page(namespace_name, secret_name, secret_data);
     });
     clear_page_effect(interval_handle);
 

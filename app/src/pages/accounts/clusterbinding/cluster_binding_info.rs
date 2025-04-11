@@ -13,7 +13,7 @@ pub fn ClusterRoleBindingInfoComponent(cluster_binding_name: String) -> impl Int
     let cluster_binding_data = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(60_000, move || {
-        update_page(cluster_binding_name, cluster_binding_data)
+        update_page(cluster_binding_name, cluster_binding_data);
     });
     clear_page_effect(interval_handle);
 

@@ -14,7 +14,7 @@ pub fn IngressInfoComponent(namespace_name: String, ingress_name: String) -> imp
     let ingress_data = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(60_000, move || {
-        update_page(namespace_name, ingress_name, ingress_data)
+        update_page(namespace_name, ingress_name, ingress_data);
     });
     clear_page_effect(interval_handle);
 

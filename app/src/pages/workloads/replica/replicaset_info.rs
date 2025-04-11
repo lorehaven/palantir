@@ -14,7 +14,7 @@ pub fn ReplicaSetInfoComponent(namespace_name: String, replicaset_name: String) 
     let replicaset_data = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(60_000, move || {
-        update_page(namespace_name, replicaset_name, replicaset_data)
+        update_page(namespace_name, replicaset_name, replicaset_data);
     });
     clear_page_effect(interval_handle);
 

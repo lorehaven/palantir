@@ -46,7 +46,7 @@ fn AccountsList(selected: RwSignal<String>, prompt: RwSignal<String>) -> impl In
     let accounts = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(3_600_000, move || {
-        update_page_list(selected, prompt, accounts)
+        update_page_list(selected, prompt, accounts);
     });
     clear_page_effect(interval_handle);
 

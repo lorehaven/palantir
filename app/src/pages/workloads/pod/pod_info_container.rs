@@ -12,7 +12,7 @@ pub fn PodInfoContainerComponent(namespace_name: String, pod_name: String) -> im
     let pod_data = RwSignal::new(vec![]);
 
     let interval_handle = update_page_effect(60_000, move || {
-        update_page(namespace_name, pod_name, pod_data)
+        update_page(namespace_name, pod_name, pod_data);
     });
     clear_page_effect(interval_handle);
 
