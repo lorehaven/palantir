@@ -2,8 +2,8 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 use serde_json::Value;
 use api::utils::get_api_token_wasm;
-use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
-use crate::pages::utils::shared::text::decode_jwt_token;
+use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
+use crate::utils::shared::text::decode_jwt_token;
 
 #[component]
 pub fn CurrentUserComponent() -> impl IntoView {

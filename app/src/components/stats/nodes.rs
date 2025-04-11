@@ -7,8 +7,8 @@ use domain::metrics::NodeMetrics;
 use domain::cluster::node::Node;
 use domain::utils::time::time_until_now;
 use crate::components::prelude::*;
-use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
-use crate::pages::utils::stats::convert_memory;
+use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
+use crate::utils::stats::convert_memory;
 
 #[component]
 pub fn NodesStatComponent(
@@ -162,7 +162,7 @@ fn get_nodes_cpu(nodes: &[Node], metrics: &[NodeMetrics]) -> (f64, f64) {
 }
 
 fn get_nodes_memory(nodes: &[Node], metrics: &[NodeMetrics]) -> ((f64, f64), (String, String)) {
-    let ncap = convert_memory(nodes.iter().fold(0., |acc, node| acc + crate::pages::utils::stats::parse_memory(&node.status.capacity.memory).unwrap_or(0.)));
-    let nuse = convert_memory(metrics.iter().fold(0., |acc, node| acc + crate::pages::utils::stats::parse_memory(&node.usage.memory).unwrap_or(0.)));
+    let ncap = convert_memory(nodes.iter().fold(0., |acc, node| acc + crate::utils::stats::parse_memory(&node.status.capacity.memory).unwrap_or(0.)));
+    let nuse = convert_memory(metrics.iter().fold(0., |acc, node| acc + crate::utils::stats::parse_memory(&node.usage.memory).unwrap_or(0.)));
     ((ncap.0, nuse.0), (ncap.1, nuse.1))
 }

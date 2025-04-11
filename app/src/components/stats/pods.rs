@@ -7,7 +7,7 @@ use domain::metrics::PodMetrics;
 use domain::cluster::pod::Pod;
 use crate::components::prelude::*;
 use crate::components::stats::shared::{get_pods_cpu, get_pods_memory};
-use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
+use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
 pub fn PodsStatComponent(

@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 
 use crate::components::prelude::*;
-use crate::pages::utils::shared::text::capitalize;
+use crate::utils::shared::text::capitalize;
 
 #[component]
 pub fn DashboardPage() -> impl IntoView {

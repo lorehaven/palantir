@@ -3,7 +3,7 @@ use leptos::task::spawn_local;
 
 use api::storage::claims as claims_api;
 use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
-use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
+use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use domain::utils::time::time_until_now;
 
 #[component]

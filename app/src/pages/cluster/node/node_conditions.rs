@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use crate::components::prelude::*;
-use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
+use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use domain::utils::time::time_until_now;
 use api::cluster::nodes as nodes_api;
 

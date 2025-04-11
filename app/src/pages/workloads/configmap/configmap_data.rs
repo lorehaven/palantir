@@ -3,7 +3,7 @@ use leptos::task::spawn_local;
 
 use api::workloads::configmaps as configmaps_api;
 use crate::components::shared::info::resource_info_view;
-use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
+use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
 pub fn ConfigMapDataComponent(

@@ -5,8 +5,8 @@ use api::metrics as metrics_api;
 use api::workloads::pods as pods_api;
 use crate::components::prelude::{TableColumn, TableColumnType, TableComponent, Wrapper, WrapperSlot};
 use domain::metrics::PodMetrics;
-use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
-use crate::pages::utils::stats::pod_stats::{pod_cpu_actual, pod_cpu_limit, pod_cpu_request, pod_memory_actual, pod_memory_limit, pod_memory_request};
+use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
+use crate::utils::stats::pod_stats::{pod_cpu_actual, pod_cpu_limit, pod_cpu_request, pod_memory_actual, pod_memory_limit, pod_memory_request};
 
 #[component]
 pub fn ReplicaSetListComponent(

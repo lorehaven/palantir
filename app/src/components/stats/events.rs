@@ -4,7 +4,7 @@ use leptos::task::spawn_local;
 use api::cluster::events as events_api;
 use domain::utils::time::time_until_now;
 use crate::components::prelude::*;
-use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
+use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
 pub fn EventsComponent(

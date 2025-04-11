@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use leptos_router::hooks::use_location;
 
 use crate::components::shared::dialog::apply_yaml::ApplyYamlDialog;
-use crate::pages::utils::shared::text::capitalize;
+use crate::utils::shared::text::capitalize;
 
 #[component]
 pub fn Header(

@@ -3,9 +3,9 @@ use leptos::task::spawn_local;
 
 use api::storage::claims as claims_api;
 use crate::components::shared::info::resource_info_view;
-use crate::pages::utils::shared::display;
-use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
-use crate::pages::utils::shared::time::format_timestamp;
+use crate::utils::shared::display;
+use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
+use crate::utils::shared::time::format_timestamp;
 
 #[component]
 pub fn ClaimInfoComponent(

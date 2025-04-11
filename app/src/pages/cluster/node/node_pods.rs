@@ -2,9 +2,9 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use crate::components::prelude::*;
-use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
+use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use domain::utils::time::time_until_now;
-use crate::pages::utils::stats::{convert_memory, parse_memory, parse_pod_cpu};
+use crate::utils::stats::{convert_memory, parse_memory, parse_pod_cpu};
 use api::metrics as metrics_api;
 use api::workloads::pods as pods_api;
 use domain::metrics::PodMetrics;

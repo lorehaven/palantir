@@ -4,7 +4,7 @@ use leptos::task::spawn_local;
 use api::workloads::pods as pods_api;
 use api::workloads as workloads_api;
 use crate::components::prelude::*;
-use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
+use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 pub mod configmap;
 pub mod configmaps;

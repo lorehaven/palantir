@@ -1,7 +1,7 @@
 use domain::metrics::PodMetrics;
 use domain::cluster::pod::Pod;
 
-use crate::pages::utils::stats::{convert_memory, parse_memory, parse_pod_cpu};
+use crate::utils::stats::{convert_memory, parse_memory, parse_pod_cpu};
 
 pub fn get_pods_cpu(pods: &[Pod], metrics: &[PodMetrics]) -> (f64, f64) {
     let pcap = pods.iter()

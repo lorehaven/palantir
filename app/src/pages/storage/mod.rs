@@ -3,7 +3,7 @@ use leptos::task::spawn_local;
 
 use api::storage::storageclasses as storage_api;
 use crate::components::prelude::*;
-use crate::pages::utils::shared::effects::{clear_page_effect, update_page_effect};
+use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 pub mod storageclass;
 
