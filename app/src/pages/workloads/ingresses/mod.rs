@@ -6,8 +6,8 @@ pub mod ingresses_list;
 
 #[component]
 pub fn WorkloadsIngressesPage() -> impl IntoView {
-    let prompt = RwSignal::new(String::new());
-    let selected = RwSignal::new("All Namespaces".to_string());
+    let resource_name = RwSignal::new(String::new());
+    let namespace_name = RwSignal::new("All Namespaces".to_string());
 
     view! {
         <Header text=vec!["Workloads", "Ingresses"] />
@@ -16,11 +16,11 @@ pub fn WorkloadsIngressesPage() -> impl IntoView {
                 <div class="workloads-ingresses main-page">
                     <Filter
                         label="Ingresses"
-                        selected
-                        prompt
+                        namespace_name
+                        resource_name
                         with_namespace=true
-                        with_prompt=true />
-                    <ingresses_list::IngressesListComponent selected prompt />
+                        with_resource_name=true />
+                    <ingresses_list::IngressesListComponent namespace_name resource_name />
                 </div>
             </PageContentSlot>
         </PageContent>

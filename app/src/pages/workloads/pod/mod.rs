@@ -16,7 +16,7 @@ pub fn WorkloadsPodPage() -> impl IntoView {
         .into_iter()
         .collect::<Vec<_>>()
         .join("-");
-    let pod_name = params
+    let name = params
         .with_untracked(|p| p.get("name"))
         .into_iter()
         .collect::<Vec<_>>()
@@ -25,8 +25,11 @@ pub fn WorkloadsPodPage() -> impl IntoView {
         "Workloads".to_string(),
         namespace_name.clone(),
         "Pod".to_string(),
-        pod_name.clone(),
+        name.clone(),
     ];
+
+    let namespace_name = RwSignal::new(namespace_name);
+    let name = RwSignal::new(name);
 
     view! {
         <Header text=page_title />
@@ -34,18 +37,18 @@ pub fn WorkloadsPodPage() -> impl IntoView {
             <PageContentSlot slot>
                 <div class="workloads-pod main-page">
                     <pod_stats::PodStatsComponent
-                        namespace_name=namespace_name.clone()
-                        pod_name=pod_name.clone() />
+                        namespace_name
+                        resource_name=name />
                     <pod_info::PodInfoComponent
-                        namespace_name=namespace_name.clone()
-                        pod_name=pod_name.clone() />
+                        namespace_name
+                        resource_name=name />
                     <pod_info_container::PodInfoContainerComponent
-                        namespace_name=namespace_name.clone()
-                        pod_name=pod_name.clone() />
+                        namespace_name
+                        resource_name=name />
                     <EventsListComponent
                         object_type="Pod".to_string()
-                        namespace_name=namespace_name.clone()
-                        object_name=pod_name.clone() />
+                        namespace_name
+                        object_name=name />
                 </div>
             </PageContentSlot>
         </PageContent>

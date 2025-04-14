@@ -8,45 +8,46 @@ use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::utils::shared::time::format_timestamp;
 
 #[component]
-pub fn ClaimInfoComponent(namespace_name: String, claim_name: String) -> impl IntoView {
-    let namespace_name = RwSignal::new(namespace_name);
-    let claim_name = RwSignal::new(claim_name);
-    let claim_data = RwSignal::new(vec![]);
+pub fn ClaimInfoComponent(
+    namespace_name: RwSignal<String>,
+    resource_name: RwSignal<String>,
+) -> impl IntoView {
+    let data = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(60_000, move || {
-        update_page(namespace_name, claim_name, claim_data);
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(namespace_name, resource_name, data);
     });
     clear_page_effect(interval_handle);
 
-    resource_info_view(claim_data)
+    resource_info_view(data)
 }
 
 fn update_page(
     namespace_name: RwSignal<String>,
-    claim_name: RwSignal<String>,
-    claim_data: RwSignal<Vec<(String, String)>>,
+    resource_name: RwSignal<String>,
+    data: RwSignal<Vec<(String, String)>>,
 ) {
-    if namespace_name.is_disposed() || claim_name.is_disposed() {
+    if namespace_name.is_disposed() || resource_name.is_disposed() {
         return;
     }
     let namespace_name = namespace_name.get();
-    let claim_name = claim_name.get();
+    let resource_name = resource_name.get();
 
     spawn_local(async move {
-        let selected_value = if namespace_name == "All Namespaces" {
+        let namespace_name = if namespace_name == "All Namespaces" {
             None
         } else {
             Some(namespace_name)
         };
-        let claim = claims_api::get_claims(selected_value)
+        let claim = claims_api::get_claims(namespace_name)
             .await
             .unwrap_or_default()
             .iter()
-            .find(|sc| sc.metadata.name == claim_name)
+            .find(|sc| sc.metadata.name == resource_name)
             .cloned()
             .unwrap_or_default();
 
-        claim_data.set(
+        data.set(
             vec![
                 ("Name", claim.clone().metadata.name),
                 ("Kind", "PersistentVolumeClaim".to_string()),

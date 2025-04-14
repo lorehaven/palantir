@@ -12,7 +12,7 @@ pub fn StorageClassInfoComponent(storageclass_name: String) -> impl IntoView {
     let storageclass_name = RwSignal::new(storageclass_name);
     let storageclass_data = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(60_000, move || {
+    let interval_handle = update_page_effect(10_000, move || {
         update_page(storageclass_name, storageclass_data);
     });
     clear_page_effect(interval_handle);

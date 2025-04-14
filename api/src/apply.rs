@@ -1,7 +1,6 @@
 use leptos::prelude::ServerFnError;
 use leptos::server;
 
-#[allow(unused_imports)]
 use crate::utils::{get_api_token, get_url};
 
 #[server(Apply, "/api/apply")]

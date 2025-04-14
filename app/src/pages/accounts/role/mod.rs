@@ -26,13 +26,16 @@ pub fn AccountsRolePage() -> impl IntoView {
         name.clone(),
     ];
 
+    let namespace_name = RwSignal::new(namespace_name);
+    let name = RwSignal::new(name);
+
     view! {
         <Header text=page_title />
         <PageContent>
             <PageContentSlot slot>
                 <div class="accounts-role main-page">
-                    <role_info::RoleInfoComponent namespace_name=namespace_name.clone() role_name=name.clone() />
-                    <role_rules::RoleRulesComponent namespace_name=namespace_name.clone() role_name=name.clone() />
+                    <role_info::RoleInfoComponent namespace_name resource_name=name />
+                    <role_rules::RoleRulesComponent namespace_name resource_name=name />
                 </div>
             </PageContentSlot>
         </PageContent>

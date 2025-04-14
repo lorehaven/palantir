@@ -9,47 +9,45 @@ use crate::utils::shared::time::format_timestamp;
 
 #[component]
 pub fn ServiceAccountInfoComponent(
-    namespace_name: String,
-    serviceaccount_name: String,
+    namespace_name: RwSignal<String>,
+    resource_name: RwSignal<String>,
 ) -> impl IntoView {
-    let namespace_name = RwSignal::new(namespace_name);
-    let serviceaccount_name = RwSignal::new(serviceaccount_name);
-    let serviceaccount_data = RwSignal::new(vec![]);
+    let data = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(60_000, move || {
-        update_page(namespace_name, serviceaccount_name, serviceaccount_data);
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(namespace_name, resource_name, data);
     });
     clear_page_effect(interval_handle);
 
-    resource_info_view(serviceaccount_data)
+    resource_info_view(data)
 }
 
 fn update_page(
     namespace_name: RwSignal<String>,
-    serviceaccount_name: RwSignal<String>,
-    serviceaccount_data: RwSignal<Vec<(String, String)>>,
+    resource_name: RwSignal<String>,
+    data: RwSignal<Vec<(String, String)>>,
 ) {
-    if namespace_name.is_disposed() || serviceaccount_name.is_disposed() {
+    if namespace_name.is_disposed() || resource_name.is_disposed() {
         return;
     }
     let namespace_name = namespace_name.get();
-    let serviceaccount_name = serviceaccount_name.get();
+    let resource_name = resource_name.get();
 
     spawn_local(async move {
-        let selected_value = if namespace_name == "All Namespaces" {
+        let namespace_name = if namespace_name == "All Namespaces" {
             None
         } else {
             Some(namespace_name)
         };
-        let sa = serviceaccounts_api::get_serviceaccounts(selected_value)
+        let sa = serviceaccounts_api::get_serviceaccounts(namespace_name)
             .await
             .unwrap_or_default()
             .iter()
-            .find(|sc| sc.metadata.name == serviceaccount_name)
+            .find(|sc| sc.metadata.name == resource_name)
             .cloned()
             .unwrap_or_default();
 
-        serviceaccount_data.set(
+        data.set(
             vec![
                 ("Name", sa.clone().metadata.name),
                 ("Kind", "ServiceAccount".to_string()),

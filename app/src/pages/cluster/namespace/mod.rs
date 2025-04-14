@@ -22,15 +22,17 @@ pub fn ClusterNamespacePage() -> impl IntoView {
         namespace_name.clone(),
     ];
 
+    let namespace_name = RwSignal::new(namespace_name);
+
     view! {
         <Header text=page_title />
         <PageContent>
             <PageContentSlot slot>
                 <div class="cluster-namespace main-page">
-                    <PodsStatComponent namespace_name=Some(namespace_name.clone()) expandable=false />
-                    <namespace_info::NamespaceInfoComponent namespace_name=namespace_name.clone() />
-                    <namespace_pods::NamespacePodsComponent namespace_name=namespace_name.clone() />
-                    <namespace_events::NamespaceEventsComponent namespace_name=namespace_name.clone() />
+                    <PodsStatComponent namespace_name expandable=false />
+                    <namespace_info::NamespaceInfoComponent namespace_name />
+                    <namespace_pods::NamespacePodsComponent namespace_name />
+                    <namespace_events::NamespaceEventsComponent namespace_name />
                 </div>
             </PageContentSlot>
         </PageContent>

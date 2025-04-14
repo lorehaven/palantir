@@ -13,7 +13,7 @@ pub fn ServiceAccountPage() -> impl IntoView {
         .into_iter()
         .collect::<Vec<_>>()
         .join("-");
-    let serviceaccount_name = params
+    let name = params
         .with_untracked(|p| p.get("name"))
         .into_iter()
         .collect::<Vec<_>>()
@@ -21,8 +21,11 @@ pub fn ServiceAccountPage() -> impl IntoView {
     let page_title = vec![
         "ServiceAccount".to_string(),
         namespace_name.clone(),
-        serviceaccount_name.clone(),
+        name.clone(),
     ];
+
+    let namespace_name = RwSignal::new(namespace_name);
+    let name = RwSignal::new(name);
 
     view! {
         <Header text=page_title />
@@ -30,8 +33,8 @@ pub fn ServiceAccountPage() -> impl IntoView {
             <PageContentSlot slot>
                 <div class="storageclass main-page">
                     <serviceaccount_info::ServiceAccountInfoComponent
-                        serviceaccount_name=serviceaccount_name.clone()
-                        namespace_name=namespace_name.clone() />
+                        resource_name=name
+                        namespace_name />
                 </div>
             </PageContentSlot>
         </PageContent>

@@ -11,12 +11,10 @@ use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
 pub fn PodsStatComponent(
-    #[prop(default = None)] namespace_name: Option<String>,
-    #[prop(default = None)] node_name: Option<String>,
+    #[prop(default = RwSignal::new("All Namespaces".to_string()))] namespace_name: RwSignal<String>,
+    #[prop(default = RwSignal::new(String::new()))] node_name: RwSignal<String>,
     #[prop(default = true)] expandable: bool,
 ) -> impl IntoView {
-    let namespace_name = RwSignal::new(namespace_name);
-    let node_name = RwSignal::new(node_name);
     let pods_ready = RwSignal::new((0., 0.));
     let pods_cpu = RwSignal::new((0., 0.));
     let pods_memory_values = RwSignal::new((0., 0.));
@@ -45,8 +43,8 @@ pub fn PodsStatComponent(
 }
 
 fn update_page(
-    namespace_name: RwSignal<Option<String>>,
-    node_name: RwSignal<Option<String>>,
+    namespace_name: RwSignal<String>,
+    node_name: RwSignal<String>,
     pods_ready: RwSignal<(f64, f64)>,
     pods_cpu: RwSignal<(f64, f64)>,
     pods_memory_values: RwSignal<(f64, f64)>,
@@ -59,6 +57,16 @@ fn update_page(
     let node_name = node_name.get();
 
     spawn_local(async move {
+        let namespace_name = if namespace_name == "All Namespaces" {
+            None
+        } else {
+            Some(namespace_name)
+        };
+        let node_name = if node_name.is_empty() {
+            None
+        } else {
+            Some(node_name)
+        };
         let pods = pods_api::get_pods(namespace_name, node_name)
             .await
             .unwrap_or_default();

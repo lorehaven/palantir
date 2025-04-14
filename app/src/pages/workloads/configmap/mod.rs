@@ -14,7 +14,7 @@ pub fn WorkloadsConfigMapPage() -> impl IntoView {
         .into_iter()
         .collect::<Vec<_>>()
         .join("-");
-    let configmap_name = params
+    let name = params
         .with_untracked(|p| p.get("name"))
         .into_iter()
         .collect::<Vec<_>>()
@@ -23,8 +23,11 @@ pub fn WorkloadsConfigMapPage() -> impl IntoView {
         "Workloads".to_string(),
         namespace_name.clone(),
         "ConfigMaps".to_string(),
-        configmap_name.clone(),
+        name.clone(),
     ];
+
+    let namespace_name = RwSignal::new(namespace_name);
+    let name = RwSignal::new(name);
 
     view! {
         <Header text=page_title />
@@ -32,11 +35,11 @@ pub fn WorkloadsConfigMapPage() -> impl IntoView {
             <PageContentSlot slot>
                 <div class="workloads-configmap main-page">
                     <configmap_info::ConfigMapInfoComponent
-                        namespace_name=namespace_name.clone()
-                        configmap_name=configmap_name.clone() />
+                        namespace_name
+                        resource_name=name />
                     <configmap_data::ConfigMapDataComponent
-                        namespace_name=namespace_name.clone()
-                        configmap_name=configmap_name.clone() />
+                        namespace_name
+                        resource_name=name />
                 </div>
             </PageContentSlot>
         </PageContent>

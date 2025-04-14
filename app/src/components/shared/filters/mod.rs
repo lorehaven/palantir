@@ -15,23 +15,23 @@ use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 #[component]
 pub fn Filter(
     label: &'static str,
-    #[prop(default = RwSignal::new(String::new()))] selected: RwSignal<String>,
-    #[prop(default = RwSignal::new(String::new()))] prompt: RwSignal<String>,
+    #[prop(default = RwSignal::new(String::new()))] namespace_name: RwSignal<String>,
+    #[prop(default = RwSignal::new(String::new()))] resource_name: RwSignal<String>,
     #[prop(default = false)] with_namespace: bool,
-    #[prop(default = false)] with_prompt: bool,
+    #[prop(default = false)] with_resource_name: bool,
 ) -> impl IntoView {
     let namespaces = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(60_000, move || update_page(namespaces));
+    let interval_handle = update_page_effect(10_000, move || update_page(namespaces));
     clear_page_effect(interval_handle);
 
     view(
         label,
-        selected,
+        namespace_name,
         namespaces,
-        prompt,
+        resource_name,
         with_namespace,
-        with_prompt,
+        with_resource_name,
     )
 }
 
@@ -50,11 +50,11 @@ fn update_page(namespaces: RwSignal<Vec<String>>) {
 
 fn view(
     label: &'static str,
-    selected: RwSignal<String>,
+    namespace_name: RwSignal<String>,
     namespaces: RwSignal<Vec<String>>,
-    prompt: RwSignal<String>,
+    resource_name: RwSignal<String>,
     with_namespace: bool,
-    with_prompt: bool,
+    with_resource_name: bool,
 ) -> impl IntoView {
     view! {
         <Wrapper>
@@ -62,11 +62,11 @@ fn view(
                 <div class="filter">
                     <label::FilterLabel label />
                     <Show when=move || with_namespace>
-                        <namespace::NamespaceFilter namespaces selected />
+                        <namespace::NamespaceFilter namespaces namespace_name />
                     </Show>
                     <spacer::FilterSpacer />
-                    <Show when=move || with_prompt>
-                        <prompt::PromptFilter prompt />
+                    <Show when=move || with_resource_name>
+                        <prompt::PromptFilter prompt=resource_name />
                     </Show>
                 </div>
             </WrapperSlot>

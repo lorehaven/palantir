@@ -1,5 +1,6 @@
 use api::workloads as workloads_api;
 use api::workloads::pods as pods_api;
+use domain::utils::time::time_until_now;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
@@ -19,8 +20,8 @@ pub mod services;
 
 #[component]
 pub fn WorkloadsPage() -> impl IntoView {
-    let prompt = RwSignal::new(String::new());
-    let selected = RwSignal::new("All Namespaces".to_string());
+    let resource_name = RwSignal::new(String::new());
+    let namespace_name = RwSignal::new("All Namespaces".to_string());
 
     view! {
         <Header text=vec!["Workloads"] />
@@ -29,12 +30,12 @@ pub fn WorkloadsPage() -> impl IntoView {
                 <div class="workloads main-page">
                     <Filter
                         label="Workloads"
-                        selected
-                        prompt
+                        namespace_name
+                        resource_name
                         with_namespace=true
-                        with_prompt=true />
-                    <WorkloadsStats selected />
-                    <WorkloadsList selected prompt />
+                        with_resource_name=true />
+                    <WorkloadsStats namespace_name />
+                    <WorkloadsList namespace_name resource_name />
                 </div>
             </PageContentSlot>
         </PageContent>
@@ -43,12 +44,12 @@ pub fn WorkloadsPage() -> impl IntoView {
 }
 
 #[component]
-fn WorkloadsStats(selected: RwSignal<String>) -> impl IntoView {
+fn WorkloadsStats(namespace_name: RwSignal<String>) -> impl IntoView {
     let workloads_ready = RwSignal::new((0., 0.));
     let pods_ready = RwSignal::new((0., 0.));
 
-    let interval_handle = update_page_effect(3_600_000, move || {
-        update_page_stats(selected, workloads_ready, pods_ready);
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page_stats(namespace_name, workloads_ready, pods_ready);
     });
     clear_page_effect(interval_handle);
 
@@ -56,20 +57,20 @@ fn WorkloadsStats(selected: RwSignal<String>) -> impl IntoView {
 }
 
 fn update_page_stats(
-    selected: RwSignal<String>,
+    namespace_name: RwSignal<String>,
     workloads_ready: RwSignal<(f64, f64)>,
     pods_ready: RwSignal<(f64, f64)>,
 ) {
-    if selected.is_disposed() {
+    if namespace_name.is_disposed() {
         return;
     }
-    let selected_value = selected.get();
+    let namespace_name = namespace_name.get();
 
     spawn_local(async move {
-        let namespace_name = if selected_value == "All Namespaces" {
+        let namespace_name = if namespace_name == "All Namespaces" {
             None
         } else {
-            Some(selected_value)
+            Some(namespace_name)
         };
         let workloads = workloads_api::get_workloads(namespace_name.clone()).await;
         let ready_workloads = workloads.iter().filter(|w| w.is_ready()).count();
@@ -114,13 +115,12 @@ fn view_stats(
 }
 
 #[component]
-fn WorkloadsList(selected: RwSignal<String>, prompt: RwSignal<String>) -> impl IntoView {
-    let workloads = RwSignal::new(vec![]);
-
-    let interval_handle = update_page_effect(3_600_000, move || {
-        update_page_list(selected, prompt, workloads);
-    });
-    clear_page_effect(interval_handle);
+fn WorkloadsList(
+    namespace_name: RwSignal<String>,
+    resource_name: RwSignal<String>,
+) -> impl IntoView {
+    let table_rows = RwSignal::new(vec![]);
+    let loading = RwSignal::new(true);
 
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 1),
@@ -129,38 +129,83 @@ fn WorkloadsList(selected: RwSignal<String>, prompt: RwSignal<String>) -> impl I
         TableColumn::new("Age", TableColumnType::String, 1),
         TableColumn::new("Pods", TableColumnType::String, 3),
     ];
-    let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/cluster/namespaces/";
-    params[2] = "/workloads/:0/:1/";
-    data_list_view(columns, workloads, styles, params)
+    let styles = vec![String::new(); columns.len()];
+    let mut params = vec![String::new(); columns.len()];
+    params[1] = "/cluster/namespaces/".to_string();
+    params[2] = "/workloads/:0/:1/".to_string();
+    params[2] = "/accounts/:1/serviceaccounts/".to_string();
+
+    let columns_update = columns.clone();
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page_list(
+            columns_update.clone(),
+            styles.clone(),
+            params.clone(),
+            table_rows,
+            namespace_name,
+            resource_name,
+            loading,
+        );
+    });
+    clear_page_effect(interval_handle);
+    data_list_view(columns, table_rows, loading)
 }
 
 fn update_page_list(
-    selected: RwSignal<String>,
-    prompt: RwSignal<String>,
-    workloads: RwSignal<Vec<Vec<String>>>,
+    columns: Vec<TableColumn>,
+    styles: Vec<String>,
+    params: Vec<String>,
+    table_rows: RwSignal<Vec<TableRow>>,
+    namespace_name: RwSignal<String>,
+    resource_name: RwSignal<String>,
+    loading: RwSignal<bool>,
 ) {
-    let selected_value = selected.get();
-    let prompt_value = prompt.get();
+    if namespace_name.is_disposed() || resource_name.is_disposed() {
+        return;
+    }
+    let namespace_name = namespace_name.get();
+    let resource_name = resource_name.get();
+
     spawn_local(async move {
-        let namespace_name = if selected_value == "All Namespaces" {
-            None
-        } else {
-            Some(selected_value)
-        };
-        let workloads_list = workloads_api::get_workloads(namespace_name).await;
-        let mut list = workloads_list
-            .into_iter()
-            .filter(|w| {
-                w.get_name()
-                    .to_lowercase()
-                    .contains(&prompt_value.to_lowercase())
-            })
-            .map(|w| w.to_model())
-            .map(|w| vec![w.r#type, w.namespace, w.name, w.age, w.pods])
-            .collect::<Vec<_>>();
-        list.sort_by(|a, b| a[1].cmp(&b[1]));
-        workloads.set(list);
+        let list = update_page_list_async(
+            columns.clone(),
+            styles.clone(),
+            params.clone(),
+            namespace_name.clone(),
+            resource_name.clone(),
+        )
+        .await
+        .unwrap_or_default();
+        table_rows.set(list);
+        loading.set(false);
     });
+}
+
+#[server]
+async fn update_page_list_async(
+    columns: Vec<TableColumn>,
+    styles: Vec<String>,
+    params: Vec<String>,
+    namespace_name: String,
+    resource_name: String,
+) -> Result<Vec<TableRow>, ServerFnError> {
+    let namespace_name = if namespace_name == "All Namespaces" {
+        None
+    } else {
+        Some(namespace_name)
+    };
+    let mut list = workloads_api::get_workloads(namespace_name)
+        .await
+        .into_iter()
+        .filter(|w| {
+            w.get_name()
+                .to_lowercase()
+                .contains(&resource_name.to_lowercase())
+        })
+        .map(|w| w.to_model())
+        .map(|w| vec![w.r#type, w.namespace, w.name, w.age, w.pods])
+        .collect::<Vec<_>>();
+
+    list.sort_by(|a, b| a[1].cmp(&b[1]));
+    Ok(parse_table_rows(columns, list, styles, params))
 }

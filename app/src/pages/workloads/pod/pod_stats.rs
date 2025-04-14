@@ -8,17 +8,18 @@ use crate::components::stats::shared::{get_pods_cpu, get_pods_memory};
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
-pub fn PodStatsComponent(namespace_name: String, pod_name: String) -> impl IntoView {
-    let namespace_name = RwSignal::new(namespace_name);
-    let pod_name = RwSignal::new(pod_name);
+pub fn PodStatsComponent(
+    namespace_name: RwSignal<String>,
+    resource_name: RwSignal<String>,
+) -> impl IntoView {
     let pod_cpu_usage = RwSignal::new((0., 0.));
     let pod_memory_values = RwSignal::new((0., 0.));
     let pod_memory_labels = RwSignal::new((String::new(), String::new()));
 
-    let interval_handle = update_page_effect(3_600_000, move || {
+    let interval_handle = update_page_effect(10_000, move || {
         update_page(
             namespace_name,
-            pod_name,
+            resource_name,
             pod_cpu_usage,
             pod_memory_values,
             pod_memory_labels,
@@ -31,28 +32,28 @@ pub fn PodStatsComponent(namespace_name: String, pod_name: String) -> impl IntoV
 
 fn update_page(
     namespace_name: RwSignal<String>,
-    pod_name: RwSignal<String>,
+    resource_name: RwSignal<String>,
     pod_cpu_usage: RwSignal<(f64, f64)>,
     pod_memory_values: RwSignal<(f64, f64)>,
     pod_memory_labels: RwSignal<(String, String)>,
 ) {
-    if namespace_name.is_disposed() || pod_name.is_disposed() {
+    if namespace_name.is_disposed() || resource_name.is_disposed() {
         return;
     }
-    let selected_value = namespace_name.get();
-    let pod_name = pod_name.get();
+    let namespace_name = namespace_name.get();
+    let resource_name = resource_name.get();
 
     spawn_local(async move {
-        let namespace_name = if selected_value.clone() == "All Namespaces" {
+        let namespace_name = if namespace_name.clone() == "All Namespaces" {
             None
         } else {
-            Some(selected_value.clone())
+            Some(namespace_name.clone())
         };
-        let pod = pods_api::get_pods(namespace_name, None)
+        let pod = pods_api::get_pods(namespace_name.clone(), None)
             .await
             .unwrap_or_default()
             .into_iter()
-            .find(|p| p.metadata.name == pod_name)
+            .find(|p| p.metadata.name == resource_name)
             .unwrap_or_default();
 
         let pod_metrics = metrics_api::get_pods()
@@ -60,7 +61,8 @@ fn update_page(
             .unwrap_or_default()
             .into_iter()
             .filter(|p| {
-                p.metadata.namespace == selected_value && p.metadata.name.contains("drone-runner")
+                p.metadata.namespace == namespace_name.clone().unwrap_or_default()
+                    && p.metadata.name.contains("drone-runner")
             })
             .collect::<Vec<_>>();
 

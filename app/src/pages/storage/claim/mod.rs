@@ -13,7 +13,7 @@ pub fn StorageClaimPage() -> impl IntoView {
         .into_iter()
         .collect::<Vec<_>>()
         .join("-");
-    let claim_name = params
+    let name = params
         .with_untracked(|p| p.get("name"))
         .into_iter()
         .collect::<Vec<_>>()
@@ -22,15 +22,18 @@ pub fn StorageClaimPage() -> impl IntoView {
         "Storage".to_string(),
         namespace_name.clone(),
         "Persistent Volume Claims".to_string(),
-        claim_name.clone(),
+        name.clone(),
     ];
+
+    let namespace_name = RwSignal::new(namespace_name);
+    let name = RwSignal::new(name);
 
     view! {
         <Header text=page_title />
         <PageContent>
             <PageContentSlot slot>
                 <div class="storage-claim main-page">
-                    <claim_info::ClaimInfoComponent namespace_name=namespace_name.clone() claim_name=claim_name.clone() />
+                    <claim_info::ClaimInfoComponent namespace_name resource_name=name />
                 </div>
             </PageContentSlot>
         </PageContent>

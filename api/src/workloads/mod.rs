@@ -1,6 +1,5 @@
 use domain::workload::Workload;
 
-#[allow(unused_imports)]
 use crate::utils::*;
 
 pub mod configmaps;

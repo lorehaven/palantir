@@ -6,7 +6,7 @@ mod bindings_list;
 
 #[component]
 pub fn AccountsRoleBindingsPage() -> impl IntoView {
-    let prompt = RwSignal::new(String::new());
+    let resource_name = RwSignal::new(String::new());
 
     view! {
         <Header text=vec!["Accounts", "Role Bindings"] />
@@ -15,9 +15,9 @@ pub fn AccountsRoleBindingsPage() -> impl IntoView {
                 <div class="accounts-bindings main-page">
                     <Filter
                         label="Role Bindings"
-                        prompt
-                        with_prompt=true />
-                    <bindings_list::BindingsListComponent prompt />
+                        resource_name
+                        with_resource_name=true />
+                    <bindings_list::BindingsListComponent resource_name />
                 </div>
             </PageContentSlot>
         </PageContent>

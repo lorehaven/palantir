@@ -8,38 +8,39 @@ use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::utils::shared::time::format_timestamp;
 
 #[component]
-pub fn ServiceInfoComponent(namespace_name: String, service_name: String) -> impl IntoView {
-    let namespace_name = RwSignal::new(namespace_name);
-    let service_name = RwSignal::new(service_name);
-    let service_data = RwSignal::new(vec![]);
+pub fn ServiceInfoComponent(
+    namespace_name: RwSignal<String>,
+    resource_name: RwSignal<String>,
+) -> impl IntoView {
+    let data = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(60_000, move || {
-        update_page(namespace_name, service_name, service_data);
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(namespace_name, resource_name, data);
     });
     clear_page_effect(interval_handle);
 
-    resource_info_view(service_data)
+    resource_info_view(data)
 }
 
 fn update_page(
     namespace_name: RwSignal<String>,
-    service_name: RwSignal<String>,
-    service_data: RwSignal<Vec<(String, String)>>,
+    resource_name: RwSignal<String>,
+    data: RwSignal<Vec<(String, String)>>,
 ) {
-    if namespace_name.is_disposed() || service_name.is_disposed() {
+    if namespace_name.is_disposed() || resource_name.is_disposed() {
         return;
     }
-    let selected_value = namespace_name.get();
-    let service_name = service_name.get();
+    let namespace_name = namespace_name.get();
+    let resource_name = resource_name.get();
 
     spawn_local(async move {
         let service = services_api::get_services(None).await.unwrap_or_default();
         let service = service
             .into_iter()
-            .find(|n| n.metadata.namespace == selected_value && n.metadata.name == service_name)
+            .find(|n| n.metadata.namespace == namespace_name && n.metadata.name == resource_name)
             .unwrap_or_default();
 
-        service_data.set(
+        data.set(
             vec![
                 ("Name", service.clone().metadata.name),
                 ("Kind", "Service".to_string()),

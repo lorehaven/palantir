@@ -4,9 +4,8 @@ use crate::components::prelude::*;
 
 pub fn data_list_view(
     columns: Vec<TableColumn>,
-    data: RwSignal<Vec<Vec<String>>>,
-    styles: Vec<&'static str>,
-    params: Vec<impl Into<String> + ToString + Clone + Send + Sync + 'static>,
+    table_rows: RwSignal<Vec<TableRow>>,
+    loading: RwSignal<bool>,
 ) -> impl IntoView {
     view! {
         <Wrapper>
@@ -15,9 +14,8 @@ pub fn data_list_view(
                     <div class="card-table">
                         <TableComponent
                             columns=columns.clone()
-                            values=data.get()
-                            styles=styles.clone()
-                            params=params.clone() />
+                            table_rows
+                            loading />
                     </div>
                 </div>
             </WrapperSlot>

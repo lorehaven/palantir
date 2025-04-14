@@ -20,13 +20,15 @@ pub fn AccountsClusterRoleBindingPage() -> impl IntoView {
         name.clone(),
     ];
 
+    let name = RwSignal::new(name);
+
     view! {
         <Header text=page_title />
         <PageContent>
             <PageContentSlot slot>
                 <div class="accounts-cluster-role-binding main-page">
-                    <cluster_binding_info::ClusterRoleBindingInfoComponent cluster_binding_name=name.clone() />
-                    <cluster_binding_subjects::ClusterRoleBindingSubjectsComponent cluster_binding_name=name.clone() />
+                    <cluster_binding_info::ClusterRoleBindingInfoComponent resource_name=name />
+                    <cluster_binding_subjects::ClusterRoleBindingSubjectsComponent resource_name=name />
                 </div>
             </PageContentSlot>
         </PageContent>

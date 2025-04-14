@@ -8,17 +8,16 @@ use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::utils::shared::time::format_timestamp;
 
 #[component]
-pub fn NodeInfoComponent(node_name: String) -> impl IntoView {
-    let node_name = RwSignal::new(node_name);
-    let node_data = RwSignal::new(vec![]);
+pub fn NodeInfoComponent(resource_name: RwSignal<String>) -> impl IntoView {
+    let data = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(60_000, move || update_page(node_name, node_data));
+    let interval_handle = update_page_effect(10_000, move || update_page(resource_name, data));
     clear_page_effect(interval_handle);
 
-    resource_info_view(node_data)
+    resource_info_view(data)
 }
 
-fn update_page(node_name: RwSignal<String>, node_data: RwSignal<Vec<(String, String)>>) {
+fn update_page(node_name: RwSignal<String>, data: RwSignal<Vec<(String, String)>>) {
     if node_name.is_disposed() {
         return;
     }
@@ -37,7 +36,7 @@ fn update_page(node_name: RwSignal<String>, node_data: RwSignal<Vec<(String, Str
             .find(|n| n.metadata.name == node_name)
             .unwrap_or_default();
 
-        node_data.set(
+        data.set(
             vec![
                 ("Name", node.clone().metadata.name),
                 ("Kind", kind),

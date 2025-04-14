@@ -6,8 +6,8 @@ pub mod services_list;
 
 #[component]
 pub fn WorkloadsServicesPage() -> impl IntoView {
-    let prompt = RwSignal::new(String::new());
-    let selected = RwSignal::new("All Namespaces".to_string());
+    let resource_name = RwSignal::new(String::new());
+    let namespace_name = RwSignal::new("All Namespaces".to_string());
 
     view! {
         <Header text=vec!["Workloads", "Services"] />
@@ -16,11 +16,11 @@ pub fn WorkloadsServicesPage() -> impl IntoView {
                 <div class="workloads-services main-page">
                     <Filter
                         label="Services"
-                        selected
-                        prompt
+                        namespace_name
+                        resource_name
                         with_namespace=true
-                        with_prompt=true />
-                    <services_list::ServicesListComponent selected prompt />
+                        with_resource_name=true />
+                    <services_list::ServicesListComponent namespace_name resource_name />
                 </div>
             </PageContentSlot>
         </PageContent>

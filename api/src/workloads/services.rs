@@ -1,10 +1,8 @@
-#[allow(unused_imports)]
 use domain::shared::response::Response;
 use domain::workload::service::Service;
 use leptos::prelude::ServerFnError;
 use leptos::server;
 
-#[allow(unused_imports)]
 use crate::utils::{kube_api_request, ApiType};
 
 #[server(GetServices, "/api/workloads/services")]

@@ -17,7 +17,7 @@ pub fn WorkloadsReplicaSetPage() -> impl IntoView {
         .into_iter()
         .collect::<Vec<_>>()
         .join("-");
-    let replicaset_name = params
+    let name = params
         .with_untracked(|p| p.get("name"))
         .into_iter()
         .collect::<Vec<_>>()
@@ -26,8 +26,11 @@ pub fn WorkloadsReplicaSetPage() -> impl IntoView {
         "Workloads".to_string(),
         namespace_name.clone(),
         "Replica Set".to_string(),
-        replicaset_name.clone(),
+        name.clone(),
     ];
+
+    let namespace_name = RwSignal::new(namespace_name);
+    let name = RwSignal::new(name);
 
     view! {
         <Header text=page_title />
@@ -35,21 +38,21 @@ pub fn WorkloadsReplicaSetPage() -> impl IntoView {
             <PageContentSlot slot>
                 <div class="workloads-replicaset main-page">
                     <replicaset_stats::ReplicaSetsStatsComponent
-                        namespace_name=namespace_name.clone()
-                        replicaset_name=replicaset_name.clone() />
+                        namespace_name
+                        resource_name=name />
                     <replicaset_info::ReplicaSetInfoComponent
-                        namespace_name=namespace_name.clone()
-                        replicaset_name=replicaset_name.clone() />
+                        namespace_name
+                        resource_name=name />
                     <replicaset_info_container::ReplicaSetInfoContainerComponent
-                        namespace_name=namespace_name.clone()
-                        replicaset_name=replicaset_name.clone() />
+                        namespace_name
+                        resource_name=name />
                     <replicaset_list::ReplicaSetListComponent
-                        namespace_name=namespace_name.clone()
-                        replicaset_name=replicaset_name.clone() />
+                        namespace_name
+                        resource_name=name />
                     <EventsListComponent
                         object_type="ReplicaSet".to_string()
-                        namespace_name=namespace_name.clone()
-                        object_name=replicaset_name.clone() />
+                        namespace_name
+                        object_name=name />
                 </div>
             </PageContentSlot>
         </PageContent>

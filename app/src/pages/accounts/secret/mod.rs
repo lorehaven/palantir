@@ -26,13 +26,16 @@ pub fn AccountsSecretPage() -> impl IntoView {
         name.clone(),
     ];
 
+    let namespace_name = RwSignal::new(namespace_name);
+    let name = RwSignal::new(name);
+
     view! {
         <Header text=page_title />
         <PageContent>
             <PageContentSlot slot>
                 <div class="accounts-secret main-page">
-                    <secret_info::SecretInfoComponent namespace_name=namespace_name.clone() secret_name=name.clone() />
-                    <secret_data::SecretDataComponent namespace_name=namespace_name.clone() secret_name=name.clone() />
+                    <secret_info::SecretInfoComponent namespace_name resource_name=name />
+                    <secret_data::SecretDataComponent namespace_name resource_name=name />
                 </div>
             </PageContentSlot>
         </PageContent>

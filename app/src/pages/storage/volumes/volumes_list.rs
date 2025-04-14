@@ -6,11 +6,9 @@ use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
-pub fn VolumesListComponent(prompt: RwSignal<String>) -> impl IntoView {
-    let volumes = RwSignal::new(vec![]);
-
-    let interval_handle = update_page_effect(10_000, move || update_page(volumes, prompt));
-    clear_page_effect(interval_handle);
+pub fn VolumesListComponent(resource_name: RwSignal<String>) -> impl IntoView {
+    let table_rows = RwSignal::new(vec![]);
+    let loading = RwSignal::new(true);
 
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 2),
@@ -18,39 +16,79 @@ pub fn VolumesListComponent(prompt: RwSignal<String>) -> impl IntoView {
         TableColumn::new("Status", TableColumnType::String, 3),
         TableColumn::new("Capacity", TableColumnType::String, 3),
     ];
-    let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/storage/volumes/";
-    data_list_view(columns, volumes, styles, params)
-}
+    let styles = vec![String::new(); columns.len()];
+    let mut params = vec![String::new(); columns.len()];
+    params[1] = "/storage/volumes/".to_string();
 
-fn update_page(volumes: RwSignal<Vec<Vec<String>>>, prompt: RwSignal<String>) {
-    if prompt.is_disposed() {
-        return;
-    }
-    let prompt_value = prompt.get();
-
-    spawn_local(async move {
-        let volumes_data = volumes_api::get_volumes().await.unwrap_or_default();
-
-        volumes.set(
-            volumes_data
-                .into_iter()
-                .filter(|n| {
-                    n.metadata
-                        .name
-                        .to_lowercase()
-                        .contains(&prompt_value.to_lowercase())
-                })
-                .map(|n| {
-                    vec![
-                        "PersistentVolume".to_string(),
-                        n.clone().metadata.name,
-                        n.status.phase,
-                        n.spec.capacity.storage,
-                    ]
-                })
-                .collect(),
+    let columns_update = columns.clone();
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(
+            columns_update.clone(),
+            styles.clone(),
+            params.clone(),
+            table_rows,
+            resource_name,
+            loading,
         );
     });
+    clear_page_effect(interval_handle);
+    data_list_view(columns, table_rows, loading)
+}
+
+fn update_page(
+    columns: Vec<TableColumn>,
+    styles: Vec<String>,
+    params: Vec<String>,
+    table_rows: RwSignal<Vec<TableRow>>,
+    resource_name: RwSignal<String>,
+    loading: RwSignal<bool>,
+) {
+    if resource_name.is_disposed() {
+        return;
+    }
+    let resource_name = resource_name.get();
+
+    spawn_local(async move {
+        let list = update_page_async(
+            columns.clone(),
+            styles.clone(),
+            params.clone(),
+            resource_name.clone(),
+        )
+        .await
+        .unwrap_or_default();
+        table_rows.set(list);
+        loading.set(false);
+    });
+}
+
+#[server]
+async fn update_page_async(
+    columns: Vec<TableColumn>,
+    styles: Vec<String>,
+    params: Vec<String>,
+    resource_name: String,
+) -> Result<Vec<TableRow>, ServerFnError> {
+    let mut list = volumes_api::get_volumes()
+        .await
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|n| {
+            n.metadata
+                .name
+                .to_lowercase()
+                .contains(&resource_name.to_lowercase())
+        })
+        .map(|n| {
+            vec![
+                "PersistentVolume".to_string(),
+                n.clone().metadata.name,
+                n.status.phase,
+                n.spec.capacity.storage,
+            ]
+        })
+        .collect::<Vec<_>>();
+
+    list.sort_by(|a, b| a[1].cmp(&b[1]));
+    Ok(parse_table_rows(columns, list, styles, params))
 }

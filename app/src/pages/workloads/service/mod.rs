@@ -14,7 +14,7 @@ pub fn WorkloadsServicePage() -> impl IntoView {
         .into_iter()
         .collect::<Vec<_>>()
         .join("-");
-    let service_name = params
+    let name = params
         .with_untracked(|p| p.get("name"))
         .into_iter()
         .collect::<Vec<_>>()
@@ -23,8 +23,11 @@ pub fn WorkloadsServicePage() -> impl IntoView {
         "Workloads".to_string(),
         namespace_name.clone(),
         "Service".to_string(),
-        service_name.clone(),
+        name.clone(),
     ];
+
+    let namespace_name = RwSignal::new(namespace_name);
+    let name = RwSignal::new(name);
 
     view! {
         <Header text=page_title />
@@ -32,12 +35,12 @@ pub fn WorkloadsServicePage() -> impl IntoView {
             <PageContentSlot slot>
                 <div class="workloads-service main-page">
                     <service_info::ServiceInfoComponent
-                        namespace_name=namespace_name.clone()
-                        service_name=service_name.clone() />
+                        namespace_name
+                        resource_name=name />
                     <EventsListComponent
                         object_type="Service".to_string()
-                        namespace_name=namespace_name.clone()
-                        object_name=service_name.clone() />
+                        namespace_name
+                        object_name=name />
                 </div>
             </PageContentSlot>
         </PageContent>

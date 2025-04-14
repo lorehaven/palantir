@@ -13,11 +13,9 @@ use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::utils::stats::{convert_memory, parse_memory};
 
 #[component]
-pub fn NodesListComponent(prompt: RwSignal<String>) -> impl IntoView {
-    let nodes = RwSignal::new(vec![]);
-
-    let interval_handle = update_page_effect(10_000, move || update_page(nodes, prompt));
-    clear_page_effect(interval_handle);
+pub fn NodesListComponent(resource_name: RwSignal<String>) -> impl IntoView {
+    let table_rows = RwSignal::new(vec![]);
+    let loading = RwSignal::new(true);
 
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 1),
@@ -32,45 +30,86 @@ pub fn NodesListComponent(prompt: RwSignal<String>) -> impl IntoView {
         TableColumn::new("RAM requested", TableColumnType::StringTwoLine, 2),
         TableColumn::new("RAM limits", TableColumnType::StringTwoLine, 2),
     ];
-    let mut styles = vec![""; columns.len()];
-    styles[4] = "font-size: 1.6rem;";
-    let mut params = vec![""; columns.len()];
-    params[1] = "/cluster/nodes/";
-    data_list_view(columns, nodes, styles, params)
+    let mut styles = vec![String::new(); columns.len()];
+    styles[4] = "font-size: 1.6rem;".to_string();
+    let mut params = vec![String::new(); columns.len()];
+    params[1] = "/cluster/nodes/".to_string();
+
+    let columns_update = columns.clone();
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(
+            columns_update.clone(),
+            styles.clone(),
+            params.clone(),
+            table_rows,
+            resource_name,
+            loading,
+        );
+    });
+    clear_page_effect(interval_handle);
+    data_list_view(columns, table_rows, loading)
 }
 
-fn update_page(nodes: RwSignal<Vec<Vec<String>>>, prompt: RwSignal<String>) {
-    if prompt.is_disposed() {
+fn update_page(
+    columns: Vec<TableColumn>,
+    styles: Vec<String>,
+    params: Vec<String>,
+    table_rows: RwSignal<Vec<TableRow>>,
+    resource_name: RwSignal<String>,
+    loading: RwSignal<bool>,
+) {
+    if resource_name.is_disposed() {
         return;
     }
-    let prompt_value = prompt.get();
+    let resource_name = resource_name.get();
 
     spawn_local(async move {
-        let nodes_data = nodes_api::get_nodes()
-            .await
-            .unwrap_or_default()
-            .into_iter()
-            .filter(|n| {
-                n.metadata
-                    .name
-                    .to_lowercase()
-                    .contains(&prompt_value.to_lowercase())
-            })
-            .collect::<Vec<_>>();
-        let nodes_metrics = metrics_api::get_nodes()
-            .await
-            .unwrap_or_default()
-            .into_iter()
-            .filter(|n| {
-                nodes_data
-                    .iter()
-                    .any(|s| s.metadata.name == n.metadata.name)
-            })
-            .collect::<Vec<NodeMetrics>>();
-        let pods_data = pods_api::get_pods(None, None).await.unwrap_or_default();
+        let list = update_page_async(
+            columns.clone(),
+            styles.clone(),
+            params.clone(),
+            resource_name.clone(),
+        )
+        .await
+        .unwrap_or_default();
+        table_rows.set(list);
+        loading.set(false);
+    });
+}
 
-        let mut nodes_vec = vec![];
-        for node in nodes_data {
+#[server]
+async fn update_page_async(
+    columns: Vec<TableColumn>,
+    styles: Vec<String>,
+    params: Vec<String>,
+    resource_name: String,
+) -> Result<Vec<TableRow>, ServerFnError> {
+    let nodes_data = nodes_api::get_nodes()
+        .await
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|n| {
+            n.metadata
+                .name
+                .to_lowercase()
+                .contains(&resource_name.to_lowercase())
+        })
+        .collect::<Vec<_>>();
+    let nodes_metrics = metrics_api::get_nodes()
+        .await
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|n| {
+            nodes_data
+                .iter()
+                .any(|s| s.metadata.name == n.metadata.name)
+        })
+        .collect::<Vec<NodeMetrics>>();
+    let pods_data = pods_api::get_pods(None, None).await.unwrap_or_default();
+
+    let mut list = nodes_data
+        .into_iter()
+        .map(|node| {
             let node_metric = nodes_metrics
                 .clone()
                 .into_iter()
@@ -84,7 +123,8 @@ fn update_page(nodes: RwSignal<Vec<Vec<String>>>, prompt: RwSignal<String>) {
             let node_cpu_requests_limits = get_node_cpu_requests_limits(&node, &node_pods_data);
             let node_memory_requests_limits =
                 get_node_memory_requests_limits(&node, &node_pods_data);
-            nodes_vec.push(vec![
+
+            vec![
                 NodeType::from_node(&node).to_string(),
                 node.clone().metadata.name,
                 time_until_now(&node.clone().metadata.creation_timestamp.unwrap_or_default()),
@@ -107,10 +147,12 @@ fn update_page(nodes: RwSignal<Vec<Vec<String>>>, prompt: RwSignal<String>) {
                 get_node_memory_actual(&node, &node_metric),
                 node_memory_requests_limits.0,
                 node_memory_requests_limits.1,
-            ]);
-        }
-        nodes.set(nodes_vec);
-    });
+            ]
+        })
+        .collect::<Vec<_>>();
+
+    list.sort_by(|a, b| a[1].cmp(&b[1]));
+    Ok(parse_table_rows(columns, list, styles, params))
 }
 
 fn get_node_cpu_actual(node: &Node, metrics: &NodeMetrics) -> String {

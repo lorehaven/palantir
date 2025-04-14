@@ -7,65 +7,100 @@ use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
 pub fn ServicesListComponent(
-    selected: RwSignal<String>,
-    prompt: RwSignal<String>,
+    namespace_name: RwSignal<String>,
+    resource_name: RwSignal<String>,
 ) -> impl IntoView {
-    let services = RwSignal::new(vec![]);
-
-    let interval_handle =
-        update_page_effect(10_000, move || update_page(selected, prompt, services));
-    clear_page_effect(interval_handle);
+    let table_rows = RwSignal::new(vec![]);
+    let loading = RwSignal::new(true);
 
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 1),
         TableColumn::new("Namespace", TableColumnType::Link, 2),
         TableColumn::new("Name", TableColumnType::Link, 7),
     ];
-    let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/cluster/namespaces/";
-    params[2] = "/workloads/:1/services/";
-    data_list_view(columns, services, styles, params)
+    let styles = vec![String::new(); columns.len()];
+    let mut params = vec![String::new(); columns.len()];
+    params[1] = "/cluster/namespaces/".to_string();
+    params[2] = "/workloads/:1/services/".to_string();
+
+    let columns_update = columns.clone();
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(
+            columns_update.clone(),
+            styles.clone(),
+            params.clone(),
+            table_rows,
+            namespace_name,
+            resource_name,
+            loading,
+        );
+    });
+    clear_page_effect(interval_handle);
+    data_list_view(columns, table_rows, loading)
 }
 
 fn update_page(
+    columns: Vec<TableColumn>,
+    styles: Vec<String>,
+    params: Vec<String>,
+    table_rows: RwSignal<Vec<TableRow>>,
     namespace_name: RwSignal<String>,
-    service_name: RwSignal<String>,
-    services: RwSignal<Vec<Vec<String>>>,
+    resource_name: RwSignal<String>,
+    loading: RwSignal<bool>,
 ) {
-    if namespace_name.is_disposed() || service_name.is_disposed() {
+    if namespace_name.is_disposed() || resource_name.is_disposed() {
         return;
     }
-    let selected_value = namespace_name.get();
-    let service_name = service_name.get();
+    let namespace_name = namespace_name.get();
+    let resource_name = resource_name.get();
 
     spawn_local(async move {
-        let selected_value = if selected_value == "All Namespaces" {
-            None
-        } else {
-            Some(selected_value)
-        };
-        let services_data = services_api::get_services(selected_value)
-            .await
-            .unwrap_or_default();
-
-        services.set(
-            services_data
-                .into_iter()
-                .filter(|s| {
-                    s.metadata
-                        .name
-                        .to_lowercase()
-                        .contains(&service_name.to_lowercase())
-                })
-                .map(|n| {
-                    vec![
-                        "Service".to_string(),
-                        n.clone().metadata.namespace,
-                        n.metadata.name,
-                    ]
-                })
-                .collect(),
-        );
+        let list = update_page_async(
+            columns.clone(),
+            styles.clone(),
+            params.clone(),
+            namespace_name.clone(),
+            resource_name.clone(),
+        )
+        .await
+        .unwrap_or_default();
+        table_rows.set(list);
+        loading.set(false);
     });
+}
+
+#[server]
+async fn update_page_async(
+    columns: Vec<TableColumn>,
+    styles: Vec<String>,
+    params: Vec<String>,
+    namespace_name: String,
+    resource_name: String,
+) -> Result<Vec<TableRow>, ServerFnError> {
+    let namespace_name = if namespace_name == "All Namespaces" {
+        None
+    } else {
+        Some(namespace_name)
+    };
+    let mut list = services_api::get_services(namespace_name)
+        .await
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|s| {
+            s.metadata
+                .name
+                .to_lowercase()
+                .contains(&resource_name.to_lowercase())
+        })
+        .map(|n| {
+            vec![
+                "Service".to_string(),
+                n.clone().metadata.namespace,
+                n.metadata.name,
+            ]
+        })
+        .collect::<Vec<_>>();
+
+    list.sort_by(|a, b| a[1].cmp(&b[1]));
+    Ok(parse_table_rows(columns, list, styles, params))
 }

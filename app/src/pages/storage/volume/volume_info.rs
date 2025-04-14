@@ -12,7 +12,7 @@ pub fn VolumeInfoComponent(volume_name: String) -> impl IntoView {
     let volume_name = RwSignal::new(volume_name);
     let volume_data = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(60_000, move || update_page(volume_name, volume_data));
+    let interval_handle = update_page_effect(10_000, move || update_page(volume_name, volume_data));
     clear_page_effect(interval_handle);
 
     resource_info_view(volume_data)

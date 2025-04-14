@@ -26,13 +26,16 @@ pub fn AccountsRoleBindingPage() -> impl IntoView {
         name.clone(),
     ];
 
+    let namespace_name = RwSignal::new(namespace_name);
+    let name = RwSignal::new(name);
+
     view! {
         <Header text=page_title />
         <PageContent>
             <PageContentSlot slot>
                 <div class="accounts-role-binding main-page">
-                    <binding_info::RoleBindingInfoComponent namespace_name=namespace_name.clone() binding_name=name.clone() />
-                    <binding_subjects::RoleBindingSubjectsComponent namespace_name=namespace_name.clone() binding_name=name.clone() />
+                    <binding_info::RoleBindingInfoComponent namespace_name resource_name=name />
+                    <binding_subjects::RoleBindingSubjectsComponent namespace_name resource_name=name />
                 </div>
             </PageContentSlot>
         </PageContent>

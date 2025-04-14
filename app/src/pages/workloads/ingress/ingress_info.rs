@@ -8,44 +8,45 @@ use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::utils::shared::time::format_timestamp;
 
 #[component]
-pub fn IngressInfoComponent(namespace_name: String, ingress_name: String) -> impl IntoView {
-    let namespace_name = RwSignal::new(namespace_name);
-    let ingress_name = RwSignal::new(ingress_name);
-    let ingress_data = RwSignal::new(vec![]);
+pub fn IngressInfoComponent(
+    namespace_name: RwSignal<String>,
+    resource_name: RwSignal<String>,
+) -> impl IntoView {
+    let data = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(60_000, move || {
-        update_page(namespace_name, ingress_name, ingress_data);
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(namespace_name, resource_name, data);
     });
     clear_page_effect(interval_handle);
 
-    resource_info_view(ingress_data)
+    resource_info_view(data)
 }
 
 fn update_page(
     namespace_name: RwSignal<String>,
-    ingress_name: RwSignal<String>,
-    ingress_data: RwSignal<Vec<(String, String)>>,
+    resource_name: RwSignal<String>,
+    data: RwSignal<Vec<(String, String)>>,
 ) {
-    if namespace_name.is_disposed() || ingress_name.is_disposed() {
+    if namespace_name.is_disposed() || resource_name.is_disposed() {
         return;
     }
-    let selected_value = namespace_name.get();
-    let ingress_name = ingress_name.get();
+    let namespace_name = namespace_name.get();
+    let resource_name = resource_name.get();
 
     spawn_local(async move {
-        let selected_value = if selected_value == "All Namespaces" {
+        let namespace_name = if namespace_name == "All Namespaces" {
             None
         } else {
-            Some(selected_value)
+            Some(namespace_name)
         };
-        let ingress = ingresses_api::get_ingresses(selected_value)
+        let ingress = ingresses_api::get_ingresses(namespace_name)
             .await
             .unwrap_or_default()
             .into_iter()
-            .find(|n| n.metadata.name == ingress_name)
+            .find(|n| n.metadata.name == resource_name)
             .unwrap_or_default();
 
-        ingress_data.set(
+        data.set(
             vec![
                 ("Name", ingress.clone().metadata.name),
                 ("Kind", "Ingress".to_string()),

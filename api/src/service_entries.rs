@@ -4,11 +4,7 @@ use domain::workload::service::{Service, ServiceEntry};
 use leptos::prelude::ServerFnError;
 use leptos::server;
 
-#[allow(unused_imports)]
-use crate::utils::kube_api_request;
-#[allow(unused_imports)]
-use crate::utils::ApiType;
-#[allow(unused_imports)]
+use crate::utils::{kube_api_request, ApiType};
 use crate::workloads::pods::get_pods;
 
 const NAME_LABEL: &str = "app.kubernetes.io/name";

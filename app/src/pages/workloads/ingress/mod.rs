@@ -14,7 +14,7 @@ pub fn WorkloadsIngressPage() -> impl IntoView {
         .into_iter()
         .collect::<Vec<_>>()
         .join("-");
-    let ingress_name = params
+    let name = params
         .with_untracked(|p| p.get("name"))
         .into_iter()
         .collect::<Vec<_>>()
@@ -23,8 +23,11 @@ pub fn WorkloadsIngressPage() -> impl IntoView {
         "Workloads".to_string(),
         namespace_name.clone(),
         "Ingresses".to_string(),
-        ingress_name.clone(),
+        name.clone(),
     ];
+
+    let namespace_name = RwSignal::new(namespace_name);
+    let name = RwSignal::new(name);
 
     view! {
         <Header text=page_title />
@@ -32,11 +35,11 @@ pub fn WorkloadsIngressPage() -> impl IntoView {
             <PageContentSlot slot>
                 <div class="workloads-ingress main-page">
                     <ingress_info::IngressInfoComponent
-                        namespace_name=namespace_name.clone()
-                        ingress_name=ingress_name.clone() />
+                        namespace_name
+                        resource_name=name />
                     <ingress_rules::IngressRulesComponent
-                        namespace_name=namespace_name.clone()
-                        ingress_name=ingress_name.clone() />
+                        namespace_name
+                        resource_name=name />
                 </div>
             </PageContentSlot>
         </PageContent>

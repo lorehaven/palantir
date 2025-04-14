@@ -7,14 +7,11 @@ use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
 pub fn IngressesListComponent(
-    selected: RwSignal<String>,
-    prompt: RwSignal<String>,
+    namespace_name: RwSignal<String>,
+    resource_name: RwSignal<String>,
 ) -> impl IntoView {
-    let ingresses = RwSignal::new(vec![]);
-
-    let interval_handle =
-        update_page_effect(10_000, move || update_page(selected, prompt, ingresses));
-    clear_page_effect(interval_handle);
+    let table_rows = RwSignal::new(vec![]);
+    let loading = RwSignal::new(true);
 
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 1),
@@ -23,39 +20,76 @@ pub fn IngressesListComponent(
         TableColumn::new("Hosts", TableColumnType::StringList, 3),
         TableColumn::new("Paths", TableColumnType::StringList, 3),
     ];
-    let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/cluster/namespaces/";
-    params[2] = "/workloads/:1/ingresses/";
-    data_list_view(columns, ingresses, styles, params)
+    let styles = vec![String::new(); columns.len()];
+    let mut params = vec![String::new(); columns.len()];
+    params[1] = "/cluster/namespaces/".to_string();
+    params[2] = "/workloads/:1/ingresses/".to_string();
+
+    let columns_update = columns.clone();
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(
+            columns_update.clone(),
+            styles.clone(),
+            params.clone(),
+            table_rows,
+            namespace_name,
+            resource_name,
+            loading,
+        );
+    });
+    clear_page_effect(interval_handle);
+    data_list_view(columns, table_rows, loading)
 }
 
 fn update_page(
+    columns: Vec<TableColumn>,
+    styles: Vec<String>,
+    params: Vec<String>,
+    table_rows: RwSignal<Vec<TableRow>>,
     namespace_name: RwSignal<String>,
-    ingress_name: RwSignal<String>,
-    ingresses: RwSignal<Vec<Vec<String>>>,
+    resource_name: RwSignal<String>,
+    loading: RwSignal<bool>,
 ) {
-    if namespace_name.is_disposed() || ingress_name.is_disposed() {
+    if namespace_name.is_disposed() || resource_name.is_disposed() {
         return;
     }
-    let selected_value = namespace_name.get();
-    let ingress_name = ingress_name.get();
+    let namespace_name = namespace_name.get();
+    let resource_name = resource_name.get();
 
     spawn_local(async move {
-        let selected_value = if selected_value == "All Namespaces" {
-            None
-        } else {
-            Some(selected_value)
-        };
-        let ingresses_data = ingresses_api::get_ingresses(selected_value)
-            .await
-            .unwrap_or_default()
-            .into_iter()
-            .filter(|i| i.metadata.name.contains(&ingress_name))
-            .collect::<Vec<_>>();
+        let list = update_page_async(
+            columns.clone(),
+            styles.clone(),
+            params.clone(),
+            namespace_name.clone(),
+            resource_name.clone(),
+        )
+        .await
+        .unwrap_or_default();
+        table_rows.set(list);
+        loading.set(false);
+    });
+}
 
-        let mut ingresses_vec = vec![];
-        for ingress in ingresses_data {
+#[server]
+async fn update_page_async(
+    columns: Vec<TableColumn>,
+    styles: Vec<String>,
+    params: Vec<String>,
+    namespace_name: String,
+    resource_name: String,
+) -> Result<Vec<TableRow>, ServerFnError> {
+    let namespace_name = if namespace_name == "All Namespaces" {
+        None
+    } else {
+        Some(namespace_name)
+    };
+    let mut list = ingresses_api::get_ingresses(namespace_name)
+        .await
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|i| i.metadata.name.contains(&resource_name))
+        .map(|ingress| {
             let hosts = ingress
                 .clone()
                 .spec
@@ -80,14 +114,16 @@ fn update_page(
                 .collect::<Vec<_>>()
                 .join("\n");
 
-            ingresses_vec.push(vec![
+            vec![
                 "Ingress".to_string(),
                 ingress.metadata.namespace,
                 ingress.metadata.name,
                 hosts,
                 paths,
-            ]);
-        }
-        ingresses.set(ingresses_vec);
-    });
+            ]
+        })
+        .collect::<Vec<_>>();
+
+    list.sort_by(|a, b| a[1].cmp(&b[1]));
+    Ok(parse_table_rows(columns, list, styles, params))
 }

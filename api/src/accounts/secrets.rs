@@ -1,10 +1,8 @@
 use domain::account::secret::Secret;
-#[allow(unused_imports)]
 use domain::shared::response::Response;
 use leptos::prelude::ServerFnError;
 use leptos::server;
 
-#[allow(unused_imports)]
 use crate::utils::{kube_api_request, ApiType};
 
 #[server(GetSecrets, "/api/accounts/secrets")]

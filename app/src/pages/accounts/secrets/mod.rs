@@ -6,8 +6,8 @@ mod secrets_list;
 
 #[component]
 pub fn AccountsSecretsPage() -> impl IntoView {
-    let prompt = RwSignal::new(String::new());
-    let selected = RwSignal::new("All Namespaces".to_string());
+    let resource_name = RwSignal::new(String::new());
+    let namespace_name = RwSignal::new("All Namespaces".to_string());
 
     view! {
         <Header text=vec!["Accounts", "Secrets"] />
@@ -16,11 +16,11 @@ pub fn AccountsSecretsPage() -> impl IntoView {
                 <div class="accounts-secrets main-page">
                     <Filter
                         label="Secrets"
-                        selected
-                        prompt
+                        namespace_name
+                        resource_name
                         with_namespace=true
-                        with_prompt=true />
-                    <secrets_list::SecretsListComponent selected prompt />
+                        with_resource_name=true />
+                    <secrets_list::SecretsListComponent namespace_name resource_name />
                 </div>
             </PageContentSlot>
         </PageContent>

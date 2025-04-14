@@ -8,44 +8,45 @@ use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::utils::shared::time::format_timestamp;
 
 #[component]
-pub fn PodInfoComponent(namespace_name: String, pod_name: String) -> impl IntoView {
-    let namespace_name = RwSignal::new(namespace_name);
-    let pod_name = RwSignal::new(pod_name);
-    let pod_data = RwSignal::new(vec![]);
+pub fn PodInfoComponent(
+    namespace_name: RwSignal<String>,
+    resource_name: RwSignal<String>,
+) -> impl IntoView {
+    let data = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(60_000, move || {
-        update_page(namespace_name, pod_name, pod_data);
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(namespace_name, resource_name, data);
     });
     clear_page_effect(interval_handle);
 
-    resource_info_view(pod_data)
+    resource_info_view(data)
 }
 
 fn update_page(
     namespace_name: RwSignal<String>,
-    pod_name: RwSignal<String>,
-    pod_data: RwSignal<Vec<(String, String)>>,
+    resource_name: RwSignal<String>,
+    data: RwSignal<Vec<(String, String)>>,
 ) {
-    if namespace_name.is_disposed() || pod_name.is_disposed() {
+    if namespace_name.is_disposed() || resource_name.is_disposed() {
         return;
     }
-    let selected_value = namespace_name.get();
-    let pod_name = pod_name.get();
+    let namespace_name = namespace_name.get();
+    let resource_name = resource_name.get();
 
     spawn_local(async move {
-        let namespace_name = if selected_value.clone() == "All Namespaces" {
+        let namespace_name = if namespace_name.clone() == "All Namespaces" {
             None
         } else {
-            Some(selected_value.clone())
+            Some(namespace_name.clone())
         };
-        let pod = pods_api::get_pods(namespace_name, None)
+        let pod = pods_api::get_pods(namespace_name.clone(), None)
             .await
             .unwrap_or_default()
             .into_iter()
-            .find(|n| n.metadata.name == pod_name)
+            .find(|n| n.metadata.name == resource_name)
             .unwrap_or_default();
 
-        pod_data.set(
+        data.set(
             vec![
                 ("Name", pod.clone().metadata.name),
                 ("Kind", "Pod".to_string()),
@@ -70,7 +71,12 @@ fn update_page(
                         .owner_references
                         .into_iter()
                         .map(|or| {
-                            format!("{}/{selected_value}/{}", or.kind.to_lowercase(), or.name)
+                            format!(
+                                "{}/{}/{}",
+                                namespace_name.clone().unwrap_or_default(),
+                                or.kind.to_lowercase(),
+                                or.name
+                            )
                         })
                         .collect::<Vec<String>>()
                         .join("\n"),

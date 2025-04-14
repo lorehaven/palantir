@@ -1,6 +1,7 @@
 use api::metrics as metrics_api;
 use api::workloads::pods as pods_api;
 use domain::metrics::PodMetrics;
+use domain::utils::time::time_until_now;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
@@ -12,12 +13,9 @@ use crate::utils::stats::pod_stats::{
 };
 
 #[component]
-pub fn NamespacePodsComponent(namespace_name: String) -> impl IntoView {
-    let namespace_name = RwSignal::new(namespace_name);
-    let pods = RwSignal::new(vec![]);
-
-    let interval_handle = update_page_effect(60_000, move || update_page(namespace_name, pods));
-    clear_page_effect(interval_handle);
+pub fn NamespacePodsComponent(namespace_name: RwSignal<String>) -> impl IntoView {
+    let table_rows = RwSignal::new(vec![]);
+    let loading = RwSignal::new(true);
 
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 1),
@@ -29,58 +27,100 @@ pub fn NamespacePodsComponent(namespace_name: String) -> impl IntoView {
         TableColumn::new("RAM request", TableColumnType::StringTwoLine, 1),
         TableColumn::new("RAM limit", TableColumnType::StringTwoLine, 1),
     ];
-    let styles = vec![""; columns.len()];
+    let styles = vec![String::new(); columns.len()];
     let mut params = vec![String::new(); columns.len()];
     params[1] = format!("/workloads/{}/pods/", namespace_name.get_untracked());
-    data_list_view(columns, pods, styles, params)
+
+    let columns_update = columns.clone();
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(
+            columns_update.clone(),
+            styles.clone(),
+            params.clone(),
+            table_rows,
+            namespace_name,
+            loading,
+        );
+    });
+    clear_page_effect(interval_handle);
+    data_list_view(columns, table_rows, loading)
 }
 
-fn update_page(namespace_name: RwSignal<String>, pods: RwSignal<Vec<Vec<String>>>) {
+fn update_page(
+    columns: Vec<TableColumn>,
+    styles: Vec<String>,
+    params: Vec<String>,
+    table_rows: RwSignal<Vec<TableRow>>,
+    namespace_name: RwSignal<String>,
+    loading: RwSignal<bool>,
+) {
     if namespace_name.is_disposed() {
         return;
     }
-    let selected_value = namespace_name.get();
+    let namespace_name = namespace_name.get();
 
     spawn_local(async move {
-        let namespace_name = if selected_value.clone() == "All Namespaces" {
-            None
-        } else {
-            Some(selected_value.clone())
-        };
-        let mut pods_data = pods_api::get_pods(namespace_name, None)
-            .await
-            .unwrap_or_default();
-        pods_data.sort_by(|a, b| a.metadata.name.cmp(&b.metadata.name));
-        let pod_names = pods_data
-            .iter()
-            .map(|p| p.metadata.name.clone())
-            .collect::<Vec<String>>();
-        let pods_metrics = metrics_api::get_pods()
-            .await
-            .unwrap_or_default()
-            .into_iter()
-            .filter(|pm| pod_names.contains(&pm.metadata.name))
-            .collect::<Vec<PodMetrics>>();
+        let list = update_page_async(
+            columns.clone(),
+            styles.clone(),
+            params.clone(),
+            namespace_name.clone(),
+        )
+        .await
+        .unwrap_or_default();
+        table_rows.set(list);
+        loading.set(false);
+    });
+}
 
-        let mut pods_vec = vec![];
-        for pod in pods_data {
+#[server]
+async fn update_page_async(
+    columns: Vec<TableColumn>,
+    styles: Vec<String>,
+    params: Vec<String>,
+    namespace_name: String,
+) -> Result<Vec<TableRow>, ServerFnError> {
+    let namespace_name = if namespace_name == "All Namespaces" {
+        None
+    } else {
+        Some(namespace_name)
+    };
+    let pods_data = pods_api::get_pods(namespace_name, None)
+        .await
+        .unwrap_or_default();
+    let pod_names = pods_data
+        .iter()
+        .map(|p| p.metadata.name.clone())
+        .collect::<Vec<String>>();
+    let pods_metrics = metrics_api::get_pods()
+        .await
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|pm| pod_names.contains(&pm.metadata.name))
+        .collect::<Vec<PodMetrics>>();
+
+    let mut list = pods_data
+        .into_iter()
+        .map(|r| {
             let metrics = pods_metrics
                 .clone()
                 .into_iter()
-                .find(|p| p.metadata.name == pod.metadata.name)
+                .find(|pp| pp.metadata.name == r.metadata.name)
                 .unwrap_or_default();
 
-            pods_vec.push(vec![
+            vec![
                 "Pod".to_string(),
-                pod.clone().metadata.name,
+                r.clone().metadata.name,
                 pod_cpu_actual(&metrics),
-                pod_cpu_request(&pod, &metrics),
-                pod_cpu_limit(&pod, &metrics),
+                pod_cpu_request(&r, &metrics),
+                pod_cpu_limit(&r, &metrics),
                 pod_memory_actual(&metrics),
-                pod_memory_request(&pod, &metrics),
-                pod_memory_limit(&pod, &metrics),
-            ]);
-        }
-        pods.set(pods_vec);
-    });
+                pod_memory_request(&r, &metrics),
+                pod_memory_limit(&r, &metrics),
+            ]
+        })
+        .collect::<Vec<_>>();
+
+    list.sort_by(|a, b| a[1].cmp(&b[1]));
+    Ok(parse_table_rows(columns, list, styles, params))
 }

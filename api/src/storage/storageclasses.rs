@@ -1,10 +1,8 @@
-#[allow(unused_imports)]
 use domain::shared::response::Response;
 use domain::storage::storageclass::StorageClass;
 use leptos::prelude::ServerFnError;
 use leptos::server;
 
-#[allow(unused_imports)]
 use crate::utils::{kube_api_request, ApiType};
 
 #[server(GetStorageClasses, "/api/storage/storageclasses")]

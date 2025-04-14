@@ -1,10 +1,8 @@
 use domain::cluster::node::Node;
-#[allow(unused_imports)]
 use domain::shared::response::Response;
 use leptos::prelude::ServerFnError;
 use leptos::server;
 
-#[allow(unused_imports)]
 use crate::utils::{kube_api_request, ApiType};
 
 pub async fn get_nodes_filtered(node_name: Option<String>) -> Vec<Node> {

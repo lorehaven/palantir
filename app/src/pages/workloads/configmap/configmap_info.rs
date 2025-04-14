@@ -7,44 +7,45 @@ use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::utils::shared::time::format_timestamp;
 
 #[component]
-pub fn ConfigMapInfoComponent(namespace_name: String, configmap_name: String) -> impl IntoView {
-    let namespace_name = RwSignal::new(namespace_name);
-    let configmap_name = RwSignal::new(configmap_name);
-    let configmap_data = RwSignal::new(vec![]);
+pub fn ConfigMapInfoComponent(
+    namespace_name: RwSignal<String>,
+    resource_name: RwSignal<String>,
+) -> impl IntoView {
+    let data = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(60_000, move || {
-        update_page(namespace_name, configmap_name, configmap_data);
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(namespace_name, resource_name, data);
     });
     clear_page_effect(interval_handle);
 
-    resource_info_view(configmap_data)
+    resource_info_view(data)
 }
 
 fn update_page(
     namespace_name: RwSignal<String>,
-    configmap_name: RwSignal<String>,
-    configmap_data: RwSignal<Vec<(String, String)>>,
+    resource_name: RwSignal<String>,
+    data: RwSignal<Vec<(String, String)>>,
 ) {
-    if namespace_name.is_disposed() || configmap_name.is_disposed() {
+    if namespace_name.is_disposed() || resource_name.is_disposed() {
         return;
     }
     let namespace_name = namespace_name.get();
-    let configmap_name = configmap_name.get();
+    let resource_name = resource_name.get();
 
     spawn_local(async move {
-        let selected_value = if namespace_name == "All Namespaces" {
+        let namespace_name = if namespace_name == "All Namespaces" {
             None
         } else {
             Some(namespace_name)
         };
-        let configmap = configmaps_api::get_configmaps(selected_value)
+        let configmap = configmaps_api::get_configmaps(namespace_name)
             .await
             .unwrap_or_default()
             .into_iter()
-            .find(|n| n.metadata.name == configmap_name)
+            .find(|n| n.metadata.name == resource_name)
             .unwrap_or_default();
 
-        configmap_data.set(
+        data.set(
             vec![
                 ("Name", configmap.metadata.name),
                 ("Kind", "ConfigMap".to_string()),

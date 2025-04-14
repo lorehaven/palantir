@@ -6,7 +6,7 @@ mod volumes_list;
 
 #[component]
 pub fn StorageVolumesPage() -> impl IntoView {
-    let prompt = RwSignal::new(String::new());
+    let resource_name = RwSignal::new(String::new());
 
     view! {
         <Header text=vec!["Storage", "Volumes"] />
@@ -15,9 +15,9 @@ pub fn StorageVolumesPage() -> impl IntoView {
                 <div class="storage-volumes main-page">
                     <Filter
                         label="Persistent Volumes"
-                        prompt
-                        with_prompt=true />
-                    <volumes_list::VolumesListComponent prompt />
+                        resource_name
+                        with_resource_name=true />
+                    <volumes_list::VolumesListComponent resource_name />
                 </div>
             </PageContentSlot>
         </PageContent>

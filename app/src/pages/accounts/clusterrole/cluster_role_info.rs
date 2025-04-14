@@ -8,37 +8,33 @@ use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::utils::shared::time::format_timestamp;
 
 #[component]
-pub fn ClusterRoleInfoComponent(cluster_role_name: String) -> impl IntoView {
-    let cluster_role_name = RwSignal::new(cluster_role_name);
-    let cluster_role_data = RwSignal::new(vec![]);
+pub fn ClusterRoleInfoComponent(resource_name: RwSignal<String>) -> impl IntoView {
+    let data = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(60_000, move || {
-        update_page(cluster_role_name, cluster_role_data);
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(resource_name, data);
     });
     clear_page_effect(interval_handle);
 
-    resource_info_view(cluster_role_data)
+    resource_info_view(data)
 }
 
-fn update_page(
-    cluster_role_name: RwSignal<String>,
-    cluster_role_data: RwSignal<Vec<(String, String)>>,
-) {
-    if cluster_role_name.is_disposed() {
+fn update_page(resource_name: RwSignal<String>, data: RwSignal<Vec<(String, String)>>) {
+    if resource_name.is_disposed() {
         return;
     }
-    let cluster_role_name = cluster_role_name.get();
+    let resource_name = resource_name.get();
 
     spawn_local(async move {
         let cr = roles_api::get_clusterroles()
             .await
             .unwrap_or_default()
             .iter()
-            .find(|sc| sc.metadata.name == cluster_role_name)
+            .find(|sc| sc.metadata.name == resource_name)
             .cloned()
             .unwrap_or_default();
 
-        cluster_role_data.set(
+        data.set(
             vec![
                 ("Name", cr.clone().metadata.name),
                 ("Kind", "PersistentVolume".to_string()),

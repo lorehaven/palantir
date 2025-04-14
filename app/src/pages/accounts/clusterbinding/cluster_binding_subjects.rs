@@ -6,49 +6,80 @@ use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
-pub fn ClusterRoleBindingSubjectsComponent(cluster_binding_name: String) -> impl IntoView {
-    let cluster_binding_name = RwSignal::new(cluster_binding_name);
-    let cluster_binding_data = RwSignal::new(vec![]);
-
-    let interval_handle = update_page_effect(60_000, move || {
-        update_page(cluster_binding_name, cluster_binding_data);
-    });
-    clear_page_effect(interval_handle);
+pub fn ClusterRoleBindingSubjectsComponent(resource_name: RwSignal<String>) -> impl IntoView {
+    let table_rows = RwSignal::new(vec![]);
+    let loading = RwSignal::new(true);
 
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 3),
-        TableColumn::new("Name", TableColumnType::String, 3),
         TableColumn::new("Namespace", TableColumnType::String, 3),
+        TableColumn::new("Name", TableColumnType::String, 3),
         TableColumn::new("Api Group", TableColumnType::String, 3),
     ];
-    let styles = vec![""; columns.len()];
-    let params = vec![""; columns.len()];
-    data_list_view(columns, cluster_binding_data, styles, params)
+    let styles = vec![String::new(); columns.len()];
+    let params = vec![String::new(); columns.len()];
+
+    let columns_update = columns.clone();
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(
+            columns_update.clone(),
+            styles.clone(),
+            params.clone(),
+            table_rows,
+            resource_name,
+            loading,
+        );
+    });
+    clear_page_effect(interval_handle);
+    data_list_view(columns, table_rows, loading)
 }
 
 fn update_page(
-    cluster_binding_name: RwSignal<String>,
-    cluster_binding_data: RwSignal<Vec<Vec<String>>>,
+    columns: Vec<TableColumn>,
+    styles: Vec<String>,
+    params: Vec<String>,
+    table_rows: RwSignal<Vec<TableRow>>,
+    resource_name: RwSignal<String>,
+    loading: RwSignal<bool>,
 ) {
-    if cluster_binding_name.is_disposed() {
+    if resource_name.is_disposed() {
         return;
     }
-    let cluster_binding_name = cluster_binding_name.get();
+    let resource_name = resource_name.get();
 
     spawn_local(async move {
-        let crb = bindings_api::get_clusterrolebindings()
-            .await
-            .unwrap_or_default()
-            .iter()
-            .find(|sc| sc.metadata.name == cluster_binding_name)
-            .cloned()
-            .unwrap_or_default();
-
-        cluster_binding_data.set(
-            crb.subjects
-                .into_iter()
-                .map(|r| vec![r.kind, r.name, r.namespace, r.api_group])
-                .collect(),
-        );
+        let list = update_page_async(
+            columns.clone(),
+            styles.clone(),
+            params.clone(),
+            resource_name.clone(),
+        )
+        .await
+        .unwrap_or_default();
+        table_rows.set(list);
+        loading.set(false);
     });
+}
+
+#[server]
+async fn update_page_async(
+    columns: Vec<TableColumn>,
+    styles: Vec<String>,
+    params: Vec<String>,
+    resource_name: String,
+) -> Result<Vec<TableRow>, ServerFnError> {
+    let mut list = bindings_api::get_clusterrolebindings()
+        .await
+        .unwrap_or_default()
+        .iter()
+        .find(|sc| sc.metadata.name == resource_name)
+        .cloned()
+        .unwrap_or_default()
+        .subjects
+        .into_iter()
+        .map(|r| vec![r.kind, r.namespace, r.name, r.api_group])
+        .collect::<Vec<_>>();
+
+    list.sort_by(|a, b| a[1].cmp(&b[1]));
+    Ok(parse_table_rows(columns, list, styles, params))
 }

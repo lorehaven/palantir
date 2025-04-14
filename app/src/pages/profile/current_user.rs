@@ -10,7 +10,7 @@ use crate::utils::shared::text::decode_jwt_token;
 pub fn CurrentUserComponent() -> impl IntoView {
     let token = RwSignal::new(String::new());
 
-    let interval_handle = update_page_effect(3_600_000, move || update_page(token));
+    let interval_handle = update_page_effect(10_000, move || update_page(token));
     clear_page_effect(interval_handle);
 
     view(token)

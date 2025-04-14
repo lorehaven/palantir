@@ -3,7 +3,6 @@ use leptos::prelude::ServerFnError;
 use leptos::server;
 use serde_json::Value;
 
-#[allow(unused_imports)]
 use crate::utils::get_api_token;
 
 #[server(GetNodesMetrics, "/api/metrics/nodes")]

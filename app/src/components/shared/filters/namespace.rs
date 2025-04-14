@@ -4,7 +4,7 @@ use crate::components::prelude::*;
 
 #[component]
 pub fn NamespaceFilter(
-    selected: RwSignal<String>,
+    namespace_name: RwSignal<String>,
     namespaces: RwSignal<Vec<String>>,
 ) -> impl IntoView {
     view! {
@@ -12,8 +12,8 @@ pub fn NamespaceFilter(
             <WrapperSlot slot>
                 <div class="namespace-filter">
                     <select
-                        prop:value=selected
-                        on:change=move |ev| selected.set(event_target_value(&ev).parse().unwrap())
+                        prop:value=namespace_name
+                        on:change=move |ev| namespace_name.set(event_target_value(&ev).parse().unwrap())
                     >
                         {namespaces.get().into_iter()
                             .map(|item| view! { <option> { item } </option> })

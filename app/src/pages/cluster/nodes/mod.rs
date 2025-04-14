@@ -7,7 +7,7 @@ mod nodes_list;
 
 #[component]
 pub fn ClusterNodesPage() -> impl IntoView {
-    let prompt = RwSignal::new(String::new());
+    let resource_name = RwSignal::new(String::new());
 
     view! {
         <Header text=vec!["Cluster", "Nodes"] />
@@ -16,10 +16,10 @@ pub fn ClusterNodesPage() -> impl IntoView {
                 <div class="cluster-nodes main-page">
                     <Filter
                         label="Nodes"
-                        prompt
-                        with_prompt=true />
+                        resource_name
+                        with_resource_name=true />
                     <NodesStatComponent />
-                    <nodes_list::NodesListComponent prompt />
+                    <nodes_list::NodesListComponent resource_name />
                 </div>
             </PageContentSlot>
         </PageContent>

@@ -4,15 +4,16 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 
 use crate::components::prelude::*;
+use crate::pages::accounts::update_page_list_async;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 #[component]
-pub fn SecretsListComponent(selected: RwSignal<String>, prompt: RwSignal<String>) -> impl IntoView {
-    let secrets = RwSignal::new(vec![]);
-
-    let interval_handle =
-        update_page_effect(10_000, move || update_page(selected, prompt, secrets));
-    clear_page_effect(interval_handle);
+pub fn SecretsListComponent(
+    namespace_name: RwSignal<String>,
+    resource_name: RwSignal<String>,
+) -> impl IntoView {
+    let table_rows = RwSignal::new(vec![]);
+    let loading = RwSignal::new(true);
 
     let columns = vec![
         TableColumn::new("Type", TableColumnType::String, 1),
@@ -21,54 +22,91 @@ pub fn SecretsListComponent(selected: RwSignal<String>, prompt: RwSignal<String>
         TableColumn::new("Age", TableColumnType::String, 1),
         TableColumn::new("Type", TableColumnType::String, 2),
     ];
-    let styles = vec![""; columns.len()];
-    let mut params = vec![""; columns.len()];
-    params[1] = "/cluster/namespaces/";
-    params[2] = "/accounts/:1/secrets/";
-    data_list_view(columns, secrets, styles, params)
+    let styles = vec![String::new(); columns.len()];
+    let mut params = vec![String::new(); columns.len()];
+    params[1] = "/cluster/namespaces/".to_string();
+    params[2] = "/accounts/:1/secrets/".to_string();
+
+    let columns_update = columns.clone();
+    let interval_handle = update_page_effect(10_000, move || {
+        update_page(
+            columns_update.clone(),
+            styles.clone(),
+            params.clone(),
+            table_rows,
+            namespace_name,
+            resource_name,
+            loading,
+        );
+    });
+    clear_page_effect(interval_handle);
+    data_list_view(columns, table_rows, loading)
 }
 
 fn update_page(
+    columns: Vec<TableColumn>,
+    styles: Vec<String>,
+    params: Vec<String>,
+    table_rows: RwSignal<Vec<TableRow>>,
     namespace_name: RwSignal<String>,
-    secret_name: RwSignal<String>,
-    secrets: RwSignal<Vec<Vec<String>>>,
+    resource_name: RwSignal<String>,
+    loading: RwSignal<bool>,
 ) {
-    if namespace_name.is_disposed() || secret_name.is_disposed() {
+    if namespace_name.is_disposed() || resource_name.is_disposed() {
         return;
     }
-    let selected_value = namespace_name.get();
-    let secret_name = secret_name.get();
+    let namespace_name = namespace_name.get();
+    let resource_name = resource_name.get();
 
     spawn_local(async move {
-        let selected_value = if selected_value == "All Namespaces" {
-            None
-        } else {
-            Some(selected_value)
-        };
-        let mut secrets_data = secrets_api::get_secrets(selected_value)
-            .await
-            .unwrap_or_default();
-        secrets_data.sort_by(|a, b| a.metadata.name.cmp(&b.metadata.name));
-
-        secrets.set(
-            secrets_data
-                .into_iter()
-                .filter(|s| {
-                    s.metadata
-                        .name
-                        .to_lowercase()
-                        .contains(&secret_name.to_lowercase())
-                })
-                .map(|s| {
-                    vec![
-                        "Secret".to_string(),
-                        s.clone().metadata.namespace,
-                        s.clone().metadata.name,
-                        time_until_now(&s.clone().metadata.creation_timestamp.unwrap_or_default()),
-                        s.r#type,
-                    ]
-                })
-                .collect(),
-        );
+        let list = update_page_async(
+            columns.clone(),
+            styles.clone(),
+            params.clone(),
+            namespace_name.clone(),
+            resource_name.clone(),
+        )
+        .await
+        .unwrap_or_default();
+        table_rows.set(list);
+        loading.set(false);
     });
+}
+
+#[server]
+async fn update_page_async(
+    columns: Vec<TableColumn>,
+    styles: Vec<String>,
+    params: Vec<String>,
+    namespace_name: String,
+    resource_name: String,
+) -> Result<Vec<TableRow>, ServerFnError> {
+    let namespace_name = if namespace_name == "All Namespaces" {
+        None
+    } else {
+        Some(namespace_name)
+    };
+    let mut list = secrets_api::get_secrets(namespace_name)
+        .await
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|s| {
+            s.metadata
+                .name
+                .to_lowercase()
+                .contains(&resource_name.to_lowercase())
+        })
+        .map(|s| {
+            vec![
+                "Secret".to_string(),
+                s.clone().metadata.namespace,
+                s.clone().metadata.name,
+                time_until_now(&s.clone().metadata.creation_timestamp.unwrap_or_default()),
+                s.r#type,
+            ]
+        })
+        .collect::<Vec<_>>();
+
+    list.sort_by(|a, b| a[1].cmp(&b[1]));
+    Ok(parse_table_rows(columns, list, styles, params))
 }

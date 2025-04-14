@@ -7,8 +7,8 @@ pub mod pods_list;
 
 #[component]
 pub fn WorkloadsPodsPage() -> impl IntoView {
-    let prompt = RwSignal::new(String::new());
-    let selected = RwSignal::new("All Namespaces".to_string());
+    let resource_name = RwSignal::new(String::new());
+    let namespace_name = RwSignal::new("All Namespaces".to_string());
 
     view! {
         <Header text=vec!["Workloads", "Pods"] />
@@ -17,12 +17,12 @@ pub fn WorkloadsPodsPage() -> impl IntoView {
                 <div class="workloads-pods main-page">
                     <Filter
                         label="Pods"
-                        selected
-                        prompt
+                        namespace_name
+                        resource_name
                         with_namespace=true
-                        with_prompt=true />
-                    <PodsStatComponent namespace_name=if selected.get() == "All Namespaces" { None } else { Some(selected.get()) } />
-                    <pods_list::PodsListComponent selected prompt />
+                        with_resource_name=true />
+                    <PodsStatComponent namespace_name />
+                    <pods_list::PodsListComponent namespace_name resource_name />
                 </div>
             </PageContentSlot>
         </PageContent>

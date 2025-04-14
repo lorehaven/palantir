@@ -6,7 +6,7 @@ mod roles_list;
 
 #[component]
 pub fn AccountsRolesPage() -> impl IntoView {
-    let prompt = RwSignal::new(String::new());
+    let resource_name = RwSignal::new(String::new());
 
     view! {
         <Header text=vec!["Accounts", "Roles"] />
@@ -15,9 +15,9 @@ pub fn AccountsRolesPage() -> impl IntoView {
                 <div class="accounts-roles main-page">
                     <Filter
                         label="Roles"
-                        prompt
-                        with_prompt=true />
-                    <roles_list::RolesListComponent prompt />
+                        resource_name
+                        with_resource_name=true />
+                    <roles_list::RolesListComponent resource_name />
                 </div>
             </PageContentSlot>
         </PageContent>

@@ -12,10 +12,9 @@ use crate::utils::stats::convert_memory;
 
 #[component]
 pub fn NodesStatComponent(
-    #[prop(default = None)] node_name: Option<String>,
+    #[prop(default = RwSignal::new(String::new()))] node_name: RwSignal<String>,
     #[prop(default = true)] expandable: bool,
 ) -> impl IntoView {
-    let node_name = RwSignal::new(node_name);
     let nodes_age = RwSignal::new(String::new());
     let nodes_ready = RwSignal::new((0., 0.));
     let nodes_cpu = RwSignal::new((0., 0.));
@@ -47,7 +46,7 @@ pub fn NodesStatComponent(
 }
 
 fn update_page(
-    node_name: RwSignal<Option<String>>,
+    node_name: RwSignal<String>,
     nodes_age: RwSignal<String>,
     nodes_ready: RwSignal<(f64, f64)>,
     nodes_cpu: RwSignal<(f64, f64)>,
@@ -60,6 +59,11 @@ fn update_page(
     let node_name = node_name.get();
 
     spawn_local(async move {
+        let node_name = if node_name.is_empty() {
+            None
+        } else {
+            Some(node_name)
+        };
         let nodes = nodes_api::get_nodes_filtered(node_name).await;
         let nodes_metrics = metrics_api::get_nodes()
             .await
@@ -84,7 +88,7 @@ fn update_page(
 }
 
 fn view(
-    node_name: RwSignal<Option<String>>,
+    node_name: RwSignal<String>,
     nodes_age: RwSignal<String>,
     nodes_ready: RwSignal<(f64, f64)>,
     nodes_cpu: RwSignal<(f64, f64)>,
@@ -120,7 +124,7 @@ fn view(
 }
 
 fn view_internal(
-    node_name: RwSignal<Option<String>>,
+    node_name: RwSignal<String>,
     nodes_age: RwSignal<String>,
     nodes_ready: RwSignal<(f64, f64)>,
     nodes_cpu: RwSignal<(f64, f64)>,
@@ -130,17 +134,17 @@ fn view_internal(
     view! {
         <div class="card-container dcc-3">
             <Show
-                when=move || node_name.get().is_some()
+                when=move || node_name.get().is_empty()
                 fallback=move || view! {
-                    <CardCircle
-                        label="Nodes"
-                        label_add="ready vs all"
-                        values=nodes_ready.get() />
+                    <CardString
+                        label="Uptime"
+                        label_add=""
+                        value=nodes_age.get() />
                     }>
-                <CardString
-                    label="Uptime"
-                    label_add=""
-                    value=nodes_age.get() />
+                <CardCircle
+                    label="Nodes"
+                    label_add="ready vs all"
+                    values=nodes_ready.get() />
 
             </Show>
             <CardCircle
