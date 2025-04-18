@@ -3,19 +3,10 @@ use domain::workload::service::Service;
 use leptos::prelude::ServerFnError;
 use leptos::server;
 
-use crate::utils::{kube_api_request, ApiType};
+use crate::resource as resource_api;
 
 #[server(GetServices, "/api/workloads/services")]
 pub async fn get_services(namespace_name: Option<String>) -> Result<Vec<Service>, ServerFnError> {
-    let response = kube_api_request(ApiType::Api, "services".to_string()).await?;
-    let items = serde_json::from_str::<Response<Service>>(&response)?
-        .items
-        .into_iter()
-        .filter(|f| {
-            f.metadata
-                .namespace
-                .contains(&namespace_name.clone().unwrap_or_default())
-        })
-        .collect();
-    Ok(items)
+    let response = resource_api::get("Service".to_string(), namespace_name, None).await?;
+    Ok(serde_json::from_str::<Response<Service>>(&response)?.items)
 }

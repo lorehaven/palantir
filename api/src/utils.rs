@@ -27,51 +27,6 @@ pub async fn get_api_token_wasm() -> Result<String, ServerFnError> {
     Ok(get_api_token())
 }
 
-#[derive(Debug, Clone, Copy, Deserialize, Serialize)]
-pub enum ApiType {
-    Api,
-    Apps,
-    Batch,
-    Networking,
-    Rbac,
-    Storage,
-}
-
-impl std::fmt::Display for ApiType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                Self::Api => "api/v1",
-                Self::Apps => "apis/apps/v1",
-                Self::Batch => "apis/batch/v1",
-                Self::Networking => "apis/networking.k8s.io/v1",
-                Self::Rbac => "apis/rbac.authorization.k8s.io/v1",
-                Self::Storage => "apis/storage.k8s.io/v1",
-            }
-        )
-    }
-}
-
-#[server]
-pub async fn kube_api_request(path: ApiType, endpoint: String) -> Result<String, ServerFnError> {
-    let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
-
-    let client = reqwest::ClientBuilder::new()
-        .danger_accept_invalid_certs(true)
-        .build()?;
-
-    let response = client
-        .get(format!("https://{server_host}:6443/{path}/{endpoint}"))
-        .bearer_auth(get_api_token())
-        .send()
-        .await?;
-
-    response.error_for_status_ref()?;
-    Ok(response.text().await?)
-}
-
 fn get_resource_map() -> Vec<(&'static str, &'static str, &'static str)> {
     vec![
         (

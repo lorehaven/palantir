@@ -4,19 +4,16 @@ use domain::workload::service::{Service, ServiceEntry};
 use leptos::prelude::ServerFnError;
 use leptos::server;
 
-use crate::utils::{kube_api_request, ApiType};
+use crate::resource as resource_api;
 use crate::workloads::pods::get_pods;
 
 const NAME_LABEL: &str = "app.kubernetes.io/name";
 
 #[server(GetServiceEntries, "/api/services/entries")]
 pub async fn get_service_entries() -> Result<Vec<ServiceEntry>, ServerFnError> {
-    let services = kube_api_request(ApiType::Api, "services".to_string()).await?;
-    Ok(
-        parse_entries_response(&services, &get_pods(None, None).await?)
-            .await
-            .unwrap_or_default(),
-    )
+    let services = resource_api::get("Service".to_string(), None, None).await?;
+    Ok(parse_entries_response(&services, &get_pods(None, None).await?)
+           .await.unwrap_or_default(), )
 }
 
 #[allow(dead_code)]

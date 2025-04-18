@@ -3,7 +3,7 @@ use domain::shared::response::Response;
 use leptos::prelude::ServerFnError;
 use leptos::server;
 
-use crate::utils::{kube_api_request, ApiType};
+use crate::resource as resource_api;
 
 pub async fn get_all_bindings() -> Vec<Box<dyn BaseRoleBinding>> {
     let mut all_bindings = vec![];
@@ -26,21 +26,12 @@ pub async fn get_all_bindings() -> Vec<Box<dyn BaseRoleBinding>> {
 pub async fn get_rolebindings(
     namespace_name: Option<String>,
 ) -> Result<Vec<RoleBinding>, ServerFnError> {
-    let response = kube_api_request(ApiType::Rbac, "rolebindings".to_string()).await?;
-    let items = serde_json::from_str::<Response<RoleBinding>>(&response)?
-        .items
-        .into_iter()
-        .filter(|f| {
-            f.metadata
-                .namespace
-                .contains(&namespace_name.clone().unwrap_or_default())
-        })
-        .collect();
-    Ok(items)
+    let response = resource_api::get("RoleBinding".to_string(), namespace_name, None).await?;
+    Ok(serde_json::from_str::<Response<RoleBinding>>(&response)?.items)
 }
 
 #[server(GetClusterBindings, "/api/accounts/clusterrolebindings")]
 pub async fn get_clusterrolebindings() -> Result<Vec<ClusterRoleBinding>, ServerFnError> {
-    let response = kube_api_request(ApiType::Rbac, "clusterrolebindings".to_string()).await?;
+    let response = resource_api::get("ClusterRoleBinding".to_string(), None, None).await?;
     Ok(serde_json::from_str::<Response<ClusterRoleBinding>>(&response)?.items)
 }
