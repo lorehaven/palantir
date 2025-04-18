@@ -1,5 +1,4 @@
 use leptos::prelude::*;
-use leptos::task::spawn_local;
 
 #[component]
 pub fn ConfirmDialog<F>(

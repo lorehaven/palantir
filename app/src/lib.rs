@@ -8,8 +8,6 @@
 #![deny(clippy::style)]
 #![deny(clippy::suspicious)]
 #![deny(missing_debug_implementations)]
-#![allow(dead_code)]
-#![allow(unused_imports)]
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::redundant_pub_crate)]

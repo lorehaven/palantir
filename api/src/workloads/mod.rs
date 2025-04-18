@@ -1,7 +1,5 @@
 use domain::workload::Workload;
 
-use crate::utils::*;
-
 pub mod configmaps;
 pub mod daemonsets;
 pub mod deployments;

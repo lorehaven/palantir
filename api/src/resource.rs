@@ -1,9 +1,7 @@
 use leptos::prelude::ServerFnError;
 use leptos::server;
-use serde_json::Value;
-use domain::shared::response::Response;
 use domain::shared::scale::Scale;
-use crate::utils::{get_api_token, get_url, ApiMode};
+use crate::utils::{get_api_token, get_url};
 
 #[server(GetResource, "/api/resources/get")]
 pub async fn get(

@@ -1,7 +1,6 @@
 use api::metrics as metrics_api;
 use api::workloads::pods as pods_api;
 use domain::metrics::PodMetrics;
-use domain::utils::time::time_until_now;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 

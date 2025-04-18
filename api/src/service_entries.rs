@@ -16,7 +16,6 @@ pub async fn get_service_entries() -> Result<Vec<ServiceEntry>, ServerFnError> {
            .await.unwrap_or_default(), )
 }
 
-#[allow(dead_code)]
 async fn parse_entries_response(
     response: &str,
     pods: &[Pod],
@@ -68,7 +67,7 @@ async fn parse_entries_response(
         .collect())
 }
 
-#[allow(dead_code)]
+
 fn format_service_name(service_name: &str) -> String {
     service_name
         .split('-')
@@ -90,7 +89,7 @@ fn format_service_name(service_name: &str) -> String {
         .join(" ")
 }
 
-#[allow(dead_code)]
+
 fn get_service_selector(service: &Service) -> String {
     service
         .metadata
@@ -100,14 +99,14 @@ fn get_service_selector(service: &Service) -> String {
         .unwrap_or(String::new())
 }
 
-#[allow(dead_code)]
+
 fn get_pod_by_label(pods: &[Pod], label: &str) -> Option<Pod> {
     pods.iter()
         .find(|p| p.metadata.labels.get(NAME_LABEL).unwrap_or(&String::new()) == label)
         .cloned()
 }
 
-#[allow(dead_code)]
+
 fn is_pod_available(pod: Option<Pod>) -> bool {
     pod.is_some_and(|p| p.status.phase == "Running")
 }

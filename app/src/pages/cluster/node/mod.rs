@@ -1,7 +1,5 @@
 use leptos::prelude::*;
-use leptos_router::hooks::use_params_map;
-
-use crate::components::prelude::*;
+use leptos_router::hooks::use_params_map;use crate::components::prelude::*;
 use crate::components::stats::nodes::NodesStatComponent;
 use crate::components::stats::pods::PodsStatComponent;
 use crate::pages::cluster::node::node_conditions::NodeConditionsComponent;
