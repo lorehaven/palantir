@@ -6,6 +6,7 @@ mod claims_list;
 
 #[component]
 pub fn StorageClaimsPage() -> impl IntoView {
+    let resource_type = RwSignal::new("PersistentVolumeClaims".to_string());
     let resource_name = RwSignal::new(String::new());
     let namespace_name = RwSignal::new("All Namespaces".to_string());
 
@@ -14,12 +15,11 @@ pub fn StorageClaimsPage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="storage-claims main-page">
-                    <Filter
-                        label="Persistent Volume Claims"
-                        namespace_name
-                        resource_name
-                        with_namespace=true
-                        with_resource_name=true />
+                    <Actions
+                        resource_type
+                        selected_namespace=namespace_name
+                        prompt_value=resource_name
+                        actions=&[ActionType::NamespacesFilter, ActionType::Prompt] />
                     <claims_list::ClaimsListComponent namespace_name resource_name />
                 </div>
             </PageContentSlot>

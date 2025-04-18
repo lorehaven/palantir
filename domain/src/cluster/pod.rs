@@ -58,6 +58,8 @@ pub struct Container {
     pub name: String,
     pub image: String,
     #[serde(default)]
+    pub args: Vec<String>,
+    #[serde(default)]
     pub ports: Vec<Port>,
     #[serde(default)]
     pub env: Vec<Env>,

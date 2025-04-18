@@ -19,6 +19,7 @@ pub mod secrets;
 
 #[component]
 pub fn AccountsPage() -> impl IntoView {
+    let resource_type = RwSignal::new("ServiceAccounts".to_string());
     let resource_name = RwSignal::new(String::new());
     let namespace_name = RwSignal::new("All Namespaces".to_string());
 
@@ -27,12 +28,11 @@ pub fn AccountsPage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="service-accounts main-page">
-                    <Filter
-                        label="Service Accounts"
-                        namespace_name
-                        resource_name
-                        with_namespace=true
-                        with_resource_name=true />
+                    <Actions
+                        resource_type
+                        selected_namespace=namespace_name
+                        prompt_value=resource_name
+                        actions=&[ActionType::NamespacesFilter, ActionType::Prompt] />
                     <AccountsList namespace_name resource_name />
                 </div>
             </PageContentSlot>

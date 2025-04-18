@@ -26,6 +26,7 @@ pub fn AccountsRolePage() -> impl IntoView {
         name.clone(),
     ];
 
+    let resource_type = RwSignal::new("Role".to_string());
     let namespace_name = RwSignal::new(namespace_name);
     let name = RwSignal::new(name);
 
@@ -34,6 +35,11 @@ pub fn AccountsRolePage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="accounts-role main-page">
+                    <Actions
+                        resource_type
+                        namespace_name=namespace_name
+                        resource_name=name
+                        actions=&[ActionType::Edit, ActionType::Delete] />
                     <role_info::RoleInfoComponent namespace_name resource_name=name />
                     <role_rules::RoleRulesComponent namespace_name resource_name=name />
                 </div>

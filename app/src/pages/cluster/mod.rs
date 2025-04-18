@@ -12,6 +12,7 @@ pub mod nodes;
 
 #[component]
 pub fn ClusterPage() -> impl IntoView {
+    let resource_type = RwSignal::new("Cluster".to_string());
     let resource_name = RwSignal::new(String::new());
 
     view! {
@@ -19,10 +20,10 @@ pub fn ClusterPage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="cluster main-page">
-                    <Filter
-                        label="Cluster overview"
-                        resource_name
-                        with_resource_name=true />
+                    <Actions
+                        resource_type
+                        prompt_value=resource_name
+                        actions=&[ActionType::Prompt] />
                     <NodesStatComponent />
                     <PodsStatComponent />
                     <EventsComponent resource_name />

@@ -12,7 +12,7 @@ use crate::utils::stats::pod_stats::{
 };
 
 #[component]
-pub fn ReplicaSetListComponent(
+pub fn DeploymentPodsComponent(
     namespace_name: RwSignal<String>,
     resource_name: RwSignal<String>,
 ) -> impl IntoView {
@@ -72,8 +72,8 @@ fn update_page(
             namespace_name.clone(),
             resource_name.clone(),
         )
-        .await
-        .unwrap_or_default();
+            .await
+            .unwrap_or_default();
         table_rows.set(list);
         loading.set(false);
     });

@@ -78,10 +78,7 @@ fn update_page(
             .await
             .unwrap_or_default()
             .into_iter()
-            .filter(|p| {
-                p.metadata.namespace == namespace_name.clone().unwrap_or_default()
-                    && p.metadata.name.contains("drone-runner")
-            })
+            .filter(|p| p.metadata.namespace == namespace_name.clone().unwrap_or_default())
             .collect::<Vec<_>>();
 
         pod_cpu_usage.set(get_pods_cpu(&replicaset_pods, &pod_metrics));

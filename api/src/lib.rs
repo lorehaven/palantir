@@ -8,6 +8,7 @@
 #![deny(clippy::style)]
 #![deny(clippy::suspicious)]
 #![deny(missing_debug_implementations)]
+#![allow(dead_code)]
 #![allow(unused_imports)]
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::module_name_repetitions)]
@@ -29,6 +30,7 @@ pub mod storage;
 pub mod workloads;
 
 pub mod apply;
+pub mod resource;
 pub mod metrics;
 pub mod service_entries;
 pub mod utils;

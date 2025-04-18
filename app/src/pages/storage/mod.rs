@@ -14,6 +14,7 @@ pub mod volumes;
 
 #[component]
 pub fn StorageClassesPage() -> impl IntoView {
+    let resource_type = RwSignal::new("StorageClasses".to_string());
     let resource_name = RwSignal::new(String::new());
 
     view! {
@@ -21,10 +22,10 @@ pub fn StorageClassesPage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="storage main-page">
-                    <Filter
-                        label="Storage Classes"
-                        resource_name
-                        with_resource_name=true />
+                    <Actions
+                        resource_type
+                        prompt_value=resource_name
+                        actions=&[ActionType::Prompt] />
                     <StorageClassesListComponent resource_name />
                 </div>
             </PageContentSlot>

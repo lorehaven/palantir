@@ -26,6 +26,7 @@ pub fn WorkloadsServicePage() -> impl IntoView {
         name.clone(),
     ];
 
+    let resource_type = RwSignal::new("Service".to_string());
     let namespace_name = RwSignal::new(namespace_name);
     let name = RwSignal::new(name);
 
@@ -34,6 +35,11 @@ pub fn WorkloadsServicePage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="workloads-service main-page">
+                    <Actions
+                        resource_type
+                        namespace_name=namespace_name
+                        resource_name=name
+                        actions=&[ActionType::Edit, ActionType::Delete] />
                     <service_info::ServiceInfoComponent
                         namespace_name
                         resource_name=name />

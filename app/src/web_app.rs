@@ -2,6 +2,7 @@ use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, Link, Stylesheet, Title};
 use leptos_router::components::{Route, Router, Routes};
 use leptos_router::path;
+// use leptoaster::provide_toaster;
 
 use crate::pages::accounts::binding::AccountsRoleBindingPage;
 use crate::pages::accounts::bindings::AccountsRoleBindingsPage;
@@ -29,9 +30,12 @@ use crate::pages::storage::volumes::StorageVolumesPage;
 use crate::pages::storage::StorageClassesPage;
 use crate::pages::workloads::configmap::WorkloadsConfigMapPage;
 use crate::pages::workloads::configmaps::WorkloadsConfigMapsPage;
+use crate::pages::workloads::deployment::WorkloadsDeploymentPage;
 use crate::pages::workloads::ingress::WorkloadsIngressPage;
 use crate::pages::workloads::ingresses::WorkloadsIngressesPage;
+use crate::pages::workloads::job::WorkloadsJobPage;
 use crate::pages::workloads::pod::WorkloadsPodPage;
+use crate::pages::workloads::pod_logs::WorkloadsPodLogsPage;
 use crate::pages::workloads::pods::WorkloadsPodsPage;
 use crate::pages::workloads::replica::WorkloadsReplicaSetPage;
 use crate::pages::workloads::replicas::WorkloadsReplicaSetsPage;
@@ -42,6 +46,7 @@ use crate::pages::workloads::WorkloadsPage;
 #[component]
 pub fn WebApp() -> impl IntoView {
     let site_root = std::env::var("LEPTOS_SITE_PKG_DIR").unwrap_or_else(|_| "pkg".to_string());
+    // provide_toaster();
     provide_meta_context();
 
     view! {
@@ -60,12 +65,15 @@ pub fn WebApp() -> impl IntoView {
                     <Route path=path!("/cluster/namespaces") view=ClusterNamespacesPage />
                     <Route path=path!("/cluster/namespaces/:name") view=ClusterNamespacePage />
                     <Route path=path!("/workloads") view=WorkloadsPage />
+                    <Route path=path!("/workloads/:namespace/deployments/:name") view=WorkloadsDeploymentPage />
+                    <Route path=path!("/workloads/:namespace/jobs/:name") view=WorkloadsJobPage />
                     <Route path=path!("/workloads/services") view=WorkloadsServicesPage />
                     <Route path=path!("/workloads/:namespace/services/:name") view=WorkloadsServicePage />
                     <Route path=path!("/workloads/replicas") view=WorkloadsReplicaSetsPage />
                     <Route path=path!("/workloads/:namespace/replicasets/:name") view=WorkloadsReplicaSetPage />
                     <Route path=path!("/workloads/pods") view=WorkloadsPodsPage />
                     <Route path=path!("/workloads/:namespace/pods/:name") view=WorkloadsPodPage />
+                    <Route path=path!("/workloads/:namespace/pods/:name/logs") view=WorkloadsPodLogsPage />
                     <Route path=path!("/workloads/ingresses") view=WorkloadsIngressesPage />
                     <Route path=path!("/workloads/:namespace/ingresses/:name") view=WorkloadsIngressPage />
                     <Route path=path!("/workloads/configmaps") view=WorkloadsConfigMapsPage />

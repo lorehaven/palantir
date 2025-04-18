@@ -26,6 +26,7 @@ pub fn WorkloadsConfigMapPage() -> impl IntoView {
         name.clone(),
     ];
 
+    let resource_type = RwSignal::new("ConfigMap".to_string());
     let namespace_name = RwSignal::new(namespace_name);
     let name = RwSignal::new(name);
 
@@ -34,6 +35,11 @@ pub fn WorkloadsConfigMapPage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="workloads-configmap main-page">
+                    <Actions
+                        resource_type
+                        namespace_name=namespace_name
+                        resource_name=name
+                        actions=&[ActionType::Edit, ActionType::Delete] />
                     <configmap_info::ConfigMapInfoComponent
                         namespace_name
                         resource_name=name />

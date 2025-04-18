@@ -7,6 +7,7 @@ mod nodes_list;
 
 #[component]
 pub fn ClusterNodesPage() -> impl IntoView {
+    let resource_type = RwSignal::new("Nodes".to_string());
     let resource_name = RwSignal::new(String::new());
 
     view! {
@@ -14,10 +15,10 @@ pub fn ClusterNodesPage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="cluster-nodes main-page">
-                    <Filter
-                        label="Nodes"
-                        resource_name
-                        with_resource_name=true />
+                    <Actions
+                        resource_type
+                        prompt_value=resource_name
+                        actions=&[ActionType::Prompt] />
                     <NodesStatComponent />
                     <nodes_list::NodesListComponent resource_name />
                 </div>

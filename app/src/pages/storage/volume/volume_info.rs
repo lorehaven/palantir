@@ -2,38 +2,37 @@ use api::storage::volumes as volumes_api;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 
-use crate::components::shared::data::resource_info_view;
+use crate::components::prelude::*;
 use crate::utils::shared::display;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::utils::shared::time::format_timestamp;
 
 #[component]
-pub fn VolumeInfoComponent(volume_name: String) -> impl IntoView {
-    let volume_name = RwSignal::new(volume_name);
-    let volume_data = RwSignal::new(vec![]);
+pub fn VolumeInfoComponent(resource_name: RwSignal<String>) -> impl IntoView {
+    let data = RwSignal::new(vec![]);
 
-    let interval_handle = update_page_effect(10_000, move || update_page(volume_name, volume_data));
+    let interval_handle = update_page_effect(10_000, move || update_page(resource_name, data));
     clear_page_effect(interval_handle);
 
-    resource_info_view(volume_data)
+    resource_info_view(data)
 }
 
-fn update_page(volume_name: RwSignal<String>, volume_data: RwSignal<Vec<(String, String)>>) {
-    if volume_name.is_disposed() {
+fn update_page(resource_name: RwSignal<String>, data: RwSignal<Vec<(String, String)>>) {
+    if resource_name.is_disposed() {
         return;
     }
-    let volume_name = volume_name.get();
+    let resource_name = resource_name.get();
 
     spawn_local(async move {
         let volume = volumes_api::get_volumes()
             .await
             .unwrap_or_default()
             .iter()
-            .find(|sc| sc.metadata.name == volume_name)
+            .find(|sc| sc.metadata.name == resource_name)
             .cloned()
             .unwrap_or_default();
 
-        volume_data.set(
+        data.set(
             vec![
                 ("Name", volume.clone().metadata.name),
                 ("Kind", "PersistentVolume".to_string()),

@@ -26,6 +26,7 @@ pub fn WorkloadsIngressPage() -> impl IntoView {
         name.clone(),
     ];
 
+    let resource_type = RwSignal::new("Ingress".to_string());
     let namespace_name = RwSignal::new(namespace_name);
     let name = RwSignal::new(name);
 
@@ -34,6 +35,11 @@ pub fn WorkloadsIngressPage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="workloads-ingress main-page">
+                    <Actions
+                        resource_type
+                        namespace_name=namespace_name
+                        resource_name=name
+                        actions=&[ActionType::Edit, ActionType::Delete] />
                     <ingress_info::IngressInfoComponent
                         namespace_name
                         resource_name=name />

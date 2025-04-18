@@ -18,11 +18,13 @@ main {
 
     .header-link {
       color: $secondaryColor;
-      cursor: pointer;
+      text-decoration: none;
+      cursor: default;
 
-      &:last-child {
-        text-decoration: none;
-        cursor: default;
+      &:nth-child(1),
+      &:nth-child(3) {
+        text-decoration-line: underline;
+        cursor: pointer;
       }
     }
   }
@@ -81,7 +83,7 @@ main {
     .content-internal {
       width: 100vw;
       padding-bottom: 1rem;
-      overflow-y: scroll;
+      overflow-y: auto;
       position: relative;
     }
   }
@@ -106,4 +108,8 @@ main {
 
 .dcc-3 {
   grid-template-columns: 1fr 1fr 1fr;
+}
+
+.spacer {
+  flex-grow: 1;
 }

@@ -22,6 +22,7 @@ pub fn ClusterNamespacePage() -> impl IntoView {
         namespace_name.clone(),
     ];
 
+    let resource_type = RwSignal::new("Namespace".to_string());
     let namespace_name = RwSignal::new(namespace_name);
 
     view! {
@@ -29,6 +30,10 @@ pub fn ClusterNamespacePage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="cluster-namespace main-page">
+                    <Actions
+                        resource_type
+                        resource_name=namespace_name
+                        actions=&[ActionType::Delete] />
                     <PodsStatComponent namespace_name expandable=false />
                     <namespace_info::NamespaceInfoComponent namespace_name />
                     <namespace_pods::NamespacePodsComponent namespace_name />

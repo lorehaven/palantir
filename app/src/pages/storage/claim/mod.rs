@@ -25,6 +25,7 @@ pub fn StorageClaimPage() -> impl IntoView {
         name.clone(),
     ];
 
+    let resource_type = RwSignal::new("PersistentVolumeClaim".to_string());
     let namespace_name = RwSignal::new(namespace_name);
     let name = RwSignal::new(name);
 
@@ -33,6 +34,11 @@ pub fn StorageClaimPage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="storage-claim main-page">
+                    <Actions
+                        resource_type
+                        namespace_name=namespace_name
+                        resource_name=name
+                        actions=&[ActionType::Edit, ActionType::Delete] />
                     <claim_info::ClaimInfoComponent namespace_name resource_name=name />
                 </div>
             </PageContentSlot>

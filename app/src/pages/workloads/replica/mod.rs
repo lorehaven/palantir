@@ -6,7 +6,7 @@ use crate::components::prelude::*;
 
 pub mod replicaset_info;
 pub mod replicaset_info_container;
-pub mod replicaset_list;
+pub mod replicaset_pods;
 pub mod replicaset_stats;
 
 #[component]
@@ -29,6 +29,7 @@ pub fn WorkloadsReplicaSetPage() -> impl IntoView {
         name.clone(),
     ];
 
+    let resource_type = RwSignal::new("ReplicaSet".to_string());
     let namespace_name = RwSignal::new(namespace_name);
     let name = RwSignal::new(name);
 
@@ -37,6 +38,11 @@ pub fn WorkloadsReplicaSetPage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="workloads-replicaset main-page">
+                    <Actions
+                        resource_type
+                        namespace_name=namespace_name
+                        resource_name=name
+                        actions=&[ActionType::Scale, ActionType::Edit, ActionType::Delete] />
                     <replicaset_stats::ReplicaSetsStatsComponent
                         namespace_name
                         resource_name=name />
@@ -46,7 +52,7 @@ pub fn WorkloadsReplicaSetPage() -> impl IntoView {
                     <replicaset_info_container::ReplicaSetInfoContainerComponent
                         namespace_name
                         resource_name=name />
-                    <replicaset_list::ReplicaSetListComponent
+                    <replicaset_pods::ReplicaSetPodsComponent
                         namespace_name
                         resource_name=name />
                     <EventsListComponent

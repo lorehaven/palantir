@@ -9,9 +9,12 @@ use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
 pub mod configmap;
 pub mod configmaps;
+pub mod deployment;
 pub mod ingress;
 pub mod ingresses;
+pub mod job;
 pub mod pod;
+pub mod pod_logs;
 pub mod pods;
 pub mod replica;
 pub mod replicas;
@@ -20,6 +23,7 @@ pub mod services;
 
 #[component]
 pub fn WorkloadsPage() -> impl IntoView {
+    let resource_type = RwSignal::new("Workloads".to_string());
     let resource_name = RwSignal::new(String::new());
     let namespace_name = RwSignal::new("All Namespaces".to_string());
 
@@ -28,12 +32,11 @@ pub fn WorkloadsPage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="workloads main-page">
-                    <Filter
-                        label="Workloads"
-                        namespace_name
-                        resource_name
-                        with_namespace=true
-                        with_resource_name=true />
+                    <Actions
+                        resource_type
+                        selected_namespace=namespace_name
+                        prompt_value=resource_name
+                        actions=&[ActionType::NamespacesFilter, ActionType::Prompt] />
                     <WorkloadsStats namespace_name />
                     <WorkloadsList namespace_name resource_name />
                 </div>
@@ -132,8 +135,7 @@ fn WorkloadsList(
     let styles = vec![String::new(); columns.len()];
     let mut params = vec![String::new(); columns.len()];
     params[1] = "/cluster/namespaces/".to_string();
-    params[2] = "/workloads/:0/:1/".to_string();
-    params[2] = "/accounts/:1/serviceaccounts/".to_string();
+    params[2] = "/workloads/:1/:0s/".to_string();
 
     let columns_update = columns.clone();
     let interval_handle = update_page_effect(10_000, move || {

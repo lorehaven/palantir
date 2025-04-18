@@ -36,13 +36,16 @@
     .dialog-header {
       height: 3rem;
       border-bottom: 0.1rem solid $secondaryColor;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.4rem;
     }
 
     .dialog-content {
       flex: 1;
       display: flex;
       justify-content: center;
-      justify-items: center;
 
       textarea {
         flex: 1;
@@ -79,9 +82,10 @@
         font-size: 1.2rem;
         color: $secondaryColor;
         background-color: $primaryAccentColor;
-        padding: 0.3rem;
+        padding: 0.3rem 0.5rem;
         border: none;
         cursor: pointer;
+        border-radius: 0.5rem;
       }
 
       button:hover {
@@ -95,4 +99,36 @@
   }
 
   .apply-yaml-dialog {}
+
+  .confirm-dialog {
+    height: unset;
+    .dialog-content {
+      flex: unset;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.4rem;
+      padding: 2rem 1rem;
+    }
+  }
+
+  .input-dialog {
+    height: unset;
+    .dialog-content {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.4rem;
+      padding: 1rem;
+
+      input {
+        font-size: 1.4rem;
+        color: $secondaryColor;
+        background-color: $primaryAccentColor;
+        padding: 0.5rem;
+        border: none;
+      }
+    }
+  }
 }

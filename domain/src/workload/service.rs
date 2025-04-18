@@ -35,6 +35,7 @@ pub struct Spec {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Port {
+    #[serde(default)]
     pub name: String,
     #[serde(default)]
     pub protocol: String,

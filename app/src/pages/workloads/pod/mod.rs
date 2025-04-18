@@ -28,6 +28,7 @@ pub fn WorkloadsPodPage() -> impl IntoView {
         name.clone(),
     ];
 
+    let resource_type = RwSignal::new("Pod".to_string());
     let namespace_name = RwSignal::new(namespace_name);
     let name = RwSignal::new(name);
 
@@ -36,6 +37,15 @@ pub fn WorkloadsPodPage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="workloads-pod main-page">
+                    <Actions
+                        resource_type
+                        namespace_name=namespace_name
+                        resource_name=name
+                        actions=&[
+                            ActionType::Logs,
+                            ActionType::Edit,
+                            ActionType::Delete,
+                        ] />
                     <pod_stats::PodStatsComponent
                         namespace_name
                         resource_name=name />

@@ -20,6 +20,7 @@ pub fn AccountsClusterRolePage() -> impl IntoView {
         name.clone(),
     ];
 
+    let resource_type = RwSignal::new("ClusterRole".to_string());
     let name = RwSignal::new(name);
 
     view! {
@@ -27,6 +28,10 @@ pub fn AccountsClusterRolePage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="accounts-cluster-role main-page">
+                    <Actions
+                        resource_type
+                        resource_name=name
+                        actions=&[ActionType::Edit, ActionType::Delete] />
                     <cluster_role_info::ClusterRoleInfoComponent resource_name=name />
                     <cluster_role_rules::ClusterRoleRulesComponent resource_name=name />
                 </div>

@@ -1,0 +1,10 @@
+.logs-view {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 16rem);
+  overflow: scroll;
+
+  pre {
+    width: 100%;
+  }
+}

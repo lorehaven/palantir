@@ -6,6 +6,7 @@ mod volumes_list;
 
 #[component]
 pub fn StorageVolumesPage() -> impl IntoView {
+    let resource_type = RwSignal::new("PersistentVolumes".to_string());
     let resource_name = RwSignal::new(String::new());
 
     view! {
@@ -13,10 +14,10 @@ pub fn StorageVolumesPage() -> impl IntoView {
         <PageContent>
             <PageContentSlot slot>
                 <div class="storage-volumes main-page">
-                    <Filter
-                        label="Persistent Volumes"
-                        resource_name
-                        with_resource_name=true />
+                    <Actions
+                        resource_type
+                        prompt_value=resource_name
+                        actions=&[ActionType::Prompt] />
                     <volumes_list::VolumesListComponent resource_name />
                 </div>
             </PageContentSlot>

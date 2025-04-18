@@ -8,19 +8,27 @@ mod storageclass_info;
 #[component]
 pub fn StorageClassPage() -> impl IntoView {
     let params = use_params_map();
-    let storageclass_name = params
+    let name = params
         .with_untracked(|p| p.get("name"))
         .into_iter()
         .collect::<Vec<_>>()
         .join("-");
-    let page_title = vec!["StorageClass".to_string(), storageclass_name.clone()];
+    let page_title = vec!["StorageClasses".to_string(), name.clone()];
+
+    let resource_type = RwSignal::new("StorageClass".to_string());
+    let name = RwSignal::new(name);
 
     view! {
         <Header text=page_title />
         <PageContent>
             <PageContentSlot slot>
                 <div class="storageclass main-page">
-                    <storageclass_info::StorageClassInfoComponent storageclass_name=storageclass_name.clone() />
+                    <Actions
+                        resource_type
+                        resource_name=name
+                        actions=&[ActionType::Edit, ActionType::Delete] />
+                    <storageclass_info::StorageClassInfoComponent
+                        resource_name=name />
                 </div>
             </PageContentSlot>
         </PageContent>
