@@ -36,6 +36,7 @@ use crate::pages::workloads::ingresses::WorkloadsIngressesPage;
 use crate::pages::workloads::job::WorkloadsJobPage;
 use crate::pages::workloads::pod::WorkloadsPodPage;
 use crate::pages::workloads::pod_logs::WorkloadsPodLogsPage;
+use crate::pages::workloads::pod_exec::WorkloadsPodExecPage;
 use crate::pages::workloads::pods::WorkloadsPodsPage;
 use crate::pages::workloads::replica::WorkloadsReplicaSetPage;
 use crate::pages::workloads::replicas::WorkloadsReplicaSetsPage;
@@ -74,6 +75,7 @@ pub fn WebApp() -> impl IntoView {
                     <Route path=path!("/workloads/pods") view=WorkloadsPodsPage />
                     <Route path=path!("/workloads/:namespace/pods/:name") view=WorkloadsPodPage />
                     <Route path=path!("/workloads/:namespace/pods/:name/logs") view=WorkloadsPodLogsPage />
+                    <Route path=path!("/workloads/:namespace/pods/:name/exec") view=WorkloadsPodExecPage />
                     <Route path=path!("/workloads/ingresses") view=WorkloadsIngressesPage />
                     <Route path=path!("/workloads/:namespace/ingresses/:name") view=WorkloadsIngressPage />
                     <Route path=path!("/workloads/configmaps") view=WorkloadsConfigMapsPage />

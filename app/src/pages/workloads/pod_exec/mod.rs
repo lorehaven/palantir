@@ -1,15 +1,12 @@
 use leptos::prelude::*;
 use leptos_router::hooks::use_params_map;
 
-use crate::components::events::EventsListComponent;
 use crate::components::prelude::*;
 
-pub mod pod_info;
-pub mod pod_info_container;
-pub mod pod_stats;
+pub mod exec_view;
 
 #[component]
-pub fn WorkloadsPodPage() -> impl IntoView {
+pub fn WorkloadsPodExecPage() -> impl IntoView {
     let params = use_params_map();
     let namespace_name = params
         .with_untracked(|p| p.get("namespace"))
@@ -31,35 +28,23 @@ pub fn WorkloadsPodPage() -> impl IntoView {
     let resource_type = RwSignal::new("Pod".to_string());
     let namespace_name = RwSignal::new(namespace_name);
     let name = RwSignal::new(name);
+    let selected_container = RwSignal::new(String::new());
 
     view! {
         <Header text=page_title />
         <PageContent>
             <PageContentSlot slot>
-                <div class="workloads-pod main-page">
+                <div class="workloads-pod-exec main-page">
                     <Actions
                         resource_type
                         namespace_name=namespace_name
                         resource_name=name
-                        actions=&[
-                            ActionType::Logs,
-                            ActionType::Exec,
-                            ActionType::Edit,
-                            ActionType::Delete,
-                        ] />
-                    <pod_stats::PodStatsComponent
-                        namespace_name
-                        resource_name=name />
-                    <pod_info::PodInfoComponent
-                        namespace_name
-                        resource_name=name />
-                    <pod_info_container::PodInfoContainerComponent
-                        namespace_name
-                        resource_name=name />
-                    <EventsListComponent
-                        object_type="Pod".to_string()
-                        namespace_name
-                        object_name=name />
+                        selected_container
+                        actions=&[ActionType::ContainersFilter] />
+                    <exec_view::PodExecViewPage
+                        namespace_name=namespace_name
+                        resource_name=name
+                        selected_container />
                 </div>
             </PageContentSlot>
         </PageContent>

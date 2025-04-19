@@ -1,7 +1,10 @@
 use app::*;
 use axum::Router;
+use axum::routing::get;
 use leptos::prelude::*;
 use leptos_axum::{generate_route_list, LeptosRoutes};
+
+pub mod ws;
 
 #[tokio::main]
 async fn main() {
@@ -11,6 +14,7 @@ async fn main() {
     let routes = generate_route_list(web_app::WebApp);
 
     let app = Router::new()
+        .route("/ws/exec", get(ws::exec_ws_handler))
         .leptos_routes(&leptos_options, routes, {
             let leptos_options = leptos_options.clone();
             move || shell::shell(leptos_options.clone())

@@ -6,6 +6,7 @@ use crate::components::prelude::*;
 pub mod containers;
 pub mod delete;
 pub mod edit;
+pub mod exec;
 pub mod follow;
 pub mod logs;
 pub mod namespaces;
@@ -20,6 +21,7 @@ pub enum ActionType {
     Delete,
     Save,
     Edit,
+    Exec,
     Follow,
     Logs,
     NamespacesFilter,
@@ -103,6 +105,11 @@ fn view(
                     <Spacer />
                     <Show when=move || actions.contains(&ActionType::Logs)>
                         <logs::LogsAction
+                            namespace_name
+                            resource_name />
+                    </Show>
+                    <Show when=move || actions.contains(&ActionType::Exec)>
+                        <exec::ExecAction
                             namespace_name
                             resource_name />
                     </Show>

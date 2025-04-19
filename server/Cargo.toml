@@ -5,9 +5,17 @@ edition.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+api = { path = "../api" }
 app = { path = "../app", default-features = false, features = ["ssr"] }
+
 leptos = { workspace = true, features = [ "ssr" ]}
 leptos_axum.workspace = true
 
 axum.workspace = true
+futures.workspace = true
+native-tls.workspace = true
+serde.workspace = true
 tokio.workspace = true
+tokio-tungstenite.workspace = true
+url.workspace = true
+bytes = "1.10.1"

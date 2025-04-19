@@ -16,7 +16,7 @@ pub fn PodLogsViewPage(
 ) -> impl IntoView {
     let data = RwSignal::new(vec![]);
     let loading = RwSignal::new(true);
-    let log_ref = NodeRef::<leptos::html::Div>::new();
+    let node_ref = NodeRef::<leptos::html::Div>::new();
 
     let interval_handle = update_page_effect(5_000, move || {
         update_page(
@@ -33,7 +33,7 @@ pub fn PodLogsViewPage(
     Effect::new(move |_| {
         data.get();
         if follow_switch.get() && !previous_switch.get() {
-            if let Some(container) = log_ref.get() {
+            if let Some(container) = node_ref.get() {
                 container.set_scroll_top(container.scroll_height());
             }
         }
@@ -45,7 +45,7 @@ pub fn PodLogsViewPage(
         loading.set(true);
     });
 
-    view(log_ref, data, prompt_value, loading)
+    view(node_ref, data, prompt_value, loading)
 }
 
 fn update_page(
@@ -96,7 +96,7 @@ fn update_page(
 }
 
 fn view(
-    log_ref: NodeRef<leptos::html::Div>,
+    node_ref: NodeRef<leptos::html::Div>,
     data: RwSignal<Vec<String>>,
     prompt: RwSignal<String>,
     loading: RwSignal<bool>,
@@ -104,7 +104,7 @@ fn view(
     view! {
         <Wrapper>
             <WrapperSlot slot>
-                <div class="logs-view" node_ref=log_ref>
+                <div class="logs-view" node_ref=node_ref>
                     {move || if loading.get() {
                         view! { <div class="loader" /> }.into_any()
                     } else {

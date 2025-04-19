@@ -1,0 +1,39 @@
+@import "theme.scss";
+
+.exec-view {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 16rem);
+  width: 100%;
+
+  .terminal {
+    height: 100%;
+    width: 100%;
+    padding: 0.2rem;
+    margin: 0;
+    font-size: 1.2rem;
+    background-color: black;
+    white-space: pre-wrap;
+    overflow-y: scroll;
+  }
+
+  .prompt {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem;
+    font-size: 1.2rem;
+    color: $secondaryColor;
+    background-color: black;
+    border-top: 0.1rem solid $secondaryColor;
+
+    input {
+      flex: 1;
+      border: none;
+      color: $secondaryColor;
+      padding: 0.3rem;
+      background-color: black;
+    }
+  }
+}

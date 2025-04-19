@@ -13,6 +13,7 @@ pub mod ingress;
 pub mod ingresses;
 pub mod job;
 pub mod pod;
+pub mod pod_exec;
 pub mod pod_logs;
 pub mod pods;
 pub mod replica;
