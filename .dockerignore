@@ -1,5 +1,7 @@
 *
+!api/
 !app/
+!domain/
 !frontend/
 !public/
 !server/
