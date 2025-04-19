@@ -17,17 +17,20 @@ pub fn DeleteAction(
     let resource_name = or_none(resource_name);
 
     let callback = move || {
+        let toaster = expect_toaster();
         spawn_local(async move {
             if let Err(err) = resource_api::delete(
-                    resource_type.get_untracked(),
-                    namespace_name.get_untracked(),
-                    resource_name.get_untracked(),
-                ).await {
-                Toast::error(&err.to_string());
+                resource_type.get_untracked(),
+                namespace_name.get_untracked(),
+                resource_name.get_untracked(),
+            )
+            .await
+            {
+                toaster.error(err.to_string());
             } else {
                 show_dialog.set(false);
                 if let Ok(history) = window().history() {
-                    Toast::success("Resource successfully deleted");
+                    toaster.success("Resource successfully deleted");
                     let _ = history.back();
                 }
             }
@@ -59,8 +62,12 @@ fn confirm_label(
 ) -> RwSignal<String> {
     let type_label = resource_type.get_untracked().to_lowercase();
     let name_label = resource_name.get_untracked();
-    let namespace_label =
-        if namespace_name.get_untracked().is_empty() { String::new() }
-        else { format!(" in `{}` namespace", namespace_name.get_untracked()) };
-    RwSignal::new(format!("You are attempting to delete {type_label} `{name_label}`{namespace_label}"))
+    let namespace_label = if namespace_name.get_untracked().is_empty() {
+        String::new()
+    } else {
+        format!(" in `{}` namespace", namespace_name.get_untracked())
+    };
+    RwSignal::new(format!(
+        "You are attempting to delete {type_label} `{name_label}`{namespace_label}"
+    ))
 }

@@ -1,10 +1,9 @@
 use leptos::prelude::*;
+
 use crate::components::prelude::*;
 
 #[component]
-pub fn FollowAction(
-    follow_switch: RwSignal<bool>,
-) -> impl IntoView {
+pub fn FollowAction(follow_switch: RwSignal<bool>) -> impl IntoView {
     view! {
         <Wrapper>
             <WrapperSlot slot>

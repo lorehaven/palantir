@@ -3,6 +3,7 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 use leptos::web_sys::{HtmlAnchorElement, Url};
 use wasm_bindgen::JsCast;
+
 use crate::components::prelude::*;
 
 #[component]
@@ -41,7 +42,6 @@ fn save(
     previous_switch: RwSignal<bool>,
 ) {
     spawn_local(async move {
-
         let container = container.get_untracked();
         let resource_type = resource_type.get_untracked();
         let namespace_name = namespace_name.get_untracked();
@@ -49,7 +49,10 @@ fn save(
         let previous_switch = previous_switch.get_untracked();
 
         let now = chrono::Local::now().naive_local();
-        let filename = format!("logs_{resource_name}_{}.log", now.format("%Y-%m-%d_%H-%M-%S-%3f"));
+        let filename = format!(
+            "logs_{resource_name}_{}.log",
+            now.format("%Y-%m-%d_%H-%M-%S-%3f")
+        );
 
         let logs = resource_api::logs(
             resource_type,
@@ -59,8 +62,8 @@ fn save(
             previous_switch,
             -1,
         )
-            .await
-            .unwrap_or_default();
+        .await
+        .unwrap_or_default();
 
         let blob_parts = js_sys::Array::new();
         blob_parts.push(&wasm_bindgen::JsValue::from_str(&logs.join("\n")));

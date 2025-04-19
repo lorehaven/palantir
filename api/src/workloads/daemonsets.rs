@@ -2,6 +2,7 @@ use domain::shared::response::Response;
 use domain::workload::daemonset::DaemonSet;
 use leptos::prelude::ServerFnError;
 use leptos::server;
+
 use crate::resource as resource_api;
 
 #[server(GetDaemonSets, "/api/workloads/daemonsets")]

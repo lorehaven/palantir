@@ -1,7 +1,8 @@
 use api::resource as resource_api;
+use domain::cluster::pod::Container;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
-use domain::cluster::pod::Container;
+
 use crate::components::prelude::*;
 
 #[component]
@@ -22,12 +23,18 @@ pub fn ContainersFilterAction(
                 namespace_name.get_untracked(),
                 resource_name.get_untracked(),
             )
-                .await
-                .unwrap_or_default();
+            .await
+            .unwrap_or_default();
             let json_value = serde_json::from_str::<serde_json::Value>(&res).unwrap();
-            let data = json_value["spec"]["containers"].as_array().unwrap()
+            let data = json_value["spec"]["containers"]
+                .as_array()
+                .unwrap()
                 .iter()
-                .map(|c| serde_json::from_value::<Container>(c.clone()).unwrap_or_default().name)
+                .map(|c| {
+                    serde_json::from_value::<Container>(c.clone())
+                        .unwrap_or_default()
+                        .name
+                })
                 .collect::<Vec<String>>();
             selected_container.set(data.first().cloned().unwrap_or_default());
             containers.set(data);

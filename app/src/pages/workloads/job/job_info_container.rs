@@ -35,14 +35,16 @@ fn update_page(
             .await
             .unwrap_or_default()
             .into_iter()
-            .find(|p| p.metadata.labels.get("job-name").cloned().unwrap_or_default() == resource_name)
+            .find(|p| {
+                p.metadata
+                    .labels
+                    .get("job-name")
+                    .cloned()
+                    .unwrap_or_default()
+                    == resource_name
+            })
             .unwrap_or_default();
-        let container = pod
-            .spec
-            .containers
-            .first()
-            .cloned()
-            .unwrap_or_default();
+        let container = pod.spec.containers.first().cloned().unwrap_or_default();
 
         data.set(vec![
             ("Container", container.name),

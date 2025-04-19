@@ -87,6 +87,7 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]

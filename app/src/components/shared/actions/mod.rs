@@ -5,13 +5,13 @@ use crate::components::prelude::*;
 
 pub mod containers;
 pub mod delete;
-pub mod save;
 pub mod edit;
 pub mod follow;
 pub mod logs;
 pub mod namespaces;
 pub mod previous;
 pub mod prompt;
+pub mod save;
 pub mod scale;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialOrd, PartialEq, Eq)]
@@ -64,13 +64,20 @@ fn view(
     prompt_value: RwSignal<String>,
     actions: &'static [ActionType],
 ) -> impl IntoView {
-    let label_namespace =
-        if namespace_name.get_untracked().is_empty() { String::new() }
-        else { format!(" • {}", namespace_name.get_untracked()) };
-    let label_resource =
-        if resource_name.get_untracked().is_empty() { String::new() }
-        else { format!(" • {}", resource_name.get_untracked()) };
-    let label = RwSignal::new(format!("{}{label_namespace}{label_resource}", resource_type.get_untracked()));
+    let label_namespace = if namespace_name.get_untracked().is_empty() {
+        String::new()
+    } else {
+        format!(" • {}", namespace_name.get_untracked())
+    };
+    let label_resource = if resource_name.get_untracked().is_empty() {
+        String::new()
+    } else {
+        format!(" • {}", resource_name.get_untracked())
+    };
+    let label = RwSignal::new(format!(
+        "{}{label_namespace}{label_resource}",
+        resource_type.get_untracked()
+    ));
 
     view! {
         <Wrapper>
@@ -135,7 +142,10 @@ fn view(
 }
 
 pub fn or_none(data: RwSignal<String>) -> RwSignal<Option<String>> {
-    let data = if data.get_untracked().is_empty() { None }
-    else { Some(data.get_untracked()) };
+    let data = if data.get_untracked().is_empty() {
+        None
+    } else {
+        Some(data.get_untracked())
+    };
     RwSignal::new(data)
 }

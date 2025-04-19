@@ -4,7 +4,7 @@ pub mod data;
 pub mod dialog;
 pub mod expandable;
 pub mod layout;
+pub mod spacer;
 pub mod table;
 pub mod toast;
 pub mod wrapper;
-pub mod spacer;

@@ -72,8 +72,8 @@ fn update_page(
             namespace_name.clone(),
             resource_name.clone(),
         )
-            .await
-            .unwrap_or_default();
+        .await
+        .unwrap_or_default();
         table_rows.set(list);
         loading.set(false);
     });
@@ -96,7 +96,14 @@ async fn update_page_async(
         .await
         .unwrap_or_default()
         .into_iter()
-        .filter(|p| p.metadata.labels.get("job-name").cloned().unwrap_or_default() == resource_name)
+        .filter(|p| {
+            p.metadata
+                .labels
+                .get("job-name")
+                .cloned()
+                .unwrap_or_default()
+                == resource_name
+        })
         .collect::<Vec<_>>();
     let pod_names = pods
         .iter()

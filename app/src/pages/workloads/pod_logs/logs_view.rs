@@ -1,6 +1,7 @@
 use api::resource as resource_api;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
+
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
@@ -18,7 +19,14 @@ pub fn PodLogsViewPage(
     let log_ref = NodeRef::<leptos::html::Div>::new();
 
     let interval_handle = update_page_effect(5_000, move || {
-        update_page(namespace_name, resource_name, selected_container, previous_switch, data, loading);
+        update_page(
+            namespace_name,
+            resource_name,
+            selected_container,
+            previous_switch,
+            data,
+            loading,
+        );
     });
     clear_page_effect(interval_handle);
 
@@ -67,9 +75,8 @@ fn update_page(
             previous,
             tail_lines,
         )
-            .await
-            .unwrap_or_default();
-
+        .await
+        .unwrap_or_default();
 
         data.update(|existing_logs| {
             if let Some(last) = existing_logs.last() {

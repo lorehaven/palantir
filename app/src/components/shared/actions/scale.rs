@@ -24,8 +24,8 @@ pub fn ScaleAction(
                 namespace_name.get_untracked(),
                 resource_name.get_untracked(),
             )
-                .await
-                .unwrap_or_default();
+            .await
+            .unwrap_or_default();
             let json_value = serde_json::from_str::<serde_json::Value>(&res).unwrap();
             let replicas = json_value["spec"]["replicas"].as_i64().unwrap();
             value.set(replicas);
@@ -33,17 +33,20 @@ pub fn ScaleAction(
     });
 
     let callback = move || {
+        let toaster = expect_toaster();
         spawn_local(async move {
             if let Err(err) = resource_api::scale(
                 resource_type.get_untracked(),
                 namespace_name.get_untracked(),
                 resource_name.get_untracked(),
                 value.get(),
-            ).await {
-                Toast::error(&err.to_string());
+            )
+            .await
+            {
+                toaster.error(err.to_string());
             } else {
                 show_dialog.set(false);
-                Toast::success("Resource successfully re-scaled");
+                toaster.success("Resource successfully re-scaled");
             }
         });
     };

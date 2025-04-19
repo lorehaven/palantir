@@ -1,10 +1,9 @@
 use leptos::prelude::*;
+
 use crate::components::prelude::*;
 
 #[component]
-pub fn PreviousAction(
-    previous_switch: RwSignal<bool>,
-) -> impl IntoView {
+pub fn PreviousAction(previous_switch: RwSignal<bool>) -> impl IntoView {
     view! {
         <Wrapper>
             <WrapperSlot slot>

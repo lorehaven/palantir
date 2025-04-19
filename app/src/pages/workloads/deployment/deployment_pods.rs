@@ -72,8 +72,8 @@ fn update_page(
             namespace_name.clone(),
             resource_name.clone(),
         )
-            .await
-            .unwrap_or_default();
+        .await
+        .unwrap_or_default();
         table_rows.set(list);
         loading.set(false);
     });

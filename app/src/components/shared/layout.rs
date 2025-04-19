@@ -1,8 +1,8 @@
+use api::utils::ApiMode;
 use leptos::prelude::*;
 use leptos_router::hooks::use_location;
-use api::utils::ApiMode;
-// use leptoaster::*;
 
+use crate::components::prelude::*;
 use crate::components::shared::dialog::apply_yaml::ApplyYamlDialog;
 use crate::utils::shared::text::capitalize;
 
@@ -134,7 +134,7 @@ pub fn PageContent(
 
     view! {
         <div class=format!("content {additional_classes}")>
-            // <Toaster />
+            <Toaster />
             <SideNavBar show_dialog />
             <ApplyYamlDialog show_dialog mode=ApiMode::Post />
             <div class="content-internal">

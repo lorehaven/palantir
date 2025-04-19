@@ -7,6 +7,8 @@
 #![deny(clippy::perf)]
 #![deny(clippy::style)]
 #![deny(clippy::suspicious)]
+#![allow(dead_code)]
+#![allow(unused_imports)]
 #![deny(missing_debug_implementations)]
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::module_name_repetitions)]

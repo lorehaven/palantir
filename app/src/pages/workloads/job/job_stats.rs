@@ -1,5 +1,5 @@
 use api::metrics as metrics_api;
-use api::workloads::{pods as pods_api, jobs as jobs_api};
+use api::workloads::{jobs as jobs_api, pods as pods_api};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 

@@ -34,9 +34,7 @@ fn update_page(
     let resource_name = resource_name.get();
 
     spawn_local(async move {
-        let job = jobs_api::get_jobs(None)
-            .await
-            .unwrap_or_default();
+        let job = jobs_api::get_jobs(None).await.unwrap_or_default();
         let job = job
             .into_iter()
             .find(|n| n.metadata.namespace == namespace_name && n.metadata.name == resource_name)
@@ -53,18 +51,11 @@ fn update_page(
                 (
                     "Created",
                     format_timestamp(
-                        &job
-                            .clone()
-                            .metadata
-                            .creation_timestamp
-                            .unwrap_or_default(),
+                        &job.clone().metadata.creation_timestamp.unwrap_or_default(),
                         None,
                     ),
                 ),
-                (
-                    "Labels",
-                    display::hashmap(job.clone().metadata.labels),
-                ),
+                ("Labels", display::hashmap(job.clone().metadata.labels)),
                 (
                     "Annotations",
                     display::hashmap(job.clone().metadata.annotations),
@@ -74,20 +65,24 @@ fn update_page(
                 ("Completion Time", end_time.clone()),
                 ("Duration", job_duration(&start_time, &end_time)),
             ]
-                .into_iter()
-                .map(|(k, v)| (k.to_string(), v))
-                .collect(),
+            .into_iter()
+            .map(|(k, v)| (k.to_string(), v))
+            .collect(),
         );
     });
 }
 
 fn job_duration(start_time: &str, end_time: &str) -> String {
-    let start: chrono::DateTime<chrono::Utc> =
-        if let Ok(time) = start_time.parse() { time }
-        else { return "-".to_string(); };
-    let end: chrono::DateTime<chrono::Utc> =
-        if let Ok(time) = end_time.parse() { time }
-        else { return "-".to_string(); };
+    let start: chrono::DateTime<chrono::Utc> = if let Ok(time) = start_time.parse() {
+        time
+    } else {
+        return "-".to_string();
+    };
+    let end: chrono::DateTime<chrono::Utc> = if let Ok(time) = end_time.parse() {
+        time
+    } else {
+        return "-".to_string();
+    };
 
     let duration = end - start;
 

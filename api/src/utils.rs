@@ -52,9 +52,21 @@ fn get_resource_map() -> Vec<(&'static str, &'static str, &'static str)> {
         ("networking.k8s.io/v1", "ingresses", "Ingress"),
         ("networking.k8s.io/v1", "networkpolicies", "NetworkPolicy"),
         ("policy/v1", "poddisruptionbudgets", "PodDisruptionBudget"),
-        ("rbac.authorization.k8s.io/v1", "clusterrolebindings", "ClusterRoleBinding"),
-        ("rbac.authorization.k8s.io/v1", "rolebindings", "RoleBinding"),
-        ("rbac.authorization.k8s.io/v1", "clusterroles", "ClusterRole"),
+        (
+            "rbac.authorization.k8s.io/v1",
+            "clusterrolebindings",
+            "ClusterRoleBinding",
+        ),
+        (
+            "rbac.authorization.k8s.io/v1",
+            "rolebindings",
+            "RoleBinding",
+        ),
+        (
+            "rbac.authorization.k8s.io/v1",
+            "clusterroles",
+            "ClusterRole",
+        ),
         ("rbac.authorization.k8s.io/v1", "roles", "Role"),
         ("scheduling.k8s.io/v1", "priorityclasses", "PriorityClass"),
         ("storage.k8s.io/v1", "storageclasses", "StorageClass"),
@@ -78,22 +90,39 @@ fn get_resource_map() -> Vec<(&'static str, &'static str, &'static str)> {
 
 #[server]
 #[allow(clippy::unused_async)]
-pub async fn get_url(kind: String, namespace: Option<String>, resource_name: Option<String>) -> Result<String, ServerFnError> {
+pub async fn get_url(
+    kind: String,
+    namespace: Option<String>,
+    resource_name: Option<String>,
+) -> Result<String, ServerFnError> {
     let resource_map = get_resource_map();
 
-    namespace.map_or_else(|| if let Some((u, k, _)) = resource_map.iter().find(|(_, _, k)| k == &kind) {
-        let prefix = if u.starts_with("v1") { "api" } else { "apis" };
-        resource_name.clone().map_or_else(
-            || Ok(format!("{prefix}/{u}/{k}")),
-            |resource_name| Ok(format!("{prefix}/{u}/{k}/{resource_name}")))
-    } else {
-        Err(ServerFnError::ServerError("invalid resource - cannot build url".to_string(), ))
-    }, |ns| if let Some((u, k, _)) = resource_map.iter().find(|(_, _, k)| k == &kind) {
-        let prefix = if u.starts_with("v1") { "api" } else { "apis" };
-        resource_name.clone().map_or_else(
-            || Ok(format!("{prefix}/{u}/namespaces/{ns}/{k}")),
-            |resource_name| Ok(format!("{prefix}/{u}/namespaces/{ns}/{k}/{resource_name}")))
-    } else {
-        Err(ServerFnError::ServerError("invalid resource - cannot build url".to_string()))
-    })
+    namespace.map_or_else(
+        || {
+            if let Some((u, k, _)) = resource_map.iter().find(|(_, _, k)| k == &kind) {
+                let prefix = if u.starts_with("v1") { "api" } else { "apis" };
+                resource_name.clone().map_or_else(
+                    || Ok(format!("{prefix}/{u}/{k}")),
+                    |resource_name| Ok(format!("{prefix}/{u}/{k}/{resource_name}")),
+                )
+            } else {
+                Err(ServerFnError::ServerError(
+                    "invalid resource - cannot build url".to_string(),
+                ))
+            }
+        },
+        |ns| {
+            if let Some((u, k, _)) = resource_map.iter().find(|(_, _, k)| k == &kind) {
+                let prefix = if u.starts_with("v1") { "api" } else { "apis" };
+                resource_name.clone().map_or_else(
+                    || Ok(format!("{prefix}/{u}/namespaces/{ns}/{k}")),
+                    |resource_name| Ok(format!("{prefix}/{u}/namespaces/{ns}/{k}/{resource_name}")),
+                )
+            } else {
+                Err(ServerFnError::ServerError(
+                    "invalid resource - cannot build url".to_string(),
+                ))
+            }
+        },
+    )
 }

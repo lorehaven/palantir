@@ -1,12 +1,11 @@
 use api::cluster::namespaces as namespaces_api;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
+
 use crate::components::prelude::*;
 
 #[component]
-pub fn NamespacesFilterAction(
-    selected_namespace: RwSignal<String>,
-) -> impl IntoView {
+pub fn NamespacesFilterAction(selected_namespace: RwSignal<String>) -> impl IntoView {
     let namespaces = RwSignal::new(vec![]);
 
     Effect::new(move |_| {

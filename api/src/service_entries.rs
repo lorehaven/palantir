@@ -12,8 +12,11 @@ const NAME_LABEL: &str = "app.kubernetes.io/name";
 #[server(GetServiceEntries, "/api/services/entries")]
 pub async fn get_service_entries() -> Result<Vec<ServiceEntry>, ServerFnError> {
     let services = resource_api::get("Service".to_string(), None, None).await?;
-    Ok(parse_entries_response(&services, &get_pods(None, None).await?)
-           .await.unwrap_or_default(), )
+    Ok(
+        parse_entries_response(&services, &get_pods(None, None).await?)
+            .await
+            .unwrap_or_default(),
+    )
 }
 
 async fn parse_entries_response(
@@ -67,7 +70,6 @@ async fn parse_entries_response(
         .collect())
 }
 
-
 fn format_service_name(service_name: &str) -> String {
     service_name
         .split('-')
@@ -89,7 +91,6 @@ fn format_service_name(service_name: &str) -> String {
         .join(" ")
 }
 
-
 fn get_service_selector(service: &Service) -> String {
     service
         .metadata
@@ -99,13 +100,11 @@ fn get_service_selector(service: &Service) -> String {
         .unwrap_or(String::new())
 }
 
-
 fn get_pod_by_label(pods: &[Pod], label: &str) -> Option<Pod> {
     pods.iter()
         .find(|p| p.metadata.labels.get(NAME_LABEL).unwrap_or(&String::new()) == label)
         .cloned()
 }
-
 
 fn is_pod_available(pod: Option<Pod>) -> bool {
     pod.is_some_and(|p| p.status.phase == "Running")

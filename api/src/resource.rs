@@ -1,6 +1,7 @@
+use domain::shared::scale::Scale;
 use leptos::prelude::ServerFnError;
 use leptos::server;
-use domain::shared::scale::Scale;
+
 use crate::utils::{get_api_token, get_url};
 
 #[server(GetResource, "/api/resources/get")]
@@ -71,7 +72,11 @@ pub async fn logs(
     let url = get_url(resource_type, Some(namespace), Some(resource)).await?;
     let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
 
-    let tail_lines = if tail_lines > 0 { format!("&tailLines={tail_lines}") } else { String::new() };
+    let tail_lines = if tail_lines > 0 {
+        format!("&tailLines={tail_lines}")
+    } else {
+        String::new()
+    };
     let response = client
         .get(format!("https://{server_host}:6443/{url}/log?container={container}&follow=false&previous={previous}{tail_lines}"))
         .bearer_auth(get_api_token())
@@ -79,7 +84,9 @@ pub async fn logs(
         .await?;
 
     if response.status().is_success() {
-        Ok(response.text().await?
+        Ok(response
+            .text()
+            .await?
             .split('\n')
             .filter(|s| !s.is_empty())
             .map(ToOwned::to_owned)
@@ -106,11 +113,14 @@ pub async fn scale(
     let response = client
         .put(format!("https://{server_host}:6443/{url}/scale"))
         .bearer_auth(get_api_token())
-        .body(serde_json::to_string(&Scale::new(
-            &namespace.unwrap_or_default(),
-            &resource.unwrap_or_default(),
-            replicas,
-        )).unwrap_or_default())
+        .body(
+            serde_json::to_string(&Scale::new(
+                &namespace.unwrap_or_default(),
+                &resource.unwrap_or_default(),
+                replicas,
+            ))
+            .unwrap_or_default(),
+        )
         .send()
         .await?;
 

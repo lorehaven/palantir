@@ -2,8 +2,8 @@ use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, Link, Stylesheet, Title};
 use leptos_router::components::{Route, Router, Routes};
 use leptos_router::path;
-// use leptoaster::provide_toaster;
 
+use crate::components::prelude::*;
 use crate::pages::accounts::binding::AccountsRoleBindingPage;
 use crate::pages::accounts::bindings::AccountsRoleBindingsPage;
 use crate::pages::accounts::clusterbinding::AccountsClusterRoleBindingPage;
@@ -46,7 +46,7 @@ use crate::pages::workloads::WorkloadsPage;
 #[component]
 pub fn WebApp() -> impl IntoView {
     let site_root = std::env::var("LEPTOS_SITE_PKG_DIR").unwrap_or_else(|_| "pkg".to_string());
-    // provide_toaster();
+    provide_toaster();
     provide_meta_context();
 
     view! {

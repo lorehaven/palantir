@@ -1,10 +1,9 @@
 use leptos::prelude::*;
+
 use crate::components::prelude::*;
 
 #[component]
-pub fn PromptAction(
-    prompt_value: RwSignal<String>,
-) -> impl IntoView {
+pub fn PromptAction(prompt_value: RwSignal<String>) -> impl IntoView {
     view! {
         <Wrapper>
             <WrapperSlot slot>

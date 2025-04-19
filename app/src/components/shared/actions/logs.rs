@@ -1,4 +1,5 @@
 use leptos::prelude::*;
+
 use crate::components::prelude::*;
 
 #[component]
@@ -6,7 +7,11 @@ pub fn LogsAction(
     namespace_name: RwSignal<String>,
     resource_name: RwSignal<String>,
 ) -> impl IntoView {
-    let url = format!("/workloads/{}/pods/{}/logs", namespace_name.get_untracked(), resource_name.get_untracked());
+    let url = format!(
+        "/workloads/{}/pods/{}/logs",
+        namespace_name.get_untracked(),
+        resource_name.get_untracked()
+    );
 
     view! {
         <Wrapper>

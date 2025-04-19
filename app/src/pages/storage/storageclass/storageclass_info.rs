@@ -19,10 +19,7 @@ pub fn StorageClassInfoComponent(resource_name: RwSignal<String>) -> impl IntoVi
     resource_info_view(data)
 }
 
-fn update_page(
-    resource_name: RwSignal<String>,
-    data: RwSignal<Vec<(String, String)>>,
-) {
+fn update_page(resource_name: RwSignal<String>, data: RwSignal<Vec<(String, String)>>) {
     if resource_name.is_disposed() {
         return;
     }

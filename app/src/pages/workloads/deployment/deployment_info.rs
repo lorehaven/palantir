@@ -68,9 +68,9 @@ fn update_page(
                 ),
                 ("Version", deployment.metadata.resource_version),
             ]
-                .into_iter()
-                .map(|(k, v)| (k.to_string(), v))
-                .collect(),
+            .into_iter()
+            .map(|(k, v)| (k.to_string(), v))
+            .collect(),
         );
     });
 }

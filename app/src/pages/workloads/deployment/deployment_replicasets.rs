@@ -63,8 +63,8 @@ fn update_page(
             namespace_name.clone(),
             resource_name.clone(),
         )
-            .await
-            .unwrap_or_default();
+        .await
+        .unwrap_or_default();
         table_rows.set(list);
         loading.set(false);
     });
@@ -88,12 +88,14 @@ async fn update_page_async(
         .unwrap_or_default()
         .into_iter()
         .filter(|p| p.metadata.name.contains(&resource_name))
-        .map(|r| vec![
-            "ReplicaSet".to_string(),
-            r.clone().metadata.name,
-            r.metadata.generation.to_string(),
-            format!("{}/{}", r.status.available_replicas, r.status.replicas),
-        ])
+        .map(|r| {
+            vec![
+                "ReplicaSet".to_string(),
+                r.clone().metadata.name,
+                r.metadata.generation.to_string(),
+                format!("{}/{}", r.status.available_replicas, r.status.replicas),
+            ]
+        })
         .collect::<Vec<_>>();
 
     list.sort_by(|a, b| a[1].cmp(&b[1]));

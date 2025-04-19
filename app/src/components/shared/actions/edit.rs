@@ -1,7 +1,8 @@
 use api::resource as resource_api;
+use api::utils::ApiMode;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
-use api::utils::ApiMode;
+
 use crate::components::prelude::*;
 use crate::components::shared::dialog::apply_yaml::ApplyYamlDialog;
 
@@ -24,8 +25,8 @@ pub fn EditAction(
                     namespace_name.get_untracked(),
                     resource_name.get_untracked(),
                 )
-                    .await
-                    .unwrap_or_default();
+                .await
+                .unwrap_or_default();
                 let yaml_value = serde_yaml::from_str::<serde_yaml::Value>(&res).unwrap();
                 let yaml_value = serde_yaml::to_string(&yaml_value).unwrap();
                 resource.set(Some(yaml_value));

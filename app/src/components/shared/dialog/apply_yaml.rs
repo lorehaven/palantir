@@ -1,7 +1,8 @@
 use api::apply as apply_api;
+use api::utils::ApiMode;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
-use api::utils::ApiMode;
+
 use crate::components::prelude::*;
 use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 
@@ -74,20 +75,21 @@ fn apply(
     error: RwSignal<String>,
     mode: ApiMode,
 ) {
+    let toaster = expect_toaster();
     let yaml_value = serde_yaml::from_str::<serde_yaml::Value>(&yaml_content.get()).unwrap();
     let json_value = serde_json::to_value(yaml_value).unwrap();
     let json_str = serde_json::to_string_pretty(&json_value).unwrap();
 
     spawn_local(async move {
         if let Err(err) = apply_api::apply(json_str.clone(), mode).await {
-            Toast::error(&err.to_string());
+            toaster.error(err.to_string());
             match err {
                 ServerFnError::ServerError(e) => error.set(e),
                 _ => error.set(err.to_string()),
             }
         } else {
             yaml_content.set(String::new());
-            Toast::success("Successfully applied yaml");
+            toaster.success("Successfully applied yaml");
             show_dialog.set(false);
         }
     });
