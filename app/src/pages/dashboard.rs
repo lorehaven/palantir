@@ -6,6 +6,7 @@ use crate::utils::shared::text::capitalize;
 #[component]
 pub fn DashboardPage() -> impl IntoView {
     let entries = vec![
+        ("facade", "list"),
         ("cluster", "cube"),
         ("workloads", "rotate-right"),
         ("storage", "warehouse"),

@@ -38,8 +38,8 @@ async fn parse_entries_response(
             let selector = get_service_selector(&s);
             s.spec.ports.into_iter().map(move |p| ServiceEntry {
                 name: format_service_name(&p.name),
-                url: format!("http://{server_host}:{}", p.port.unwrap()),
-                url_display: format!("{server_dns_name}:{}", p.port.unwrap()),
+                url: format!("http://{server_host}:{}", p.node_port.clone().unwrap()),
+                url_display: format!("{server_dns_name}:{}", p.node_port.unwrap()),
                 available: is_pod_available(get_pod_by_label(pods, &selector)),
             })
         })
