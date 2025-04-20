@@ -25,7 +25,7 @@ async fn parse_entries_response(
 ) -> Result<Vec<ServiceEntry>, Box<dyn std::error::Error>> {
     let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
     let server_dns_name =
-        std::env::var("SERVER_DNS_NAME").unwrap_or_else(|_| "ossiriand.arda".to_string());
+        std::env::var("SERVER_DNS_NAME").unwrap_or_else(|_| "localhost".to_string());
 
     let mut services = serde_json::from_str::<Response<Service>>(response)?
         .items

@@ -1,89 +1,94 @@
-<picture>
-    <source srcset="https://raw.githubusercontent.com/leptos-rs/leptos/main/docs/logos/Leptos_logo_Solid_White.svg" media="(prefers-color-scheme: dark)">
-    <img src="https://raw.githubusercontent.com/leptos-rs/leptos/main/docs/logos/Leptos_logo_RGB.svg" alt="Leptos Logo">
-</picture>
+# Palantir
 
-# Leptos Axum Starter Template
+**Palantir** is a lightweight Kubernetes dashboard application built using [Rust](https://www.rust-lang.org/) and [Leptos](https://leptos.dev/). It provides an intuitive, real-time web interface to observe and manage your Kubernetes clusters with speed and elegance.
 
-This is a template for use with the [Leptos](https://github.com/leptos-rs/leptos) web framework and the [cargo-leptos](https://github.com/akesson/cargo-leptos) tool using [Axum](https://github.com/tokio-rs/axum).
+---
 
-## Creating your template repo
+## 🚀 Features
 
-If you don't have `cargo-leptos` installed you can install it with
+- 📊 Visualize Kubernetes resources
+- 🔄 Live updates using efficient client-server communication
+- 🌈 Clean, reactive UI powered by Leptos
+- 🛡️ Secure by design – runs locally or in-cluster
+- 🔌 Extendable and modular architecture
 
-```bash
-cargo install cargo-leptos --locked
-```
+---
 
-Then run
-```bash
-cargo leptos new --git https://github.com/leptos-rs/start-axum-workspace-0.7/
-```
+## 🛠️ Built With
 
-to generate a new project template.
+- [Rust](https://www.rust-lang.org/) – backend logic and performance
+- [Leptos](https://leptos.dev/) – fullstack reactive web UI in Rust
 
-```bash
-cd {projectname}
-```
+---
 
-to go to your newly created project.  
-Feel free to explore the project structure, but the best place to start with your application code is in `src/app.rs`.  
-Addtionally, Cargo.toml may need updating as new versions of the dependencies are released, especially if things are not working after a `cargo update`.
+## 📦 Installation
 
-### Islands support
+> ⚠️ **Requirements**: Rust toolchain, Leptos CLI
 
-Note that for islands to work correctly, you need to have a `use app;` in your frontend `lib.rs` otherwise rustc / wasm_bindgen gets confused.
-To prevent clippy from complaining, at the top of the `frontend/lib.rs` file place:
-```rust
-#[allow(clippy::single_component_path_imports)]
-#[allow(unused_imports)]
-use app;
-```
-
-## Running your project
+Clone the repo:
 
 ```bash
-cargo leptos watch
-```
+git clone https://github.com/lorehaven/palantir.git
+cd palantir
+``````
 
-## Installing Additional Tools
+Build and run the server:
 
-By default, `cargo-leptos` uses `nightly` Rust, `cargo-generate`, and `sass`. If you run into any trouble, you may need to install one or more of these tools.
+``````bash
+cargo leptos build
+``````
 
-1. `rustup toolchain install nightly --allow-downgrade` - make sure you have Rust nightly
-2. `rustup default nightly` - setup nightly as default, or you can use rust-toolchain file later on
-3. `rustup target add wasm32-unknown-unknown` - add the ability to compile Rust to WebAssembly
-4. `cargo install cargo-generate` - install `cargo-generate` binary (should be installed automatically in future)
-5. `npm install -g sass` - install `dart-sass` (should be optional in future
+Open your browser at [http://localhost:3000](http://localhost:3000)
 
-## Compiling for Release
-```bash
-cargo leptos build --release
-```
+---
 
-Will generate your server binary in target/server/release and your site package in target/site
+## 🔧 Configuration
 
-## Executing a Server on a Remote Machine Without the Toolchain
-After running a `cargo leptos build --release` the minimum files needed are:
+Palantir uses environment variables for configuration:
 
-1. The server binary located in `target/server/release`
-2. The `site` directory and all files within located in `target/site`
+- SERVER_HOST [String] - server address. defaults to localhost \
+- SERVER_DNS_NAME [String] - server display name. defaults to localhost \
+- KUBERNETES_TOKEN_PATH [String] - for local builds - location of a file holding access token \
+- ADDITIONAL_SERVICES [List<Map>] - services to be added to facade view not being a part of kubernetes cluster \
+> [{name: String, url: String, url_display: String, available: bool}]
+---
 
-Copy these files to your remote server. The directory structure should be:
-```text
-start-axum-workspace
-site/
-```
-Set the following enviornment variables (updating for your project as needed):
-```text
-LEPTOS_OUTPUT_NAME="start-axum-workspace"
-LEPTOS_SITE_ROOT="site"
-LEPTOS_SITE_PKG_DIR="pkg"
-LEPTOS_SITE_ADDR="127.0.0.1:3000"
-LEPTOS_RELOAD_PORT="3001"
-```
-Finally, run the server binary.
+## 🌐 Deployment
 
-## Licensing
+Palantir can be containerized and deployed directly into your cluster.
 
-This template itself is released under the Unlicense. You should replace the LICENSE for your own application with an appropriate license if you plan to release it publicly.
+The \`Dockerfile\` is provided: [Dockerfile](Dockerfile)
+
+> While deploying inside a kubernetes cluster,\
+> Consider running it with minimal RBAC privileges for read-only access if you just want a viewer mode.
+
+---
+
+## 🧪 Development
+
+Start in dev mode with hot reload:
+
+``````bash
+LEPTOS_ENV=dev cargo leptos watch
+``````
+
+Frontend is auto-recompiled with changes using Leptos' hot reload.
+
+---
+
+---
+
+## 🤝 Contributing
+
+Pull requests are welcome! For major changes, please open an issue first to discuss what you’d like to change.
+
+- Make sure to format code with \`cargo fmt\`
+- Run \`cargo clippy --all-targets --all-features -- -D warnings\` before submitting
+
+---
+
+## 📄 License
+
+[License](LICENSE)
+
+---
