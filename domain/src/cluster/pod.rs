@@ -26,10 +26,9 @@ pub struct Spec {
     pub service_account_name: String,
     #[serde(rename = "serviceAccount")]
     pub service_account: String,
-    #[serde(rename = "nodeName")]
+    #[serde(default, rename = "nodeName")]
     pub node_name: String,
-    #[serde(default)]
-    #[serde(rename = "hostNetwork")]
+    #[serde(default, rename = "hostNetwork")]
     pub host_network: Option<bool>,
     // security context
     pub priority: i32,
@@ -109,16 +108,15 @@ pub struct Resource {
 pub struct Status {
     pub phase: String,
     pub conditions: Vec<Condition>,
-    #[serde(rename = "hostIP")]
+    #[serde(default, rename = "hostIP")]
     pub host_ip: String,
-    #[serde(default)]
-    #[serde(rename = "podIP")]
+    #[serde(default, rename = "podIP")]
     pub pod_ip: Option<String>,
-    #[serde(rename = "startTime")]
+    #[serde(default, rename = "startTime")]
     pub start_time: String,
-    #[serde(rename = "containerStatuses")]
+    #[serde(default, rename = "containerStatuses")]
     pub container_statuses: Vec<ContainerStatus>,
-    #[serde(rename = "qosClass")]
+    #[serde(default, rename = "qosClass")]
     pub qos_class: String,
 }
 
