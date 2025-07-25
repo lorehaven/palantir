@@ -31,7 +31,7 @@ async fn handle_exec_socket(mut client_ws: WebSocket, params: ExecParams) {
     let url = match url::Url::parse(&k8s_url) {
         Ok(url) => url,
         Err(e) => {
-            let _ = client_ws.send(Message::Text(format!("Invalid K8s URL: {}", e))).await;
+            let _ = client_ws.send(Message::Text(format!("Invalid K8s URL: {e}"))).await;
             return;
         }
     };
@@ -45,12 +45,12 @@ async fn handle_exec_socket(mut client_ws: WebSocket, params: ExecParams) {
         .header("Sec-WebSocket-Version", "13")
         .header("Sec-WebSocket-Key", tt::handshake::client::generate_key())
         .header("Sec-WebSocket-Protocol", "v4.channel.k8s.io")
-        .header("Authorization", format!("Bearer {}", token))
+        .header("Authorization", format!("Bearer {token}"))
         .version(tt::http::Version::HTTP_11)
         .body(()) {
             Ok(req) => req,
             Err(e) => {
-            let _ = client_ws.send(Message::Text(format!("Failed to build request: {}", e))).await;
+            let _ = client_ws.send(Message::Text(format!("Failed to build request: {e}"))).await;
             return;
         }
     };
@@ -61,7 +61,7 @@ async fn handle_exec_socket(mut client_ws: WebSocket, params: ExecParams) {
     {
         Ok(tls) => tls,
         Err(e) => {
-            let _ = client_ws.send(Message::Text(format!("Failed to configure TLS: {}", e))).await;
+            let _ = client_ws.send(Message::Text(format!("Failed to configure TLS: {e}"))).await;
             return;
         }
     };
