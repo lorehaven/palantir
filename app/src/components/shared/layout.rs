@@ -7,7 +7,7 @@ use crate::components::shared::dialog::apply_yaml::ApplyYamlDialog;
 use crate::utils::shared::text::capitalize;
 
 #[component]
-pub fn Header(#[prop(optional)] text: Vec<impl Into<String>>) -> impl IntoView {
+pub fn Header(#[prop(optional)] text: Vec<impl Into<String> + 'static>) -> impl IntoView {
     let text = text.into_iter().map(Into::into).collect::<Vec<String>>();
     let mut links = text
         .iter()
