@@ -16,8 +16,8 @@ pub fn parse_table_rows(
         .enumerate()
         .map(|(idx, item)| {
             let r#type = columns[idx % columns.len()].r#type.clone();
-            let style = styles[idx % styles.len()].to_string();
-            let param = params[idx % params.len()].to_string();
+            let style = styles[idx % styles.len()].clone();
+            let param = params[idx % params.len()].clone();
             let values_idx = values[idx
                 / values
                     .first()

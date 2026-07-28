@@ -9,7 +9,7 @@ pub fn capitalize(s: &str) -> String {
 }
 
 pub fn decode_jwt_token(token: &str) -> String {
-    let jwt_token = token.split('.').collect::<Vec<&str>>()[1];
+    let jwt_token = token.split('.').nth(1).unwrap();
     let bytes_url = base64::engine::GeneralPurpose::new(
         &base64::alphabet::URL_SAFE,
         base64::engine::general_purpose::NO_PAD,

@@ -16,7 +16,7 @@ impl NodeMetrics {
             .labels
             .get("kubernetes.io/hostname")
             .unwrap()
-            .to_string()
+            .clone()
     }
 }
 

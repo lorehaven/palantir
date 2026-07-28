@@ -17,7 +17,7 @@ pub fn Header(#[prop(optional)] text: Vec<impl Into<String> + 'static>) -> impl 
             if idx == text.len() - 1 || idx >= 1 {
                 view! {
                     <span class="header-separator"> / </span>
-                    <span class="header-link">{ t.to_string() }</span>
+                    <span class="header-link">{ t.clone() }</span>
                 }
                 .into_any()
             } else {
@@ -31,7 +31,7 @@ pub fn Header(#[prop(optional)] text: Vec<impl Into<String> + 'static>) -> impl 
                 );
                 view! {
                     <span class="header-separator"> / </span>
-                    <a href=href class="header-link">{ t.to_string() }</a>
+                    <a href=href class="header-link">{ t.clone() }</a>
                 }
                 .into_any()
             }

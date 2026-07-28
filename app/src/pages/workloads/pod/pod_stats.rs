@@ -63,7 +63,7 @@ fn update_page(
             .filter(|p| p.metadata.namespace == namespace_name.clone().unwrap_or_default())
             .collect::<Vec<_>>();
 
-        pod_cpu_usage.set(get_pods_cpu(&[pod.clone()], &pod_metrics));
+        pod_cpu_usage.set(get_pods_cpu(std::slice::from_ref(&pod), &pod_metrics));
         let pods_memory = get_pods_memory(&[pod], &pod_metrics);
         pod_memory_values.set(pods_memory.0);
         pod_memory_labels.set(pods_memory.1);
