@@ -1,6 +1,6 @@
 use app::*;
-use axum::Router;
 use axum::routing::get;
+use axum::Router;
 use leptos::prelude::*;
 use leptos_axum::{generate_route_list, LeptosRoutes};
 

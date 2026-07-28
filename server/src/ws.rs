@@ -1,10 +1,13 @@
 use axum::{
-    extract::{Query, WebSocketUpgrade, ws::{WebSocket, Message}},
+    extract::{
+        ws::{Message, WebSocket},
+        Query, WebSocketUpgrade,
+    },
     response::IntoResponse,
 };
 use futures::{SinkExt, StreamExt};
-use tokio_tungstenite::{connect_async_tls_with_config, Connector};
 use tokio_tungstenite::tungstenite as tt;
+use tokio_tungstenite::{connect_async_tls_with_config, Connector};
 
 #[derive(Debug, serde::Deserialize)]
 pub struct ExecParams {
@@ -31,7 +34,9 @@ async fn handle_exec_socket(mut client_ws: WebSocket, params: ExecParams) {
     let url = match url::Url::parse(&k8s_url) {
         Ok(url) => url,
         Err(e) => {
-            let _ = client_ws.send(Message::Text(format!("Invalid K8s URL: {e}"))).await;
+            let _ = client_ws
+                .send(Message::Text(format!("Invalid K8s URL: {e}")))
+                .await;
             return;
         }
     };
@@ -47,10 +52,13 @@ async fn handle_exec_socket(mut client_ws: WebSocket, params: ExecParams) {
         .header("Sec-WebSocket-Protocol", "v4.channel.k8s.io")
         .header("Authorization", format!("Bearer {token}"))
         .version(tt::http::Version::HTTP_11)
-        .body(()) {
-            Ok(req) => req,
-            Err(e) => {
-            let _ = client_ws.send(Message::Text(format!("Failed to build request: {e}"))).await;
+        .body(())
+    {
+        Ok(req) => req,
+        Err(e) => {
+            let _ = client_ws
+                .send(Message::Text(format!("Failed to build request: {e}")))
+                .await;
             return;
         }
     };
@@ -61,18 +69,25 @@ async fn handle_exec_socket(mut client_ws: WebSocket, params: ExecParams) {
     {
         Ok(tls) => tls,
         Err(e) => {
-            let _ = client_ws.send(Message::Text(format!("Failed to configure TLS: {e}"))).await;
+            let _ = client_ws
+                .send(Message::Text(format!("Failed to configure TLS: {e}")))
+                .await;
             return;
         }
     };
 
-    let (k8s_ws_stream, _) = match connect_async_tls_with_config(request, None, false, Some(Connector::NativeTls(tls))).await {
-        Ok(res) => res,
-        Err(e) => {
-            let _ = client_ws.send(Message::Text(format!("Failed to connect to K8s: {e}"))).await;
-            return;
-        }
-    };
+    let (k8s_ws_stream, _) =
+        match connect_async_tls_with_config(request, None, false, Some(Connector::NativeTls(tls)))
+            .await
+        {
+            Ok(res) => res,
+            Err(e) => {
+                let _ = client_ws
+                    .send(Message::Text(format!("Failed to connect to K8s: {e}")))
+                    .await;
+                return;
+            }
+        };
 
     let (mut k8s_sink, mut k8s_stream) = k8s_ws_stream.split();
     let (mut client_sink, mut client_stream) = client_ws.split();
@@ -95,7 +110,8 @@ async fn handle_exec_socket(mut client_ws: WebSocket, params: ExecParams) {
     let to_browser = async {
         while let Some(Ok(msg)) = k8s_stream.next().await {
             if let tt::Message::Binary(b) = msg {
-                let payload = b.get(1..)
+                let payload = b
+                    .get(1..)
                     .map(|bytes| String::from_utf8_lossy(bytes).into_owned())
                     .unwrap_or_default();
                 if !payload.is_empty() {
