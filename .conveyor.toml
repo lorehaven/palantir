@@ -11,24 +11,30 @@
 on = { push = ["master"], pull_request = ["*"] }
 
 # --------------------------------------------------------------------- check
-# Clippy compiles the workspace, so the separate `cargo build` and `cargo check`
-# steps drone ran alongside it would be the same work three times.
+# Uses forge's `anvil` CLI and the shared rust-builder image (built in
+# forge/ci/rust-builder), the same way forge's own .conveyor.toml does - clippy,
+# machete and audit as separate jobs in one stage, so one failure doesn't hide
+# the other two.
 
 [[stage]]
 name = "check"
 
 [[stage.job]]
-name    = "clippy"
-image   = "rust:1.94"
+name    = "lint"
+image   = "ossiriand.arda:8080/forge/ci/rust-builder:latest"
 timeout = 1800
-steps = [
-    "rustup component add clippy",
-    "cargo clippy --all-targets --all-features -- -D warnings",
-]
+steps   = [{ anvil = "lint --all-targets --deny-warnings" }]
+
+[[stage.job]]
+name    = "deps"
+image   = "ossiriand.arda:8080/forge/ci/rust-builder:latest"
+timeout = 1800
+steps   = [{ anvil = "machete" }, { anvil = "audit" }]
 
 # Formatting is not checked here. `.rustfmt.toml` sets `group_imports` and
 # `imports_granularity`, both nightly-only, which is why format.sh switches
-# toolchains. Uncomment once the runner has a nightly installed:
+# toolchains - and the rust-builder image only has stable installed. Uncomment
+# once a nightly-capable runner is available:
 #
 # [[stage.job]]
 # name  = "fmt"
@@ -68,10 +74,10 @@ name  = "test"
 needs = ["build"]
 
 [[stage.job]]
-name    = "cargo"
-image   = "rust:1.94"
+name    = "unit"
+image   = "ossiriand.arda:8080/forge/ci/rust-builder:latest"
 timeout = 1800
-steps   = ["cargo test --workspace"]
+steps   = [{ anvil = "test --all" }]
 
 # --------------------------------------------------------------------- image
 # What build.sh does, tagged with the commit instead of a hardcoded 1.0.0 - two
