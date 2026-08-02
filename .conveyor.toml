@@ -19,7 +19,7 @@ name = "check"
 
 [[stage.job]]
 name    = "clippy"
-image   = "rust:1.88"
+image   = "rust:1.94"
 timeout = 1800
 steps = [
     "rustup component add clippy",
@@ -46,7 +46,7 @@ needs = ["check"]
 
 [[stage.job]]
 name    = "leptos"
-image   = "rust:1.88"
+image   = "rust:1.94"
 timeout = 3600
 env     = { LEPTOS_SASS_VERSION = "1.71.0" }
 steps = [
@@ -69,7 +69,7 @@ needs = ["build"]
 
 [[stage.job]]
 name    = "cargo"
-image   = "rust:1.88"
+image   = "rust:1.94"
 timeout = 1800
 steps   = ["cargo test --workspace"]
 
