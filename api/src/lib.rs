@@ -30,7 +30,10 @@ pub mod storage;
 pub mod workloads;
 
 pub mod apply;
+pub mod auth;
+pub mod config;
 pub mod metrics;
 pub mod resource;
 pub mod service_entries;
 pub mod utils;
+pub mod ws_ticket;

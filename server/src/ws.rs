@@ -1,42 +1,58 @@
-use axum::{
-    extract::{
-        ws::{Message, WebSocket},
-        Query, WebSocketUpgrade,
-    },
-    response::IntoResponse,
-};
+use actix_web::{web, Error, HttpRequest, HttpResponse};
+use actix_ws::Message;
 use futures::{SinkExt, StreamExt};
+use quench_cache::CacheStore;
 use tokio_tungstenite::tungstenite as tt;
 use tokio_tungstenite::{connect_async_tls_with_config, Connector};
 
 #[derive(Debug, serde::Deserialize)]
-pub struct ExecParams {
-    pub namespace: String,
-    pub pod: String,
-    pub container: String,
+pub struct TicketParam {
+    pub ticket: String,
 }
 
+/// Redeems the ticket `api::ws_ticket::mint_exec_ticket` minted for an
+/// authenticated caller - see that module for why the WS upgrade can't carry
+/// the caller's identity directly. A missing/expired/already-used ticket
+/// closes the socket immediately rather than falling back to any
+/// client-supplied namespace/pod/container.
 pub async fn exec_ws_handler(
-    ws: WebSocketUpgrade,
-    Query(params): Query<ExecParams>,
-) -> impl IntoResponse {
-    ws.on_upgrade(move |socket| handle_exec_socket(socket, params))
+    req: HttpRequest,
+    body: web::Payload,
+    query: web::Query<TicketParam>,
+    cache: web::Data<CacheStore>,
+) -> Result<HttpResponse, Error> {
+    let Some(exec_ticket) = api::ws_ticket::redeem(&cache, &query.ticket).await else {
+        return Ok(HttpResponse::Unauthorized().body("invalid or expired exec ticket"));
+    };
+
+    let (response, session, msg_stream) = actix_ws::handle(&req, body)?;
+    actix_web::rt::spawn(handle_exec_socket(
+        session,
+        msg_stream,
+        exec_ticket,
+        cache.into_inner(),
+    ));
+    Ok(response)
 }
 
-async fn handle_exec_socket(mut client_ws: WebSocket, params: ExecParams) {
-    let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
-    let token = api::utils::get_api_token();
+async fn handle_exec_socket(
+    mut client_session: actix_ws::Session,
+    mut client_stream: actix_ws::MessageStream,
+    params: api::ws_ticket::ExecTicket,
+    cache: std::sync::Arc<CacheStore>,
+) {
+    let server_host = api::config::server_host();
+    let server_port = api::config::server_port();
+    let token = api::utils::get_api_token_with(&cache).await;
 
-    let k8s_url = format!("wss://{server_host}:6443/api/v1/namespaces/{}/pods/{}/exec?container={}&stdin=1&stdout=1&stderr=1&tty=1&command=sh",
+    let k8s_url = format!("wss://{server_host}:{server_port}/api/v1/namespaces/{}/pods/{}/exec?container={}&stdin=1&stdout=1&stderr=1&tty=1&command=sh",
         params.namespace, params.pod, params.container
     );
 
     let url = match url::Url::parse(&k8s_url) {
         Ok(url) => url,
         Err(e) => {
-            let _ = client_ws
-                .send(Message::Text(format!("Invalid K8s URL: {e}")))
-                .await;
+            let _ = client_session.text(format!("Invalid K8s URL: {e}")).await;
             return;
         }
     };
@@ -56,8 +72,8 @@ async fn handle_exec_socket(mut client_ws: WebSocket, params: ExecParams) {
     {
         Ok(req) => req,
         Err(e) => {
-            let _ = client_ws
-                .send(Message::Text(format!("Failed to build request: {e}")))
+            let _ = client_session
+                .text(format!("Failed to build request: {e}"))
                 .await;
             return;
         }
@@ -69,8 +85,8 @@ async fn handle_exec_socket(mut client_ws: WebSocket, params: ExecParams) {
     {
         Ok(tls) => tls,
         Err(e) => {
-            let _ = client_ws
-                .send(Message::Text(format!("Failed to configure TLS: {e}")))
+            let _ = client_session
+                .text(format!("Failed to configure TLS: {e}"))
                 .await;
             return;
         }
@@ -82,19 +98,19 @@ async fn handle_exec_socket(mut client_ws: WebSocket, params: ExecParams) {
         {
             Ok(res) => res,
             Err(e) => {
-                let _ = client_ws
-                    .send(Message::Text(format!("Failed to connect to K8s: {e}")))
+                let _ = client_session
+                    .text(format!("Failed to connect to K8s: {e}"))
                     .await;
                 return;
             }
         };
 
     let (mut k8s_sink, mut k8s_stream) = k8s_ws_stream.split();
-    let (mut client_sink, mut client_stream) = client_ws.split();
 
     let to_k8s = async {
         while let Some(Ok(msg)) = client_stream.next().await {
-            if let Message::Text(mut t) = msg {
+            if let Message::Text(t) = msg {
+                let mut t = t.to_string();
                 if !t.ends_with('\n') {
                     t.push('\n');
                 }
@@ -114,8 +130,8 @@ async fn handle_exec_socket(mut client_ws: WebSocket, params: ExecParams) {
                     .get(1..)
                     .map(|bytes| String::from_utf8_lossy(bytes).into_owned())
                     .unwrap_or_default();
-                if !payload.is_empty() {
-                    let _ = client_sink.send(Message::Text(payload)).await;
+                if !payload.is_empty() && client_session.text(payload).await.is_err() {
+                    return;
                 }
             }
         }

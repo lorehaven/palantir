@@ -18,12 +18,18 @@ opt-level = 'z'
 
 [workspace.dependencies]
 leptos = "0.7.8"
-leptos_axum = "0.7.8"
+leptos_actix = "0.7.8"
 leptos_meta = "0.7.8"
 leptos_router = "0.7.8"
 leptos-use = { version = "0.15.7", features = ["use_websocket"] }
 
-axum = { version = "0.7.9", features = ["ws"] }
+actix-files = "0.6.10"
+actix-web = { version = "4.14", features = ["rustls-0_23"] }
+actix-ws = "0.3.1"
+quench-auth = { version = "0.3.5", registry = "ennor" }
+quench-cache = { version = "0.1.6", registry = "ennor", features = ["redis"] }
+quench-starter = { version = "0.3.4", registry = "ennor" }
+uuid = { version = "1.24", features = ["v4"] }
 base64 = "0.22"
 chrono = "0.4"
 codee = "0.3"

@@ -23,9 +23,8 @@ async fn parse_entries_response(
     response: &str,
     pods: &[Pod],
 ) -> Result<Vec<ServiceEntry>, Box<dyn std::error::Error>> {
-    let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
-    let server_dns_name =
-        std::env::var("SERVER_DNS_NAME").unwrap_or_else(|_| "localhost".to_string());
+    let server_host = crate::config::server_host();
+    let server_dns_name = crate::config::server_dns_name();
 
     let mut services = serde_json::from_str::<Response<Service>>(response)?
         .items
@@ -45,10 +44,8 @@ async fn parse_entries_response(
         })
         .collect::<Vec<ServiceEntry>>();
 
-    let additional_services_json =
-        std::env::var("ADDITIONAL_SERVICES").unwrap_or_else(|_| "[]".to_string());
     let mut additional_entries =
-        serde_json::from_str::<Vec<ServiceEntry>>(&additional_services_json)?;
+        serde_json::from_str::<Vec<ServiceEntry>>(&crate::config::additional_services_json())?;
     for s in &mut additional_entries.iter_mut() {
         if s.available {
             continue;

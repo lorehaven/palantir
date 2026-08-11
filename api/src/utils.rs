@@ -9,21 +9,67 @@ pub enum ApiMode {
     Put,
 }
 
-const DEFAULT_TOKEN_PATH: &str = "/var/run/secrets/kubernetes.io/serviceaccount/token";
+/// How long a cached token stays valid. Comfortably under a projected K8s
+/// `ServiceAccount` token's typical rotation window (kubelet refreshes the
+/// file well before expiry), so a cache hit is never staler than the
+/// kubelet's own refresh cadence would already allow.
+#[cfg(not(target_arch = "wasm32"))]
+const TOKEN_CACHE_TTL_SECS: u64 = 60;
+#[cfg(not(target_arch = "wasm32"))]
+const TOKEN_CACHE_KEY: &str = "k8s-token";
 
-pub fn get_api_token() -> String {
-    let token_path =
-        std::env::var("KUBERNETES_TOKEN_PATH").unwrap_or_else(|_| DEFAULT_TOKEN_PATH.to_string());
-    std::fs::read_to_string(token_path)
+fn read_token_file() -> String {
+    std::fs::read_to_string(crate::config::kubernetes_token_path())
         .expect("token file is missing.")
         .trim()
         .to_string()
 }
 
+/// Cached read of the K8s `ServiceAccount` token.
+///
+/// Takes a store the caller already holds (e.g. `server/src/ws.rs`'s plain
+/// actix handler, which isn't inside a Leptos server-fn context and so
+/// can't use [`get_api_token`]'s own `leptos_actix::extract` path).
+#[cfg(not(target_arch = "wasm32"))]
+pub async fn get_api_token_with(store: &quench_cache::CacheStore) -> String {
+    if let Ok(Some(cached)) = store.get(TOKEN_CACHE_KEY).await {
+        if let Some(token) = cached.as_str() {
+            return token.to_string();
+        }
+    }
+
+    let token = read_token_file();
+    let _ = store
+        .set(
+            TOKEN_CACHE_KEY,
+            serde_json::Value::String(token.clone()),
+            Some(TOKEN_CACHE_TTL_SECS),
+        )
+        .await;
+    token
+}
+
+/// Cached read for callers inside a Leptos server-fn context.
+///
+/// Extracts the `CacheStore` `server/src/main.rs` registered as `app_data`.
+/// Falls back to an uncached file read if no store is reachable (e.g.
+/// running outside a real request, such as a doctest) rather than failing
+/// outright.
+pub async fn get_api_token() -> String {
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        if let Ok(store) =
+            leptos_actix::extract::<actix_web::web::Data<quench_cache::CacheStore>>().await
+        {
+            return get_api_token_with(&store).await;
+        }
+    }
+    read_token_file()
+}
+
 #[server]
-#[allow(clippy::unused_async)]
 pub async fn get_api_token_wasm() -> Result<String, ServerFnError> {
-    Ok(get_api_token())
+    Ok(get_api_token().await)
 }
 
 fn get_resource_map() -> Vec<(&'static str, &'static str, &'static str)> {

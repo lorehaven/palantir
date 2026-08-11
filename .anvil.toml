@@ -1,0 +1,12 @@
+[docker]
+registry = "ennor.ddns.net/forge"
+cargo_registry = "ennor"
+
+[docker.modules.docker]
+dockerfile = "Dockerfile"
+packages = ["server"]
+
+[docker.modules.docker.server]
+module_name = "palantir"
+image_name = "palantir"
+registries = ["ossiriand.arda:8080/forge", "ennor.ddns.net/forge"]

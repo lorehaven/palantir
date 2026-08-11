@@ -1,17 +1,23 @@
 [package]
 name = "server"
-version.workspace = true
+version = "0.1.0"
 edition.workspace = true
 rust-version.workspace = true
+publish = false
 
 [dependencies]
 api = { path = "../api" }
 app = { path = "../app", default-features = false, features = ["ssr"] }
 
 leptos = { workspace = true, features = [ "ssr" ]}
-leptos_axum.workspace = true
+leptos_actix.workspace = true
 
-axum.workspace = true
+actix-files.workspace = true
+actix-web.workspace = true
+actix-ws.workspace = true
+quench-auth.workspace = true
+quench-cache.workspace = true
+quench-starter.workspace = true
 futures.workspace = true
 native-tls.workspace = true
 serde.workspace = true
@@ -19,3 +25,4 @@ tokio.workspace = true
 tokio-tungstenite.workspace = true
 url.workspace = true
 bytes = "1.10.1"
+tracing = "0.1.44"

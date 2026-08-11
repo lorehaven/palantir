@@ -1,13 +1,22 @@
 [package]
 name = "api"
-version.workspace = true
+version = "0.1.0"
 edition.workspace = true
 rust-version.workspace = true
+publish = false
 
 [dependencies]
 domain = { path = "../domain" }
 
 leptos.workspace = true
+quench-config = { version = "0.1.2", registry = "ennor" }
 reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+actix-web.workspace = true
+leptos_actix.workspace = true
+quench-auth.workspace = true
+quench-cache.workspace = true
+uuid.workspace = true

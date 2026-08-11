@@ -47,19 +47,24 @@ use crate::pages::workloads::WorkloadsPage;
 #[component]
 pub fn WebApp() -> impl IntoView {
     let site_root = std::env::var("LEPTOS_SITE_PKG_DIR").unwrap_or_else(|_| "pkg".to_string());
+    let base_path = crate::base_path::base_path();
     provide_toaster();
     provide_meta_context();
 
     view! {
         <Link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet"/>
-        <Stylesheet href=format!("/pkg/palantir.css")/>
-        <Stylesheet href=format!("/{site_root}/palantir.css")/>
+        <Stylesheet href=format!("{base_path}/pkg/palantir.css")/>
+        <Stylesheet href=format!("{base_path}/{site_root}/palantir.css")/>
         <Title text="Palantir"/>
-        <Router>
+        <Router base=crate::base_path::router_base()>
             <main>
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=path!("/facade") view=FacadePage />
                     <Route path=path!("/") view=DashboardPage />
+                    // Every forge relying party lands post-login at `/ui/home`
+                    // (see quench_auth::actix::domain::sso_client::authorize_redirect) -
+                    // this alias keeps that convention without duplicating the dashboard.
+                    <Route path=path!("/home") view=DashboardPage />
                     <Route path=path!("/cluster") view=ClusterPage />
                     <Route path=path!("/cluster/nodes") view=ClusterNodesPage />
                     <Route path=path!("/cluster/nodes/:name") view=ClusterNodePage />

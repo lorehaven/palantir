@@ -1,4 +1,5 @@
 use crate::components::prelude::*;
+use api::ws_ticket::mint_exec_ticket;
 use codee::string::FromToStringCodec;
 use leptos::attr::loading;
 use leptos::prelude::*;
@@ -18,6 +19,11 @@ pub fn PodExecViewPage(
     let socket = RwSignal::new(None);
     let loading = RwSignal::new(true);
 
+    // The browser's WebSocket API can't attach an Authorization header or
+    // reliably carry the session cookie on the upgrade request, so identity
+    // is established here instead: this authenticated server function mints
+    // a short-lived, single-use ticket bound to exactly this namespace/pod/
+    // container, and only the ticket travels on the WS URL.
     Effect::new(move |_| {
         if selected_container.get().is_empty() {
             return;
@@ -26,9 +32,15 @@ pub fn PodExecViewPage(
         let namespace_name = namespace_name.get();
         let resource_name = resource_name.get();
         let selected_container = selected_container.get();
-        let ws_url = format!("/ws/exec?namespace={namespace_name}&pod={resource_name}&container={selected_container}");
-        let ws = use_websocket::<String, String, FromToStringCodec>(&ws_url);
-        socket.set(Some(ws));
+        spawn_local(async move {
+            if let Ok(ticket) =
+                mint_exec_ticket(namespace_name, resource_name, selected_container).await
+            {
+                let ws_url = format!("{}/ws/exec?ticket={ticket}", crate::base_path::base_path());
+                let ws = use_websocket::<String, String, FromToStringCodec>(&ws_url);
+                socket.set(Some(ws));
+            }
+        });
     });
 
     Effect::new(move |_| {

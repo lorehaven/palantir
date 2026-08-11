@@ -27,6 +27,7 @@
 
 mod pages;
 
+pub mod base_path;
 pub mod components;
 pub mod shell;
 pub mod utils;

@@ -22,7 +22,8 @@ pub fn Header(#[prop(optional)] text: Vec<impl Into<String> + 'static>) -> impl 
                 .into_any()
             } else {
                 let href = format!(
-                    "/{}",
+                    "{}/{}",
+                    crate::base_path::router_base(),
                     text[0..=idx]
                         .iter()
                         .map(|t| t.to_lowercase())
@@ -39,7 +40,7 @@ pub fn Header(#[prop(optional)] text: Vec<impl Into<String> + 'static>) -> impl 
         .collect::<Vec<_>>();
     links.insert(
         0,
-        view! { <a href="/" class="header-link">Palantir</a> }.into_any(),
+        view! { <a href=crate::base_path::router_base() class="header-link">Palantir</a> }.into_any(),
     );
     view! {
         <div class="header"> { links } </div>
@@ -104,7 +105,7 @@ pub fn SideNavBarEntry(
                 </div>
             }.into_any(),
             None => view! {
-                <a href=format!("{}/{}", url_prefix, name) class=class>
+                <a href=format!("{}{}/{}", crate::base_path::router_base(), url_prefix, name) class=class>
                     <i class=icon_class />
                     <div class="side-nav-bar-entry-title">{title}</div>
                 </a>

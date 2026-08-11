@@ -21,7 +21,8 @@ pub async fn get_pods() -> Result<Vec<PodMetrics>, ServerFnError> {
 
 #[server]
 async fn get_metrics(path: String) -> Result<Value, ServerFnError> {
-    let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
+    let server_host = crate::config::server_host();
+    let server_port = crate::config::server_port();
 
     let client = reqwest::ClientBuilder::new()
         .danger_accept_invalid_certs(true)
@@ -29,9 +30,9 @@ async fn get_metrics(path: String) -> Result<Value, ServerFnError> {
 
     let response = client
         .get(format!(
-            "https://{server_host}:6443/apis/metrics.k8s.io/v1beta1/{path}"
+            "https://{server_host}:{server_port}/apis/metrics.k8s.io/v1beta1/{path}"
         ))
-        .bearer_auth(get_api_token())
+        .bearer_auth(get_api_token().await)
         .send()
         .await?;
 

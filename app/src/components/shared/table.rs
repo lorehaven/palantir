@@ -76,7 +76,7 @@ pub fn TableComponent(
                         match r#type {
                             TableColumnType::Bool => view! { <BoolValue item style /> }.into_any(),
                             TableColumnType::Link => {
-                                let link = format!("{param}{item}");
+                                let link = format!("{}{param}{item}", crate::base_path::router_base());
                                 view! { <LinkValue item style link /> }.into_any()
                             },
                             TableColumnType::String => view! { <StringValue item style /> }.into_any(),

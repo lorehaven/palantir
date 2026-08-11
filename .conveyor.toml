@@ -1,23 +1,13 @@
-# Palantir's build, for conveyor.
-#
-# Replaces .drone.yml step for step: clippy, the leptos build, and the image
-# that build.sh pushes by hand today. The pipeline is read from the commit being
-# built, so a branch can change its own build and the change is reviewable in
-# the pull request that makes it.
-#
-# `image` is used by the kubernetes executor and ignored by the native one,
-# where steps run on whatever the conveyor host has installed.
-
+# Every push to master, and every pull request.
 on = { push = ["master"], pull_request = ["*"] }
-
-# --------------------------------------------------------------------- check
-# Uses forge's `anvil` CLI and the shared rust-builder image (built in
-# forge/ci/rust-builder), the same way forge's own .conveyor.toml does - clippy,
-# machete and audit as separate jobs in one stage, so one failure doesn't hide
-# the other two.
 
 [[stage]]
 name = "check"
+
+[[stage.job]]
+name  = "format"
+image = "ossiriand.arda:8080/forge/ci/rust-builder:latest"
+steps = [{ anvil = "format --check" }]
 
 [[stage.job]]
 name    = "lint"
@@ -31,21 +21,6 @@ image   = "ossiriand.arda:8080/forge/ci/rust-builder:latest"
 timeout = 1800
 steps   = [{ anvil = "machete" }, { anvil = "audit" }]
 
-# Formatting is not checked here. `.rustfmt.toml` sets `group_imports` and
-# `imports_granularity`, both nightly-only, which is why format.sh switches
-# toolchains - and the rust-builder image only has stable installed. Uncomment
-# once a nightly-capable runner is available:
-#
-# [[stage.job]]
-# name  = "fmt"
-# image = "rustlang/rust:nightly"
-# steps = ["cargo +nightly fmt --all --check"]
-
-# --------------------------------------------------------------------- build
-# The wasm half. This is the step that catches a frontend that compiles for the
-# server target and not for the browser, which a plain `cargo build` misses
-# entirely.
-
 [[stage]]
 name  = "build"
 needs = ["check"]
@@ -57,17 +32,9 @@ timeout = 3600
 env     = { LEPTOS_SASS_VERSION = "1.71.0" }
 steps = [
     "rustup target add wasm32-unknown-unknown",
-    # Guarded rather than unconditional: under the native executor the toolchain
-    # persists between runs, and `cargo install` is several minutes of the build
-    # spent rebuilding something already on the box.
     "command -v cargo-leptos >/dev/null || cargo install --locked cargo-leptos",
     "cargo leptos build --release",
 ]
-
-# ---------------------------------------------------------------------- test
-# There are no #[test] functions in the workspace yet. This keeps the stage
-# honest - it compiles the test targets and runs the zero of them that exist,
-# so the first test anyone writes is already wired into CI.
 
 [[stage]]
 name  = "test"
@@ -79,13 +46,6 @@ image   = "ossiriand.arda:8080/forge/ci/rust-builder:latest"
 timeout = 1800
 steps   = [{ anvil = "test --all" }]
 
-# --------------------------------------------------------------------- image
-# What build.sh does, tagged with the commit instead of a hardcoded 1.0.0 - two
-# pushes of :1.0.0 from different commits are indistinguishable afterwards.
-#
-# Not gated on `event == 'push'`, so a manual run still publishes: that is how
-# the image gets built today.
-
 [[stage]]
 name  = "image"
 needs = ["test"]
@@ -94,9 +54,10 @@ when  = "branch == 'master' && event != 'pull_request'"
 [[stage.job]]
 name    = "docker"
 timeout = 3600
-env     = { IMAGE = "ossiriand.arda:30021/ossiriand-1/palantir" }
+env     = { IMAGE = "ossiriand.arda:8080/forge/palantir/palantir", CARGO_REGISTRIES_ENNOR_INDEX = "sparse+https://ennor.ddns.net/warehouse/index/" }
+secrets = ["CARGO_REGISTRIES_ENNOR_TOKEN"]
 steps = [
-    "docker buildx build -t palantir .",
+    "docker buildx build --build-arg CARGO_REGISTRIES_ENNOR_INDEX --build-arg CARGO_REGISTRIES_ENNOR_TOKEN -t palantir .",
     "docker tag palantir $IMAGE:$CONVEYOR_SHA",
     "docker tag palantir $IMAGE:latest",
     "docker push $IMAGE:$CONVEYOR_SHA",

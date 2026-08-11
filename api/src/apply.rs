@@ -5,6 +5,8 @@ use crate::utils::{get_api_token, get_url, ApiMode};
 
 #[server(Apply, "/api/apply")]
 pub async fn apply(payload: String, mode: ApiMode) -> Result<String, ServerFnError> {
+    crate::auth::require_write().await?;
+
     let payload_json = serde_json::from_str::<serde_json::Value>(&payload)
         .map_err(|e| ServerFnError::new(format!("Failed to parse JSON: {e}")))?;
     let resource_type = payload_json
@@ -34,16 +36,17 @@ pub async fn apply(payload: String, mode: ApiMode) -> Result<String, ServerFnErr
         .build()?;
 
     let url = get_url(resource_type, namespace, resource).await?;
-    let server_host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
+    let server_host = crate::config::server_host();
+    let server_port = crate::config::server_port();
 
     let response = match mode {
-        ApiMode::Post => client.post(format!("https://{server_host}:6443/{url}")),
-        ApiMode::Put => client.put(format!("https://{server_host}:6443/{url}")),
+        ApiMode::Post => client.post(format!("https://{server_host}:{server_port}/{url}")),
+        ApiMode::Put => client.put(format!("https://{server_host}:{server_port}/{url}")),
         _ => unimplemented!(),
     }
     .header("Content-Type", "application/json")
     .body(payload)
-    .bearer_auth(get_api_token())
+    .bearer_auth(get_api_token().await)
     .send()
     .await?;
 

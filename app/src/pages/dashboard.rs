@@ -23,7 +23,7 @@ pub fn DashboardPage() -> impl IntoView {
                         {entries.clone().into_iter()
                             .map(|item|
                                 view! {
-                                    <a href={format!("/{}", item.0)} class:entry>
+                                    <a href={format!("{}/{}", crate::base_path::router_base(), item.0)} class:entry>
                                         <div class="row">
                                             <i class=format!("fa-solid fa-{}", item.1) style="font-size: 1.4rem;" />
                                             <div class="entry-title">{{ capitalize(item.0) }}</div>

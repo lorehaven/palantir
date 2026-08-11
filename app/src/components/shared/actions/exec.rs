@@ -8,7 +8,8 @@ pub fn ExecAction(
     resource_name: RwSignal<String>,
 ) -> impl IntoView {
     let url = format!(
-        "/workloads/{}/pods/{}/exec",
+        "{}/workloads/{}/pods/{}/exec",
+        crate::base_path::router_base(),
         namespace_name.get_untracked(),
         resource_name.get_untracked()
     );
