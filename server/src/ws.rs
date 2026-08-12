@@ -2,8 +2,7 @@ use actix_web::{web, Error, HttpRequest, HttpResponse};
 use actix_ws::Message;
 use futures::{SinkExt, StreamExt};
 use quench_cache::CacheStore;
-use tokio_tungstenite::tungstenite as tt;
-use tokio_tungstenite::{connect_async_tls_with_config, Connector};
+use tokio_tungstenite::{connect_async_tls_with_config, tungstenite as tt, Connector};
 
 #[derive(Debug, serde::Deserialize)]
 pub struct TicketParam {

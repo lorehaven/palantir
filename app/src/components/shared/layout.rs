@@ -40,7 +40,8 @@ pub fn Header(#[prop(optional)] text: Vec<impl Into<String> + 'static>) -> impl 
         .collect::<Vec<_>>();
     links.insert(
         0,
-        view! { <a href=crate::base_path::router_base() class="header-link">Palantir</a> }.into_any(),
+        view! { <a href=crate::base_path::router_base() class="header-link">Palantir</a> }
+            .into_any(),
     );
     view! {
         <div class="header"> { links } </div>

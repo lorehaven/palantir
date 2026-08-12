@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use actix_files::{Files, NamedFile};
 use actix_web::dev::HttpServiceFactory;
 use actix_web::middleware::from_fn;
@@ -9,7 +11,6 @@ use quench_auth::actix::domain::session::SessionDb;
 use quench_auth::actix::domain::sso_client::SsoConfig;
 use quench_auth::prelude::JwtConfig;
 use quench_cache::CacheStore;
-use std::sync::Arc;
 
 mod auth_gate;
 mod auth_routes;

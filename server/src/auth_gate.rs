@@ -13,14 +13,16 @@
 //! reusing `Auth`'s own bearer/cookie/JWKS/session logic rather than
 //! re-deriving it.
 
+use std::sync::Arc;
+
 use actix_web::body::{BoxBody, MessageBody};
 use actix_web::dev::{ServiceRequest, ServiceResponse};
 use actix_web::middleware::Next;
 use actix_web::web::Data;
 use actix_web::{Error, HttpMessage, HttpResponse};
-use quench_auth::actix::domain::{realm, session::SessionDb};
+use quench_auth::actix::domain::realm;
+use quench_auth::actix::domain::session::SessionDb;
 use quench_auth::prelude::JwtConfig;
-use std::sync::Arc;
 
 /// Static assets, the SSO round trip, and `/ws/exec` (authenticated
 /// indirectly through its own single-use ticket - see `api::ws_ticket`, not

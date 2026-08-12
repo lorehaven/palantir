@@ -39,12 +39,13 @@ pub async fn mint_exec_ticket(
 
 #[cfg(not(target_arch = "wasm32"))]
 mod native {
-    use super::{ExecTicket, TICKET_TTL_SECS};
-    use crate::auth::require_write;
     use actix_web::web::Data;
     use leptos::prelude::ServerFnError;
     use quench_cache::CacheStore;
     use uuid::Uuid;
+
+    use super::{ExecTicket, TICKET_TTL_SECS};
+    use crate::auth::require_write;
 
     pub async fn mint(
         namespace: String,
