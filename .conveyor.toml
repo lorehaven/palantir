@@ -27,7 +27,7 @@ needs = ["check"]
 
 [[stage.job]]
 name    = "leptos"
-image   = "rust:1.94"
+image   = "ossiriand.arda:8080/forge/ci/rust-builder:latest"
 timeout = 3600
 env     = { LEPTOS_SASS_VERSION = "1.71.0" }
 steps = [
@@ -45,21 +45,3 @@ name    = "unit"
 image   = "ossiriand.arda:8080/forge/ci/rust-builder:latest"
 timeout = 1800
 steps   = [{ anvil = "test --all" }]
-
-[[stage]]
-name  = "image"
-needs = ["test"]
-when  = "branch == 'master' && event != 'pull_request'"
-
-[[stage.job]]
-name    = "docker"
-timeout = 3600
-env     = { IMAGE = "ossiriand.arda:8080/forge/palantir/palantir", CARGO_REGISTRIES_ENNOR_INDEX = "sparse+https://ennor.ddns.net/warehouse/index/" }
-secrets = ["CARGO_REGISTRIES_ENNOR_TOKEN"]
-steps = [
-    "docker buildx build --build-arg CARGO_REGISTRIES_ENNOR_INDEX --build-arg CARGO_REGISTRIES_ENNOR_TOKEN -t palantir .",
-    "docker tag palantir $IMAGE:$CONVEYOR_SHA",
-    "docker tag palantir $IMAGE:latest",
-    "docker push $IMAGE:$CONVEYOR_SHA",
-    "docker push $IMAGE:latest",
-]
