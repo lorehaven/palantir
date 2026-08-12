@@ -29,7 +29,7 @@ needs = ["check"]
 name    = "leptos"
 image   = "ossiriand.arda:8080/forge/ci/rust-builder:latest"
 timeout = 3600
-env     = { LEPTOS_SASS_VERSION = "1.71.0" }
+env     = { LEPTOS_SASS_VERSION = "1.72.0" }
 steps = [
     "rustup target add wasm32-unknown-unknown",
     "command -v cargo-leptos >/dev/null || cargo install --locked cargo-leptos",
