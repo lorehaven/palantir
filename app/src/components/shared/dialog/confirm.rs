@@ -1,44 +1,65 @@
-use leptos::prelude::*;
+//! A confirm/cancel modal.
+//!
+//! Shown by toggling `overlay_class`/`panel_class` via
+//! `quench_web::framework::dom::toggle_modal` from a trigger elsewhere on
+//! the page (there's no reactive `show_dialog` signal anymore - the dialog
+//! markup is always in the DOM, hidden by CSS until toggled).
+//!
+//! Confirming issues `hx-delete confirm_url`; on success the handler
+//! responds with an `HX-Redirect` header (htmx then navigates there) rather
+//! than a body swap - see the handler this posts to.
+//!
+//! Only one instance of a given `overlay_class`/`panel_class` pair may exist
+//! per page (`toggle_modal` targets it by class, expecting exactly one
+//! match) - fine for a single detail-page action, but a per-row dialog on a
+//! list page needs a row-unique class pair.
 
-#[component]
-pub fn ConfirmDialog<F>(
-    confirm_label: RwSignal<String>,
-    show_dialog: RwSignal<bool>,
-    callback: F,
-) -> impl IntoView
-where
-    F: FnOnce() + Clone + Send + Sync + 'static,
-{
-    let callback = RwSignal::new(callback);
+use quench_web::framework::dom::toggle_modal;
+use quench_web::prelude::*;
 
-    view! {
-        <Show when=move || show_dialog.get()>
-            <div class="dialog-overlay" />
-            <div class="dialog-wrapper">
-                <div class="dialog confirm-dialog">
-                    <div class="dialog-content">
-                        <div>{confirm_label.get()}</div>
-                        <div>Are you sure?</div>
-                    </div>
-                    <div class="dialog-footer">
-                        <span style="flex: 1" />
-                        <button class="btn btn-primary" on:click=move |_| yes(show_dialog, callback)>Yes</button>
-                        <button class="btn btn-primary" on:click=move |_| no(show_dialog)>No</button>
-                    </div>
-                </div>
-            </div>
-        </Show>
-    }
-}
+pub fn confirm_dialog(
+    message: &str,
+    overlay_class: &str,
+    panel_class: &str,
+    confirm_url: &str,
+) -> Element {
+    let hide = toggle_modal(overlay_class, panel_class, "show");
 
-fn yes<F>(show_dialog: RwSignal<bool>, callback: RwSignal<F>)
-where
-    F: FnOnce() + Clone + Send + Sync + 'static,
-{
-    callback.get()();
-    show_dialog.set(false);
-}
-
-fn no(show_dialog: RwSignal<bool>) {
-    show_dialog.set(false);
+    div()
+        .child(
+            div()
+                .class(format!("dialog-overlay {overlay_class}"))
+                .attr("onclick", hide.clone()),
+        )
+        .child(
+            div().class(format!("dialog-wrapper {panel_class}")).child(
+                div()
+                    .class("dialog confirm-dialog")
+                    .child(
+                        div()
+                            .class("dialog-content")
+                            .child(div().text(message))
+                            .child(div().text("Are you sure?")),
+                    )
+                    .child(
+                        div()
+                            .class("dialog-footer")
+                            .child(span().attr("style", "flex: 1"))
+                            .child(
+                                button()
+                                    .class("btn btn-primary")
+                                    .attr("hx-delete", confirm_url)
+                                    .attr("hx-target", "body")
+                                    .attr("hx-swap", "none")
+                                    .text("Yes"),
+                            )
+                            .child(
+                                button()
+                                    .class("btn btn-primary")
+                                    .attr("onclick", hide)
+                                    .text("No"),
+                            ),
+                    ),
+            ),
+        )
 }

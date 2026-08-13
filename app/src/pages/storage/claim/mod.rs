@@ -1,48 +1,85 @@
-use leptos::prelude::*;
-use leptos_router::hooks::use_params_map;
+use api::storage::claims as claims_api;
+use quench_cache::CacheStore;
+use quench_web::prelude::*;
 
 use crate::components::prelude::*;
+use crate::utils::shared::display;
+use crate::utils::shared::time::format_timestamp;
 
-mod claim_info;
+pub async fn render(cache: &CacheStore, current_path: &str, namespace: &str, name: &str) -> String {
+    let confirm_url = format!(
+        "{}/storage/{namespace}/claims/{name}",
+        crate::base_path::ui_base()
+    );
 
-#[component]
-pub fn StorageClaimPage() -> impl IntoView {
-    let params = use_params_map();
-    let namespace_name = params
-        .with_untracked(|p| p.get("namespace"))
+    crate::shell::page(
+        &["Storage", namespace, "Persistent Volume Claims", name],
+        current_path,
+        div()
+            .class("storage-claim main-page")
+            .child(actions(
+                "PersistentVolumeClaim",
+                vec![
+                    edit_action(cache, "PersistentVolumeClaim", Some(namespace), name).await,
+                    delete_action("PersistentVolumeClaim", Some(namespace), name, &confirm_url),
+                ],
+            ))
+            .child(fragment(cache, namespace, name).await),
+    )
+}
+
+pub async fn fragment(cache: &CacheStore, namespace: &str, name: &str) -> Element {
+    let claim = claims_api::get_claims(cache, Some(namespace.to_string()))
+        .await
+        .unwrap_or_default()
         .into_iter()
-        .collect::<Vec<_>>()
-        .join("-");
-    let name = params
-        .with_untracked(|p| p.get("name"))
-        .into_iter()
-        .collect::<Vec<_>>()
-        .join("-");
-    let page_title = vec![
-        "Storage".to_string(),
-        namespace_name.clone(),
-        "Persistent Volume Claims".to_string(),
-        name.clone(),
+        .find(|c| c.metadata.name == name)
+        .unwrap_or_default();
+
+    let data = vec![
+        ("Name".to_string(), claim.metadata.name.clone()),
+        ("Kind".to_string(), "PersistentVolumeClaim".to_string()),
+        ("Namespace".to_string(), claim.metadata.namespace.clone()),
+        (
+            "Created".to_string(),
+            format_timestamp(
+                claim
+                    .metadata
+                    .creation_timestamp
+                    .as_deref()
+                    .unwrap_or_default(),
+                None,
+            ),
+        ),
+        (
+            "Labels".to_string(),
+            display::hashmap(claim.metadata.labels),
+        ),
+        (
+            "Annotations".to_string(),
+            display::hashmap(claim.metadata.annotations),
+        ),
+        ("Version".to_string(), claim.metadata.resource_version),
+        ("Status".to_string(), claim.status.phase),
+        ("Class".to_string(), String::new()),
+        ("Volume".to_string(), claim.spec.volume_name),
+        ("Modes".to_string(), claim.spec.access_modes.join("\n")),
+        (
+            "Capacity".to_string(),
+            claim.spec.resources.requests.storage,
+        ),
     ];
 
-    let resource_type = RwSignal::new("PersistentVolumeClaim".to_string());
-    let namespace_name = RwSignal::new(namespace_name);
-    let name = RwSignal::new(name);
-
-    view! {
-        <Header text=page_title />
-        <PageContent>
-            <PageContentSlot slot>
-                <div class="storage-claim main-page">
-                    <Actions
-                        resource_type
-                        namespace_name=namespace_name
-                        resource_name=name
-                        actions=&[ActionType::Edit, ActionType::Delete] />
-                    <claim_info::ClaimInfoComponent namespace_name resource_name=name />
-                </div>
-            </PageContentSlot>
-        </PageContent>
-        <Footer />
-    }
+    resource_info_view(&data)
+        .attr("id", "claim-info")
+        .attr(
+            "hx-get",
+            format!(
+                "{}/storage/{namespace}/claims/{name}/fragment",
+                crate::base_path::ui_base()
+            ),
+        )
+        .attr("hx-trigger", "every 10s")
+        .attr("hx-target", "this")
+        .attr("hx-swap", "outerHTML")
 }

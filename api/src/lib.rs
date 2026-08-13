@@ -11,6 +11,7 @@
 #![allow(unused_imports)]
 #![deny(missing_debug_implementations)]
 #![allow(clippy::missing_panics_doc)]
+#![allow(clippy::missing_errors_doc)]
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::redundant_pub_crate)]
 #![allow(clippy::similar_names)]

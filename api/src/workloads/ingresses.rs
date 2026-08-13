@@ -1,12 +1,13 @@
 use domain::shared::response::Response;
 use domain::workload::ingress::Ingress;
-use leptos::prelude::ServerFnError;
-use leptos::server;
+use quench_cache::CacheStore;
 
 use crate::resource as resource_api;
 
-#[server(GetIngresses, "/api/workloads/ingresses")]
-pub async fn get_ingresses(namespace_name: Option<String>) -> Result<Vec<Ingress>, ServerFnError> {
-    let response = resource_api::get("Ingress".to_string(), namespace_name, None).await?;
+pub async fn get_ingresses(
+    cache: &CacheStore,
+    namespace_name: Option<String>,
+) -> anyhow::Result<Vec<Ingress>> {
+    let response = resource_api::get(cache, "Ingress", namespace_name, None).await?;
     Ok(serde_json::from_str::<Response<Ingress>>(&response)?.items)
 }

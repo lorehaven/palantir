@@ -1,46 +1,36 @@
-use leptos::prelude::*;
-use leptos_router::hooks::use_params_map;
+pub mod namespace_events;
+pub mod namespace_info;
+pub mod namespace_pods;
+
+use quench_cache::CacheStore;
+use quench_web::prelude::*;
 
 use crate::components::prelude::*;
-use crate::components::stats::pods::PodsStatComponent;
+use crate::components::stats::pods as pods_stat;
 
-mod namespace_events;
-mod namespace_info;
-mod namespace_pods;
+pub async fn render(cache: &CacheStore, current_path: &str, namespace_name: &str) -> String {
+    let confirm_url = format!(
+        "{}/cluster/namespaces/{namespace_name}",
+        crate::base_path::ui_base()
+    );
 
-#[component]
-pub fn ClusterNamespacePage() -> impl IntoView {
-    let params = use_params_map();
-    let namespace_name = params
-        .with_untracked(|p| p.get("name"))
-        .into_iter()
-        .collect::<Vec<_>>()
-        .join("-");
-    let page_title = vec![
-        "Cluster".to_string(),
-        "Namespaces".to_string(),
-        namespace_name.clone(),
-    ];
-
-    let resource_type = RwSignal::new("Namespace".to_string());
-    let namespace_name = RwSignal::new(namespace_name);
-
-    view! {
-        <Header text=page_title />
-        <PageContent>
-            <PageContentSlot slot>
-                <div class="cluster-namespace main-page">
-                    <Actions
-                        resource_type
-                        resource_name=namespace_name
-                        actions=&[ActionType::Delete] />
-                    <PodsStatComponent namespace_name expandable=false />
-                    <namespace_info::NamespaceInfoComponent namespace_name />
-                    <namespace_pods::NamespacePodsComponent namespace_name />
-                    <namespace_events::NamespaceEventsComponent namespace_name />
-                </div>
-            </PageContentSlot>
-        </PageContent>
-        <Footer />
-    }
+    crate::shell::page(
+        &["Cluster", "Namespaces", namespace_name],
+        current_path,
+        div()
+            .class("cluster-namespace main-page")
+            .child(actions(
+                "Namespace",
+                vec![delete_action(
+                    "Namespace",
+                    None,
+                    namespace_name,
+                    &confirm_url,
+                )],
+            ))
+            .child(pods_stat::render(cache, Some(namespace_name), None).await)
+            .child(namespace_info::fragment(cache, namespace_name).await)
+            .child(namespace_pods::fragment(cache, namespace_name).await)
+            .child(namespace_events::fragment(cache, namespace_name).await),
+    )
 }

@@ -1,13 +1,12 @@
-use leptos::prelude::*;
+use quench_web::prelude::*;
 
-#[component]
-pub fn CardCircle(
-    label: &'static str,
-    #[prop(default = "")] label_add: &'static str,
+pub fn card_circle(
+    label: &str,
+    label_add: &str,
     values: (f64, f64),
-    #[prop(default = (String::new(), String::new()))] value_labels: (String, String),
-    #[prop(default = true)] decimal: bool,
-) -> impl IntoView {
+    value_labels: (&str, &str),
+    decimal: bool,
+) -> Element {
     let used_format = if decimal {
         format!("{:.0}", values.1)
     } else {
@@ -18,20 +17,33 @@ pub fn CardCircle(
     } else {
         format!("{:.2}", values.0)
     };
+    let fill = (values.1 / values.0) * 100.0;
 
-    view! {
-        <div class="card-circle">
-            <div>
-                <div class="label">{label}</div>
-                <div class="label-add">{label_add}</div>
-            </div>
-            <div class="ring" style=format!("--fill: {}%", (values.1 / values.0) * 100.0)>
-                <div class="ring-inner">
-                    <div class="ring-inner-text">{used_format} {value_labels.1}</div>
-                    <div class="ring-inner-text">of</div>
-                    <div class="ring-inner-text">{total_format} {value_labels.0}</div>
-                </div>
-            </div>
-        </div>
-    }
+    div()
+        .class("card-circle")
+        .child(
+            div()
+                .child(div().class("label").text(label))
+                .child(div().class("label-add").text(label_add)),
+        )
+        .child(
+            div()
+                .class("ring")
+                .attr("style", format!("--fill: {fill}%"))
+                .child(
+                    div()
+                        .class("ring-inner")
+                        .child(
+                            div()
+                                .class("ring-inner-text")
+                                .text(format!("{used_format} {}", value_labels.1)),
+                        )
+                        .child(div().class("ring-inner-text").text("of"))
+                        .child(
+                            div()
+                                .class("ring-inner-text")
+                                .text(format!("{total_format} {}", value_labels.0)),
+                        ),
+                ),
+        )
 }

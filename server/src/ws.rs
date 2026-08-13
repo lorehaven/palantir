@@ -42,7 +42,7 @@ async fn handle_exec_socket(
 ) {
     let server_host = api::config::server_host();
     let server_port = api::config::server_port();
-    let token = api::utils::get_api_token_with(&cache).await;
+    let token = api::utils::get_api_token(&cache).await;
 
     let k8s_url = format!("wss://{server_host}:{server_port}/api/v1/namespaces/{}/pods/{}/exec?container={}&stdin=1&stdout=1&stderr=1&tty=1&command=sh",
         params.namespace, params.pod, params.container

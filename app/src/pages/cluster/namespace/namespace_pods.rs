@@ -1,22 +1,35 @@
 use api::metrics as metrics_api;
 use api::workloads::pods as pods_api;
 use domain::metrics::PodMetrics;
-use leptos::prelude::*;
-use leptos::task::spawn_local;
+use quench_cache::CacheStore;
+use quench_web::prelude::*;
 
 use crate::components::prelude::*;
-use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
 use crate::utils::stats::pod_stats::{
     pod_cpu_actual, pod_cpu_limit, pod_cpu_request, pod_memory_actual, pod_memory_limit,
     pod_memory_request,
 };
 
-#[component]
-pub fn NamespacePodsComponent(namespace_name: RwSignal<String>) -> impl IntoView {
-    let table_rows = RwSignal::new(vec![]);
-    let loading = RwSignal::new(true);
+pub async fn fragment(cache: &CacheStore, namespace_name: &str) -> Element {
+    let columns = columns();
+    let rows = rows(cache, &columns, namespace_name).await;
 
-    let columns = vec![
+    data_list_view(&columns, &rows)
+        .attr("id", "namespace-pods")
+        .attr(
+            "hx-get",
+            format!(
+                "{}/cluster/namespaces/{namespace_name}/pods/fragment",
+                crate::base_path::ui_base()
+            ),
+        )
+        .attr("hx-trigger", "every 10s")
+        .attr("hx-target", "this")
+        .attr("hx-swap", "outerHTML")
+}
+
+fn columns() -> Vec<TableColumn> {
+    vec![
         TableColumn::new("Type", TableColumnType::String, 1),
         TableColumn::new("Name", TableColumnType::Link, 3),
         TableColumn::new("CPU actual", TableColumnType::String, 1),
@@ -25,73 +38,22 @@ pub fn NamespacePodsComponent(namespace_name: RwSignal<String>) -> impl IntoView
         TableColumn::new("RAM actual", TableColumnType::String, 1),
         TableColumn::new("RAM request", TableColumnType::StringTwoLine, 1),
         TableColumn::new("RAM limit", TableColumnType::StringTwoLine, 1),
-    ];
+    ]
+}
+
+async fn rows(cache: &CacheStore, columns: &[TableColumn], namespace_name: &str) -> Vec<TableRow> {
     let styles = vec![String::new(); columns.len()];
     let mut params = vec![String::new(); columns.len()];
-    params[1] = format!("/workloads/{}/pods/", namespace_name.get_untracked());
+    params[1] = format!("/workloads/{namespace_name}/pods/");
 
-    let columns_update = columns.clone();
-    let interval_handle = update_page_effect(10_000, move || {
-        update_page(
-            columns_update.clone(),
-            styles.clone(),
-            params.clone(),
-            table_rows,
-            namespace_name,
-            loading,
-        );
-    });
-    clear_page_effect(interval_handle);
-    data_list_view(columns, table_rows, loading)
-}
-
-fn update_page(
-    columns: Vec<TableColumn>,
-    styles: Vec<String>,
-    params: Vec<String>,
-    table_rows: RwSignal<Vec<TableRow>>,
-    namespace_name: RwSignal<String>,
-    loading: RwSignal<bool>,
-) {
-    if namespace_name.is_disposed() {
-        return;
-    }
-    let namespace_name = namespace_name.get();
-
-    spawn_local(async move {
-        let list = update_page_async(
-            columns.clone(),
-            styles.clone(),
-            params.clone(),
-            namespace_name.clone(),
-        )
-        .await
-        .unwrap_or_default();
-        table_rows.set(list);
-        loading.set(false);
-    });
-}
-
-#[server]
-async fn update_page_async(
-    columns: Vec<TableColumn>,
-    styles: Vec<String>,
-    params: Vec<String>,
-    namespace_name: String,
-) -> Result<Vec<TableRow>, ServerFnError> {
-    let namespace_name = if namespace_name == "All Namespaces" {
-        None
-    } else {
-        Some(namespace_name)
-    };
-    let pods_data = pods_api::get_pods(namespace_name, None)
+    let pods_data = pods_api::get_pods(cache, Some(namespace_name.to_string()), None)
         .await
         .unwrap_or_default();
     let pod_names = pods_data
         .iter()
         .map(|p| p.metadata.name.clone())
         .collect::<Vec<String>>();
-    let pods_metrics = metrics_api::get_pods()
+    let pods_metrics = metrics_api::get_pods(cache)
         .await
         .unwrap_or_default()
         .into_iter()
@@ -102,14 +64,14 @@ async fn update_page_async(
         .into_iter()
         .map(|r| {
             let metrics = pods_metrics
-                .clone()
-                .into_iter()
+                .iter()
                 .find(|pp| pp.metadata.name == r.metadata.name)
+                .cloned()
                 .unwrap_or_default();
 
             vec![
                 "Pod".to_string(),
-                r.clone().metadata.name,
+                r.metadata.name.clone(),
                 pod_cpu_actual(&metrics),
                 pod_cpu_request(&r, &metrics),
                 pod_cpu_limit(&r, &metrics),
@@ -121,5 +83,5 @@ async fn update_page_async(
         .collect::<Vec<_>>();
 
     list.sort_by(|a, b| a[1].cmp(&b[1]));
-    Ok(parse_table_rows(columns, list, styles, params))
+    parse_table_rows(columns, list, &styles, &params)
 }

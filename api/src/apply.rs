@@ -1,22 +1,27 @@
-use leptos::prelude::ServerFnError;
-use leptos::server;
+use quench_auth::prelude::{Claims, JwtConfig};
+use quench_cache::CacheStore;
 
-use crate::utils::{get_api_token, get_url, ApiMode};
+use crate::utils::ApiMode;
 
-#[server(Apply, "/api/apply")]
-pub async fn apply(payload: String, mode: ApiMode) -> Result<String, ServerFnError> {
-    crate::auth::require_write().await?;
+pub async fn apply(
+    cache: &CacheStore,
+    config: &JwtConfig,
+    claims: Option<&Claims>,
+    payload: String,
+    mode: ApiMode,
+) -> anyhow::Result<String> {
+    crate::auth::require_write(config, claims)?;
 
     let payload_json = serde_json::from_str::<serde_json::Value>(&payload)
-        .map_err(|e| ServerFnError::new(format!("Failed to parse JSON: {e}")))?;
+        .map_err(|e| anyhow::anyhow!("Failed to parse JSON: {e}"))?;
     let resource_type = payload_json
         .get("kind")
         .and_then(serde_json::Value::as_str)
-        .ok_or_else(|| ServerFnError::new("Missing or invalid 'kind' field"))?
+        .ok_or_else(|| anyhow::anyhow!("Missing or invalid 'kind' field"))?
         .to_string();
     let metadata = payload_json
         .get("metadata")
-        .ok_or_else(|| ServerFnError::new("Missing 'metadata' field"))?;
+        .ok_or_else(|| anyhow::anyhow!("Missing 'metadata' field"))?;
     let namespace = metadata
         .get("namespace")
         .and_then(serde_json::Value::as_str)
@@ -26,7 +31,7 @@ pub async fn apply(payload: String, mode: ApiMode) -> Result<String, ServerFnErr
             metadata
                 .get("name")
                 .and_then(serde_json::Value::as_str)
-                .ok_or_else(|| ServerFnError::new("Missing or invalid 'name' field"))
+                .ok_or_else(|| anyhow::anyhow!("Missing or invalid 'name' field"))
                 .map(ToString::to_string)
         })
         .transpose()?;
@@ -35,24 +40,24 @@ pub async fn apply(payload: String, mode: ApiMode) -> Result<String, ServerFnErr
         .danger_accept_invalid_certs(true)
         .build()?;
 
-    let url = get_url(resource_type, namespace, resource).await?;
+    let url = crate::utils::get_url(&resource_type, namespace, resource)?;
     let server_host = crate::config::server_host();
     let server_port = crate::config::server_port();
 
     let response = match mode {
         ApiMode::Post => client.post(format!("https://{server_host}:{server_port}/{url}")),
         ApiMode::Put => client.put(format!("https://{server_host}:{server_port}/{url}")),
-        _ => unimplemented!(),
+        ApiMode::Get | ApiMode::Delete => unimplemented!(),
     }
     .header("Content-Type", "application/json")
     .body(payload)
-    .bearer_auth(get_api_token().await)
+    .bearer_auth(crate::utils::get_api_token(cache).await)
     .send()
     .await?;
 
     if response.status().is_success() {
         Ok(response.text().await?)
     } else {
-        Err(ServerFnError::ServerError(response.status().to_string()))
+        Err(anyhow::anyhow!(response.status().to_string()))
     }
 }

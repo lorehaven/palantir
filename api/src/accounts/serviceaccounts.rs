@@ -1,14 +1,13 @@
 use domain::account::serviceaccount::ServiceAccount;
 use domain::shared::response::Response;
-use leptos::prelude::ServerFnError;
-use leptos::server;
+use quench_cache::CacheStore;
 
 use crate::resource as resource_api;
 
-#[server(GetServiceAccounts, "/api/accounts/serviceaccounts")]
 pub async fn get_serviceaccounts(
+    cache: &CacheStore,
     namespace_name: Option<String>,
-) -> Result<Vec<ServiceAccount>, ServerFnError> {
-    let response = resource_api::get("ServiceAccount".to_string(), namespace_name, None).await?;
+) -> anyhow::Result<Vec<ServiceAccount>> {
+    let response = resource_api::get(cache, "ServiceAccount", namespace_name, None).await?;
     Ok(serde_json::from_str::<Response<ServiceAccount>>(&response)?.items)
 }

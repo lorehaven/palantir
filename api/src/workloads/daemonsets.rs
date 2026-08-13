@@ -1,14 +1,13 @@
 use domain::shared::response::Response;
 use domain::workload::daemonset::DaemonSet;
-use leptos::prelude::ServerFnError;
-use leptos::server;
+use quench_cache::CacheStore;
 
 use crate::resource as resource_api;
 
-#[server(GetDaemonSets, "/api/workloads/daemonsets")]
 pub async fn get_daemonsets(
+    cache: &CacheStore,
     namespace_name: Option<String>,
-) -> Result<Vec<DaemonSet>, ServerFnError> {
-    let response = resource_api::get("DaemonSet".to_string(), namespace_name, None).await?;
+) -> anyhow::Result<Vec<DaemonSet>> {
+    let response = resource_api::get(cache, "DaemonSet", namespace_name, None).await?;
     Ok(serde_json::from_str::<Response<DaemonSet>>(&response)?.items)
 }

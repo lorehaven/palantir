@@ -1,14 +1,13 @@
 # Palantir
 
-**Palantir** is a lightweight Kubernetes dashboard application built using [Rust](https://www.rust-lang.org/) and [Leptos](https://leptos.dev/). It provides an intuitive, real-time web interface to observe and manage your Kubernetes clusters with speed and elegance.
+**Palantir** is a lightweight Kubernetes dashboard application built using [Rust](https://www.rust-lang.org/), [actix-web](https://actix.rs/), and [quench-web](https://github.com/lorehaven/forge). It provides an intuitive, real-time web interface to observe and manage your Kubernetes clusters with speed and elegance.
 
 ---
 
 ## 🚀 Features
 
 - 📊 Visualize Kubernetes resources
-- 🔄 Live updates using efficient client-server communication
-- 🌈 Clean, reactive UI powered by Leptos
+- 🔄 Live updates via [htmx](https://htmx.org/) polling fragments - no client-side JavaScript framework
 - 🛡️ Secure by design – runs locally or in-cluster
 - 🔌 Extendable and modular architecture
 
@@ -17,26 +16,30 @@
 ## 🛠️ Built With
 
 - [Rust](https://www.rust-lang.org/) – backend logic and performance
-- [Leptos](https://leptos.dev/) – fullstack reactive web UI in Rust
+- [actix-web](https://actix.rs/) – HTTP server
+- [quench-web](https://github.com/lorehaven/forge) – server-rendered HTML builder, shared across every `forge` service
+- [htmx](https://htmx.org/) – the small amount of client-side interactivity (polling, form submission) each page needs
 
 ---
 
 ## 📦 Installation
 
-> ⚠️ **Requirements**: Rust toolchain, Leptos CLI
+> ⚠️ **Requirements**: Rust toolchain, `sass` (`npm install -g sass`)
 
 Clone the repo:
 
 ```bash
 git clone https://github.com/lorehaven/palantir.git
 cd palantir
-``````
+```
 
 Build and run the server:
 
-``````bash
-cargo leptos build
-``````
+```bash
+mkdir -p dist/assets/css
+sass --no-source-map styles/main.scss dist/assets/css/palantir.css
+cargo run -p server
+```
 
 Open your browser at [http://localhost:3000](http://localhost:3000)
 
@@ -66,15 +69,16 @@ The \`Dockerfile\` is provided: [Dockerfile](Dockerfile)
 
 ## 🧪 Development
 
-Start in dev mode with hot reload:
+`run.sh` compiles `styles/*.scss` and starts the server with local-dev defaults
+(in-memory session/cache store, auth disabled):
 
-``````bash
-LEPTOS_ENV=dev cargo leptos watch
-``````
+```bash
+./run.sh
+```
 
-Frontend is auto-recompiled with changes using Leptos' hot reload.
-
----
+There's no client-side build/hot-reload step - every page is rendered server-side,
+so a plain `cargo watch -x 'run -p server'` (or just re-running `run.sh`) picks up
+Rust changes; edits to `styles/*.scss` need the `sass` command re-run to take effect.
 
 ---
 

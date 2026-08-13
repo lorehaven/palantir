@@ -1,26 +1,24 @@
 use domain::metrics::{NodeMetrics, PodMetrics};
-use leptos::prelude::ServerFnError;
-use leptos::server;
+use quench_cache::CacheStore;
 use serde_json::Value;
 
-use crate::utils::get_api_token;
-
-#[server(GetNodesMetrics, "/api/metrics/nodes")]
-pub async fn get_nodes() -> Result<Vec<NodeMetrics>, ServerFnError> {
-    let metrics = get_metrics("nodes".to_string()).await?;
-    serde_json::from_value::<Vec<NodeMetrics>>(metrics.get("items").unwrap().clone())
-        .map_err(|e| ServerFnError::new(e.to_string()))
+pub async fn get_nodes(cache: &CacheStore) -> anyhow::Result<Vec<NodeMetrics>> {
+    let metrics = get_metrics(cache, "nodes").await?;
+    let items = metrics
+        .get("items")
+        .ok_or_else(|| anyhow::anyhow!("metrics response missing 'items'"))?;
+    Ok(serde_json::from_value::<Vec<NodeMetrics>>(items.clone())?)
 }
 
-#[server(GetPodsMetrics, "/api/metrics/pods")]
-pub async fn get_pods() -> Result<Vec<PodMetrics>, ServerFnError> {
-    let metrics = get_metrics("pods".to_string()).await?;
-    serde_json::from_value::<Vec<PodMetrics>>(metrics.get("items").unwrap().clone())
-        .map_err(|e| ServerFnError::new(e.to_string()))
+pub async fn get_pods(cache: &CacheStore) -> anyhow::Result<Vec<PodMetrics>> {
+    let metrics = get_metrics(cache, "pods").await?;
+    let items = metrics
+        .get("items")
+        .ok_or_else(|| anyhow::anyhow!("metrics response missing 'items'"))?;
+    Ok(serde_json::from_value::<Vec<PodMetrics>>(items.clone())?)
 }
 
-#[server]
-async fn get_metrics(path: String) -> Result<Value, ServerFnError> {
+async fn get_metrics(cache: &CacheStore, path: &str) -> anyhow::Result<Value> {
     let server_host = crate::config::server_host();
     let server_port = crate::config::server_port();
 
@@ -32,7 +30,7 @@ async fn get_metrics(path: String) -> Result<Value, ServerFnError> {
         .get(format!(
             "https://{server_host}:{server_port}/apis/metrics.k8s.io/v1beta1/{path}"
         ))
-        .bearer_auth(get_api_token().await)
+        .bearer_auth(crate::utils::get_api_token(cache).await)
         .send()
         .await?;
 

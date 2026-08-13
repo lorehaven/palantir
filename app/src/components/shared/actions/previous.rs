@@ -1,20 +1,28 @@
-use leptos::prelude::*;
+use quench_web::prelude::*;
 
-use crate::components::prelude::*;
-
-#[component]
-pub fn PreviousAction(previous_switch: RwSignal<bool>) -> impl IntoView {
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="action previous-action">
-                    <div class="actions-checkbox" on:click=move |_| previous_switch.set(!previous_switch.get())>
-                        <input type="checkbox" checked=previous_switch />
-                        <span class="slider" />
-                    </div>
-                    <div>Previous</div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
+/// Unlike `follow::follow_action`, toggling this one does need the server -
+/// the log fragment listens for `change` on this checkbox's `id` and
+/// re-fetches with `previous=true/false`.
+pub fn previous_action(id: &str, checked: bool) -> Element {
+    let mut checkbox = input()
+        .attr("type", "checkbox")
+        .attr("id", id)
+        .attr("name", "previous");
+    if checked {
+        checkbox = checkbox.attr("checked", "checked");
     }
+
+    div()
+        .class("action previous-action")
+        .child(
+            div()
+                .class("actions-checkbox")
+                .attr(
+                    "onclick",
+                    format!("document.getElementById('{id}').click()"),
+                )
+                .child(checkbox)
+                .child(span().class("slider")),
+        )
+        .child(div().text("Previous"))
 }

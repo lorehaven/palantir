@@ -26,14 +26,14 @@ name  = "build"
 needs = ["check"]
 
 [[stage.job]]
-name    = "leptos"
+name    = "server"
 image   = "ossiriand.arda:8080/forge/ci/rust-builder:latest"
 timeout = 3600
-env     = { LEPTOS_SASS_VERSION = "1.72.0" }
 steps = [
-    "rustup target add wasm32-unknown-unknown",
-    "command -v cargo-leptos >/dev/null || cargo install --locked cargo-leptos",
-    "cargo leptos build --release",
+    "command -v sass >/dev/null || npm install -g sass",
+    "mkdir -p dist/assets/css",
+    "sass --no-source-map styles/main.scss dist/assets/css/palantir.css",
+    "cargo build --release -p server",
 ]
 
 [[stage]]

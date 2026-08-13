@@ -1,53 +1,65 @@
-use leptos::prelude::*;
+//! A single-number input modal (currently just `actions::scale::scale_action`).
+//!
+//! `hx_vals_json` carries whatever context the submit endpoint needs beyond
+//! the number itself (resource type/namespace/name) as a static JSON blob -
+//! htmx merges it into the submitted params alongside the input's own value.
 
-#[component]
-pub fn InputDialog<F>(
-    label: RwSignal<String>,
-    value: RwSignal<i64>,
-    show_dialog: RwSignal<bool>,
-    callback: F,
-) -> impl IntoView
-where
-    F: FnOnce() + Clone + Send + Sync + 'static,
-{
-    let callback = RwSignal::new(callback);
+use quench_web::framework::dom::toggle_modal;
+use quench_web::prelude::*;
 
-    view! {
-        <Show when=move || show_dialog.get()>
-            <div class="dialog-overlay" />
-            <div class="dialog-wrapper">
-                <div class="dialog input-dialog">
-                    <div class="dialog-header">
-                        <div>{label.get()}</div>
-                    </div>
-                    <div class="dialog-content">
-                        <input
-                            r#type="number"
-                            min="0"
-                            prop:value=value
-                            on:keyup=move |ev| value.set(event_target_value(&ev).parse().unwrap())
-                            prop:placeholder="filter"
-                        />
-                    </div>
-                    <div class="dialog-footer">
-                        <span style="flex: 1" />
-                        <button class="btn btn-primary" on:click=move |_| apply(show_dialog, callback)>Apply</button>
-                        <button class="btn btn-primary" on:click=move |_| cancel(show_dialog)>Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </Show>
-    }
-}
+pub fn input_dialog(
+    overlay_class: &str,
+    panel_class: &str,
+    label: &str,
+    current_value: i64,
+    submit_url: &str,
+    hx_vals_json: &str,
+) -> Element {
+    let hide = toggle_modal(overlay_class, panel_class, "show");
+    let input_id = format!("{overlay_class}-value");
 
-fn apply<F>(show_dialog: RwSignal<bool>, callback: RwSignal<F>)
-where
-    F: FnOnce() + Clone + Send + Sync + 'static,
-{
-    callback.get()();
-    show_dialog.set(false);
-}
-
-fn cancel(show_dialog: RwSignal<bool>) {
-    show_dialog.set(false);
+    div()
+        .child(
+            div()
+                .class(format!("dialog-overlay {overlay_class}"))
+                .attr("onclick", hide.clone()),
+        )
+        .child(
+            div().class(format!("dialog-wrapper {panel_class}")).child(
+                div()
+                    .class("dialog input-dialog")
+                    .child(div().class("dialog-header").child(div().text(label)))
+                    .child(
+                        div().class("dialog-content").child(
+                            input()
+                                .attr("type", "number")
+                                .attr("min", "0")
+                                .attr("id", input_id.clone())
+                                .attr("name", "replicas")
+                                .attr("value", current_value.to_string()),
+                        ),
+                    )
+                    .child(
+                        div()
+                            .class("dialog-footer")
+                            .child(span().attr("style", "flex: 1"))
+                            .child(
+                                button()
+                                    .class("btn btn-primary")
+                                    .attr("hx-put", submit_url)
+                                    .attr("hx-vals", hx_vals_json)
+                                    .attr("hx-include", format!("#{input_id}"))
+                                    .attr("hx-target", "body")
+                                    .attr("hx-swap", "none")
+                                    .text("Apply"),
+                            )
+                            .child(
+                                button()
+                                    .class("btn btn-primary")
+                                    .attr("onclick", hide)
+                                    .text("Cancel"),
+                            ),
+                    ),
+            ),
+        )
 }

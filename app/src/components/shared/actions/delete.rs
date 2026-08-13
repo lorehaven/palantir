@@ -1,73 +1,41 @@
-use api::resource as resource_api;
-use leptos::prelude::*;
-use leptos::task::spawn_local;
+use quench_web::framework::dom::toggle_modal;
+use quench_web::prelude::*;
 
-use crate::components::prelude::*;
-use crate::components::shared::dialog::confirm::ConfirmDialog;
+use crate::components::shared::dialog::confirm::confirm_dialog;
 
-#[component]
-pub fn DeleteAction(
-    resource_type: RwSignal<String>,
-    namespace_name: RwSignal<String>,
-    resource_name: RwSignal<String>,
-) -> impl IntoView {
-    let confirm_label = confirm_label(resource_type, namespace_name, resource_name);
-    let show_dialog = RwSignal::new(false);
-    let namespace_name = or_none(namespace_name);
-    let resource_name = or_none(resource_name);
+/// `confirm_url` is the `hx-delete` target the confirm dialog posts to (see
+/// `dialog::confirm::confirm_dialog`) - the caller's actix route, which
+/// responds with `HX-Redirect` on success.
+pub fn delete_action(
+    resource_type: &str,
+    namespace: Option<&str>,
+    resource_name: &str,
+    confirm_url: &str,
+) -> Element {
+    let namespace_label = namespace
+        .map(|ns| format!(" in `{ns}` namespace"))
+        .unwrap_or_default();
+    let message = format!(
+        "You are attempting to delete {} `{resource_name}`{namespace_label}",
+        resource_type.to_lowercase()
+    );
 
-    let callback = move || {
-        let toaster = expect_toaster();
-        spawn_local(async move {
-            if let Err(err) = resource_api::delete(
-                resource_type.get_untracked(),
-                namespace_name.get_untracked(),
-                resource_name.get_untracked(),
-            )
-            .await
-            {
-                toaster.error(err.to_string());
-            } else {
-                show_dialog.set(false);
-                if let Ok(history) = window().history() {
-                    toaster.success("Resource successfully deleted");
-                    let _ = history.back();
-                }
-            }
-        });
-    };
+    let overlay_class = "delete-confirm-overlay";
+    let panel_class = "delete-confirm-panel";
 
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="action delete-action">
-                    <ConfirmDialog
-                        confirm_label
-                        show_dialog
-                        callback />
-                    <div class="actions-icon" on:click=move |_| show_dialog.set(true)>
-                        <i class="fa-solid fa-trash" />
-                    </div>
-                    <div>Delete</div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
-    }
-}
-
-fn confirm_label(
-    resource_type: RwSignal<String>,
-    namespace_name: RwSignal<String>,
-    resource_name: RwSignal<String>,
-) -> RwSignal<String> {
-    let type_label = resource_type.get_untracked().to_lowercase();
-    let name_label = resource_name.get_untracked();
-    let namespace_label = if namespace_name.get_untracked().is_empty() {
-        String::new()
-    } else {
-        format!(" in `{}` namespace", namespace_name.get_untracked())
-    };
-    RwSignal::new(format!(
-        "You are attempting to delete {type_label} `{name_label}`{namespace_label}"
-    ))
+    div()
+        .class("action delete-action")
+        .child(confirm_dialog(
+            &message,
+            overlay_class,
+            panel_class,
+            confirm_url,
+        ))
+        .child(
+            div()
+                .class("actions-icon")
+                .attr("onclick", toggle_modal(overlay_class, panel_class, "show"))
+                .child(i().class("fa-solid fa-trash")),
+        )
+        .child(div().text("Delete"))
 }

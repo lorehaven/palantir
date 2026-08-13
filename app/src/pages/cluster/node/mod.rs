@@ -1,42 +1,23 @@
-use leptos::prelude::*;
-use leptos_router::hooks::use_params_map;
+pub mod node_conditions;
+pub mod node_info;
+pub mod node_pods;
 
-use crate::components::prelude::*;
-use crate::components::stats::nodes::NodesStatComponent;
-use crate::components::stats::pods::PodsStatComponent;
-use crate::pages::cluster::node::node_conditions::NodeConditionsComponent;
-use crate::pages::cluster::node::node_info::NodeInfoComponent;
-use crate::pages::cluster::node::node_pods::NodePodsComponent;
+use quench_cache::CacheStore;
+use quench_web::prelude::*;
 
-mod node_conditions;
-mod node_info;
-mod node_pods;
+use crate::components::stats::nodes as nodes_stat;
+use crate::components::stats::pods as pods_stat;
 
-#[component]
-pub fn ClusterNodePage() -> impl IntoView {
-    let params = use_params_map();
-    let name = params
-        .with_untracked(|p| p.get("name"))
-        .into_iter()
-        .collect::<Vec<_>>()
-        .join("-");
-    let page_title = vec!["Cluster".to_string(), "Nodes".to_string(), name.clone()];
-
-    let name = RwSignal::new(name);
-
-    view! {
-        <Header text=page_title />
-        <PageContent>
-            <PageContentSlot slot>
-                <div class="cluster-node main-page">
-                    <NodesStatComponent node_name=name expandable=false />
-                    <PodsStatComponent node_name=name expandable=false />
-                    <NodeInfoComponent resource_name=name />
-                    <NodeConditionsComponent resource_name=name />
-                    <NodePodsComponent resource_name=name />
-                </div>
-            </PageContentSlot>
-        </PageContent>
-        <Footer />
-    }
+pub async fn render(cache: &CacheStore, current_path: &str, node_name: &str) -> String {
+    crate::shell::page(
+        &["Cluster", "Nodes", node_name],
+        current_path,
+        div()
+            .class("cluster-node main-page")
+            .child(nodes_stat::render(cache, Some(node_name)).await)
+            .child(pods_stat::render(cache, None, Some(node_name)).await)
+            .child(node_info::fragment(cache, node_name).await)
+            .child(node_conditions::fragment(cache, node_name).await)
+            .child(node_pods::fragment(cache, node_name).await),
+    )
 }

@@ -1,8 +1,8 @@
 //! A path-aware stand-in for `quench_auth::actix::middleware::auth::Auth`.
 //!
 //! `Auth` is a per-scope `.wrap()`, but palantir can't scope it the obvious
-//! way: the public login/callback/logout routes and every protected Leptos
-//! page live under the *same* `/ui` prefix, and actix's scope router commits
+//! way: the public login/callback/logout routes and every protected page
+//! live under the *same* `/ui` prefix, and actix's scope router commits
 //! to whichever sibling scope's prefix matches first, never trying the
 //! other even for a path it doesn't define -
 //! <https://github.com/actix/actix-web/issues/2904> (confirmed by testing
@@ -28,8 +28,7 @@ use quench_auth::prelude::JwtConfig;
 /// indirectly through its own single-use ticket - see `api::ws_ticket`, not
 /// through this middleware).
 fn is_public(path: &str) -> bool {
-    path.contains("/pkg/")
-        || path.ends_with("/favicon.ico")
+    path.contains("/assets/")
         || path.ends_with("/ws/exec")
         || path.ends_with("/ui/login")
         || path.ends_with("/ui/auth/callback")

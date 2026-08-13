@@ -1,48 +1,39 @@
-//! Per-function write-permission checks for `#[server]` functions.
+//! Per-call write-permission checks for actions that mutate cluster state
+//! (delete/scale/apply).
 //!
-//! Every route Leptos auto-registers (`leptos_routes`'s own scan of
-//! `server_fn::actix::server_fn_paths()`) shares one scope, so there's no
-//! per-route place to hang a `RequireWrite`-style middleware the way a
-//! handwritten actix route could - see that middleware's own doc comment,
-//! which recommends exactly this: guard the individual route with
-//! [`quench_auth::prelude::Claims::can`] instead.
-#![cfg(not(target_arch = "wasm32"))]
+//! Palantir's own `auth_gate` middleware (`server/src/auth_gate.rs`) already
+//! puts the caller's `Claims` into the request extensions for every
+//! protected route; handlers pull them out and pass them here alongside the
+//! `JwtConfig` they already hold, rather than this module reaching back into
+//! the request itself.
 
-use actix_web::web::Data;
-use actix_web::{HttpMessage, HttpRequest};
-use leptos::prelude::ServerFnError;
 use quench_auth::prelude::{Claims, JwtConfig};
 
 /// Confirms the caller holds this service's generic `"write"` action.
 ///
-/// Reads the `Claims` the `Auth` middleware put in the request's
-/// extensions - the same rule `RequireWrite` enforces for handwritten
-/// routes. Returns `Ok(None)` rather than erroring when auth is turned off
-/// (`SERVICE_AUTH_ENABLED=false`), matching `Auth`/`RequireWrite`'s own dev
+/// Returns `Ok(None)` rather than erroring when auth is turned off
+/// (`SERVICE_AUTH_ENABLED=false`), matching the `Auth` middleware's own dev
 /// bypass: nothing to check, so nothing is refused.
 ///
 /// # Errors
 ///
 /// Errors if the caller isn't authenticated at all, or is authenticated but
 /// lacks the `"write"` action on this service.
-pub async fn require_write() -> Result<Option<Claims>, ServerFnError> {
-    let config = leptos_actix::extract::<Data<JwtConfig>>().await?;
+pub fn require_write(
+    config: &JwtConfig,
+    claims: Option<&Claims>,
+) -> anyhow::Result<Option<Claims>> {
     if !config.auth_enabled {
         return Ok(None);
     }
 
-    let req = leptos_actix::extract::<HttpRequest>().await?;
-    let claims = req
-        .extensions()
-        .get::<Claims>()
-        .cloned()
-        .ok_or_else(|| ServerFnError::new("not authenticated"))?;
+    let claims = claims.ok_or_else(|| anyhow::anyhow!("not authenticated"))?;
 
     if claims.can(&config.service_name, "write") {
-        Ok(Some(claims))
+        Ok(Some(claims.clone()))
     } else {
-        Err(ServerFnError::new(
-            "this action needs write permission on palantir",
+        Err(anyhow::anyhow!(
+            "this action needs write permission on palantir"
         ))
     }
 }

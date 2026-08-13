@@ -4,10 +4,10 @@
 //! form here on purpose.
 //!
 //! Registered with full literal paths rather than nested in a
-//! `web::scope("/ui")`, deliberately: the protected Leptos pages also live
-//! under `/ui/*`, and a sibling scope claiming that same prefix is exactly
-//! the actix routing collision `auth_gate`'s doc comment describes - so
-//! these are flat services, same as the Leptos routes are.
+//! `web::scope("/ui")`, deliberately: every protected page also lives under
+//! `/ui/*`, and a sibling scope claiming that same prefix is exactly the
+//! actix routing collision `auth_gate`'s doc comment describes - so these
+//! are flat services alongside the rest.
 
 use actix_web::{get, web, HttpRequest, Responder};
 use quench_auth::actix::domain::sso_client::SsoConfig;

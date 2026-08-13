@@ -1,6 +1,9 @@
 pub mod pod_stats;
 
 pub fn parse_memory(memory_str: &str) -> Option<f64> {
+    if memory_str.len() < 2 {
+        return None;
+    }
     let (num_str, unit_str) = memory_str.split_at(memory_str.len() - 2);
     let num: f64 = num_str.parse().ok()?;
     match unit_str {

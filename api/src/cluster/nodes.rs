@@ -1,32 +1,30 @@
 use domain::cluster::node::Node;
 use domain::shared::response::Response;
-use leptos::prelude::ServerFnError;
-use leptos::server;
+use quench_cache::CacheStore;
 
 use crate::resource as resource_api;
 
-pub async fn get_nodes_filtered(node_name: Option<String>) -> Vec<Node> {
+pub async fn get_nodes_filtered(cache: &CacheStore, node_name: Option<String>) -> Vec<Node> {
     if let Some(name) = node_name {
-        vec![get_node_by_name(name.clone()).await.unwrap_or_default()]
+        vec![get_node_by_name(cache, name.clone())
+            .await
+            .unwrap_or_default()]
     } else {
-        get_nodes().await.unwrap_or_default()
+        get_nodes(cache).await.unwrap_or_default()
     }
 }
 
-#[server(GetNodesResponse, "/api/nodes/response")]
-pub async fn get_nodes_response() -> Result<Response<Node>, ServerFnError> {
-    let response = resource_api::get("Node".to_string(), None, None).await?;
+pub async fn get_nodes_response(cache: &CacheStore) -> anyhow::Result<Response<Node>> {
+    let response = resource_api::get(cache, "Node", None, None).await?;
     Ok(serde_json::from_str::<Response<Node>>(&response)?)
 }
 
-#[server(GetNodes, "/api/nodes")]
-pub async fn get_nodes() -> Result<Vec<Node>, ServerFnError> {
-    let response = resource_api::get("Node".to_string(), None, None).await?;
+pub async fn get_nodes(cache: &CacheStore) -> anyhow::Result<Vec<Node>> {
+    let response = resource_api::get(cache, "Node", None, None).await?;
     Ok(serde_json::from_str::<Response<Node>>(&response)?.items)
 }
 
-#[server(GetNodeByName, "/api/node/:name")]
-pub async fn get_node_by_name(name: String) -> Result<Node, ServerFnError> {
-    let response = resource_api::get("Node".to_string(), None, Some(name)).await?;
+pub async fn get_node_by_name(cache: &CacheStore, name: String) -> anyhow::Result<Node> {
+    let response = resource_api::get(cache, "Node", None, Some(name)).await?;
     Ok(serde_json::from_str::<Node>(&response).unwrap_or_default())
 }

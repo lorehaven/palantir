@@ -1,18 +1,17 @@
 use domain::account::bindings::{BaseRoleBinding, ClusterRoleBinding, RoleBinding};
 use domain::shared::response::Response;
-use leptos::prelude::ServerFnError;
-use leptos::server;
+use quench_cache::CacheStore;
 
 use crate::resource as resource_api;
 
-pub async fn get_all_bindings() -> Vec<Box<dyn BaseRoleBinding>> {
+pub async fn get_all_bindings(cache: &CacheStore) -> Vec<Box<dyn BaseRoleBinding>> {
     let mut all_bindings = vec![];
-    let bindings = get_rolebindings(None)
+    let bindings = get_rolebindings(cache, None)
         .await
         .unwrap_or_default()
         .into_iter()
         .map(|d| Box::new(d) as Box<dyn BaseRoleBinding>);
-    let clusterbindings = get_clusterrolebindings()
+    let clusterbindings = get_clusterrolebindings(cache)
         .await
         .unwrap_or_default()
         .into_iter()
@@ -22,16 +21,17 @@ pub async fn get_all_bindings() -> Vec<Box<dyn BaseRoleBinding>> {
     all_bindings
 }
 
-#[server(GetBindings, "/api/accounts/rolebindings")]
 pub async fn get_rolebindings(
+    cache: &CacheStore,
     namespace_name: Option<String>,
-) -> Result<Vec<RoleBinding>, ServerFnError> {
-    let response = resource_api::get("RoleBinding".to_string(), namespace_name, None).await?;
+) -> anyhow::Result<Vec<RoleBinding>> {
+    let response = resource_api::get(cache, "RoleBinding", namespace_name, None).await?;
     Ok(serde_json::from_str::<Response<RoleBinding>>(&response)?.items)
 }
 
-#[server(GetClusterBindings, "/api/accounts/clusterrolebindings")]
-pub async fn get_clusterrolebindings() -> Result<Vec<ClusterRoleBinding>, ServerFnError> {
-    let response = resource_api::get("ClusterRoleBinding".to_string(), None, None).await?;
+pub async fn get_clusterrolebindings(
+    cache: &CacheStore,
+) -> anyhow::Result<Vec<ClusterRoleBinding>> {
+    let response = resource_api::get(cache, "ClusterRoleBinding", None, None).await?;
     Ok(serde_json::from_str::<Response<ClusterRoleBinding>>(&response)?.items)
 }

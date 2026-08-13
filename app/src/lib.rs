@@ -25,10 +25,8 @@
 #![allow(clippy::needless_pass_by_value)]
 #![cfg_attr(test, deny(rust_2018_idioms))]
 
-mod pages;
-
 pub mod base_path;
 pub mod components;
+pub mod pages;
 pub mod shell;
 pub mod utils;
-pub mod web_app;

@@ -1,20 +1,27 @@
-use leptos::prelude::*;
+use quench_web::prelude::*;
 
-use crate::components::prelude::*;
-
-#[component]
-pub fn FollowAction(follow_switch: RwSignal<bool>) -> impl IntoView {
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="action follow-action">
-                    <div class="actions-checkbox" on:click=move |_| follow_switch.set(!follow_switch.get())>
-                        <input type="checkbox" checked=follow_switch />
-                        <span class="slider" />
-                    </div>
-                    <div>Follow</div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
+/// A pure client-side toggle.
+///
+/// No htmx wiring, since "follow" only controls whether the log view's own
+/// inline script auto-scrolls after each poll (see
+/// `pages::workloads::pod_logs`), not what gets fetched.
+pub fn follow_action(id: &str, checked: bool) -> Element {
+    let mut checkbox = input().attr("type", "checkbox").attr("id", id);
+    if checked {
+        checkbox = checkbox.attr("checked", "checked");
     }
+
+    div()
+        .class("action follow-action")
+        .child(
+            div()
+                .class("actions-checkbox")
+                .attr(
+                    "onclick",
+                    format!("document.getElementById('{id}').click()"),
+                )
+                .child(checkbox)
+                .child(span().class("slider")),
+        )
+        .child(div().text("Follow"))
 }

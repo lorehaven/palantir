@@ -1,19 +1,17 @@
 use domain::cluster::pod::Pod;
 use domain::shared::response::Response;
 use domain::workload::service::{Service, ServiceEntry};
-use leptos::prelude::ServerFnError;
-use leptos::server;
+use quench_cache::CacheStore;
 
 use crate::resource as resource_api;
 use crate::workloads::pods::get_pods;
 
 const NAME_LABEL: &str = "app.kubernetes.io/name";
 
-#[server(GetServiceEntries, "/api/services/entries")]
-pub async fn get_service_entries() -> Result<Vec<ServiceEntry>, ServerFnError> {
-    let services = resource_api::get("Service".to_string(), None, None).await?;
+pub async fn get_service_entries(cache: &CacheStore) -> anyhow::Result<Vec<ServiceEntry>> {
+    let services = resource_api::get(cache, "Service", None, None).await?;
     Ok(
-        parse_entries_response(&services, &get_pods(None, None).await?)
+        parse_entries_response(&services, &get_pods(cache, None, None).await?)
             .await
             .unwrap_or_default(),
     )

@@ -1,18 +1,17 @@
 use domain::account::roles::{BaseRole, ClusterRole, Role};
 use domain::shared::response::Response;
-use leptos::prelude::ServerFnError;
-use leptos::server;
+use quench_cache::CacheStore;
 
 use crate::resource as resource_api;
 
-pub async fn get_all_roles() -> Vec<Box<dyn BaseRole>> {
+pub async fn get_all_roles(cache: &CacheStore) -> Vec<Box<dyn BaseRole>> {
     let mut all_roles = vec![];
-    let roles = get_roles(None)
+    let roles = get_roles(cache, None)
         .await
         .unwrap_or_default()
         .into_iter()
         .map(|d| Box::new(d) as Box<dyn BaseRole>);
-    let clusterroles = get_clusterroles()
+    let clusterroles = get_clusterroles(cache)
         .await
         .unwrap_or_default()
         .into_iter()
@@ -22,14 +21,15 @@ pub async fn get_all_roles() -> Vec<Box<dyn BaseRole>> {
     all_roles
 }
 
-#[server(GetRoles, "/api/accounts/roles")]
-pub async fn get_roles(namespace_name: Option<String>) -> Result<Vec<Role>, ServerFnError> {
-    let response = resource_api::get("Role".to_string(), namespace_name, None).await?;
+pub async fn get_roles(
+    cache: &CacheStore,
+    namespace_name: Option<String>,
+) -> anyhow::Result<Vec<Role>> {
+    let response = resource_api::get(cache, "Role", namespace_name, None).await?;
     Ok(serde_json::from_str::<Response<Role>>(&response)?.items)
 }
 
-#[server(GetClusterRoles, "/api/accounts/clusterroles")]
-pub async fn get_clusterroles() -> Result<Vec<ClusterRole>, ServerFnError> {
-    let response = resource_api::get("ClusterRole".to_string(), None, None).await?;
+pub async fn get_clusterroles(cache: &CacheStore) -> anyhow::Result<Vec<ClusterRole>> {
+    let response = resource_api::get(cache, "ClusterRole", None, None).await?;
     Ok(serde_json::from_str::<Response<ClusterRole>>(&response)?.items)
 }

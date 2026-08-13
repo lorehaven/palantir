@@ -1,29 +1,17 @@
-use leptos::prelude::*;
+use quench_web::prelude::*;
 
-use crate::components::prelude::*;
-
-#[component]
-pub fn ExecAction(
-    namespace_name: RwSignal<String>,
-    resource_name: RwSignal<String>,
-) -> impl IntoView {
+pub fn exec_action(namespace: &str, name: &str) -> Element {
     let url = format!(
-        "{}/workloads/{}/pods/{}/exec",
-        crate::base_path::router_base(),
-        namespace_name.get_untracked(),
-        resource_name.get_untracked()
+        "{}/workloads/{namespace}/pods/{name}/exec",
+        crate::base_path::ui_base()
     );
 
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="action exec-action">
-                    <a href=url.clone() class="actions-icon">
-                        <i class="fa-solid fa-terminal" />
-                    </a>
-                    <div>Exec</div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
-    }
+    div()
+        .class("action exec-action")
+        .child(
+            a().attr("href", url)
+                .class("actions-icon")
+                .child(i().class("fa-solid fa-terminal")),
+        )
+        .child(div().text("Exec"))
 }

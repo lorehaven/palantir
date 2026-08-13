@@ -1,69 +1,60 @@
 use api::service_entries::get_service_entries;
 use domain::workload::service::ServiceEntry;
-use leptos::prelude::*;
-use leptos::task::spawn_local;
+use quench_cache::CacheStore;
+use quench_web::prelude::*;
 
-use crate::components::prelude::*;
-use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
-
-#[component]
-pub fn FacadePage() -> impl IntoView {
-    let entries = RwSignal::new(vec![]);
-    let loading = RwSignal::new(true);
-
-    let interval_handle = update_page_effect(10_000, move || update_page(entries, loading));
-    clear_page_effect(interval_handle);
-
-    view(entries, loading)
+pub async fn render(cache: &CacheStore, current_path: &str) -> String {
+    crate::shell::page(
+        &["Services"],
+        current_path,
+        div()
+            .class("facade content-facade")
+            .child(fragment(cache).await),
+    )
 }
 
-fn update_page(entries: RwSignal<Vec<ServiceEntry>>, loading: RwSignal<bool>) {
-    spawn_local(async move {
-        entries.set(get_service_entries().await.unwrap_or_default());
-        loading.set(false);
-    });
+pub async fn fragment(cache: &CacheStore) -> Element {
+    let entries = get_service_entries(cache).await.unwrap_or_default();
+
+    entries
+        .into_iter()
+        .fold(div().class("entries"), |el, entry| {
+            el.child(entry_link(&entry))
+        })
+        .attr("id", "facade-entries")
+        .attr(
+            "hx-get",
+            format!("{}/facade/fragment", crate::base_path::ui_base()),
+        )
+        .attr("hx-trigger", "every 10s")
+        .attr("hx-target", "this")
+        .attr("hx-swap", "outerHTML")
 }
 
-fn view(entries: RwSignal<Vec<ServiceEntry>>, loading: RwSignal<bool>) -> impl IntoView {
-    view! {
-        <Header text=vec!["Services"] />
-        <PageContent additional_classes="content-facade">
-            <PageContentSlot slot>
-                <div class="facade">
-                    <Show
-                        when=move || { !loading.get() }
-                        fallback=|| view! { <div class="loader" /> }>
-                        <div class="entries">
-                            <For
-                                each=move || entries.get()
-                                key=|item| item.name.clone()
-                                children=move |item| {
-                                    let enabled = item.available;
-                                    view! {
-                                        <a href=if enabled { Some(item.url) } else { None } target="blank"
-                                            class:entry=move || enabled class:entry-disabled=move || !enabled>
-                                            <div class="column-left">
-                                                <div class="entry-title">{{ item.name }}</div>
-                                                <div>{{ item.url_display }}</div>
-                                            </div>
-                                            <div class="column-right">
-                                                <Show
-                                                    when=move || enabled
-                                                    fallback=|| view! {
-                                                        <i class="fa-regular fa-circle-xmark" style="color: #bb0000; font-size: 1.4rem;" />
-                                                    }>
-                                                        <i class="fa-regular fa-circle-check" style="font-size: 1.4rem;" />
-                                                </Show>
-                                            </div>
-                                        </a>
-                                    }
-                                }
-                            />
-                        </div>
-                    </Show>
-                </div>
-            </PageContentSlot>
-        </PageContent>
-        <Footer />
+fn entry_link(entry: &ServiceEntry) -> Element {
+    let class = if entry.available {
+        "entry"
+    } else {
+        "entry-disabled"
+    };
+    let icon = if entry.available {
+        i().class("fa-regular fa-circle-check")
+            .attr("style", "font-size: 1.4rem;")
+    } else {
+        i().class("fa-regular fa-circle-xmark")
+            .attr("style", "color: #bb0000; font-size: 1.4rem;")
+    };
+
+    let mut link = a().class(class).attr("target", "blank");
+    if entry.available {
+        link = link.attr("href", entry.url.clone());
     }
+
+    link.child(
+        div()
+            .class("column-left")
+            .child(div().class("entry-title").text(&entry.name))
+            .child(div().text(&entry.url_display)),
+    )
+    .child(div().class("column-right").child(icon))
 }

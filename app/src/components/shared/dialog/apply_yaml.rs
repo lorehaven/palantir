@@ -1,102 +1,68 @@
-use api::apply as apply_api;
-use api::utils::ApiMode;
-use leptos::prelude::*;
-use leptos::task::spawn_local;
+//! The create/edit-as-YAML modal.
+//!
+//! Shared by the nav "+" button (`method = "post"`, empty `initial_yaml`)
+//! and every resource's Edit action (`method = "put"`, `initial_yaml`
+//! pre-fetched server-side - there's no client-side fetch-on-open anymore,
+//! so the textarea is never empty for a moment the way the old Leptos
+//! dialog's was).
+//!
+//! Submits to the single generic `/ui/apply` route (see
+//! `server::routes::apply`) - the payload's own `kind`/`metadata` decide
+//! which K8s resource it targets, so this dialog never needs to know that
+//! itself.
 
-use crate::components::prelude::*;
-use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
+use quench_web::framework::dom::toggle_modal;
+use quench_web::prelude::*;
 
-#[component]
-pub fn ApplyYamlDialog(
-    show_dialog: RwSignal<bool>,
-    #[prop(default = RwSignal::new(None))] resource: RwSignal<Option<String>>,
-    mode: ApiMode,
-) -> impl IntoView {
-    let yaml_content = RwSignal::new(String::new());
-    let error = RwSignal::new(String::new());
+pub fn apply_yaml_dialog(
+    overlay_class: &str,
+    panel_class: &str,
+    initial_yaml: &str,
+    method: &str,
+    submit_url: &str,
+) -> Element {
+    let hide = toggle_modal(overlay_class, panel_class, "show");
+    let textarea_id = format!("{overlay_class}-yaml");
+    let method_attr = if method == "put" { "hx-put" } else { "hx-post" };
 
-    let interval_handle = update_page_effect(3_600_000, move || {
-        update_resource(show_dialog, yaml_content, resource);
-    });
-    clear_page_effect(interval_handle);
-
-    view! {
-        <Show when=move || show_dialog.get()>
-            <div class="dialog-overlay" />
-            <div class="dialog-wrapper">
-                <div class="dialog apply-yaml-dialog">
-                    <div class="dialog-content">
-                        <textarea bind:value={yaml_content} on:input=move |_| validate(yaml_content.get(), error) />
-                    </div>
-                    <div class="dialog-footer">
-                        <span style="flex: 1" />
-                        <button class="btn btn-primary" on:click=move |_| apply(yaml_content, show_dialog, error, mode)>Apply</button>
-                        <button class="btn btn-primary" on:click=move |_| cancel(yaml_content, show_dialog, error)>Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </Show>
-    }
-}
-
-fn update_resource(
-    show_dialog: RwSignal<bool>,
-    yaml_content: RwSignal<String>,
-    resource: RwSignal<Option<String>>,
-) {
-    if resource.is_disposed() {
-        return;
-    }
-
-    let resource_value = resource.get();
-    let show_dialog_value = show_dialog.get();
-
-    spawn_local(async move {
-        if show_dialog_value {
-            if let Some(res) = resource_value {
-                yaml_content.set(res);
-                resource.set(None);
-            }
-        }
-    });
-}
-
-fn validate(yaml_content: String, error: RwSignal<String>) {
-    if let Err(err) = serde_yaml::from_str::<serde_yaml::Value>(&yaml_content) {
-        error.set(err.to_string());
-    } else {
-        error.set(String::new());
-    }
-}
-
-fn apply(
-    yaml_content: RwSignal<String>,
-    show_dialog: RwSignal<bool>,
-    error: RwSignal<String>,
-    mode: ApiMode,
-) {
-    let toaster = expect_toaster();
-    let yaml_value = serde_yaml::from_str::<serde_yaml::Value>(&yaml_content.get()).unwrap();
-    let json_value = serde_json::to_value(yaml_value).unwrap();
-    let json_str = serde_json::to_string_pretty(&json_value).unwrap();
-
-    spawn_local(async move {
-        if let Err(err) = apply_api::apply(json_str.clone(), mode).await {
-            toaster.error(err.to_string());
-            match err {
-                ServerFnError::ServerError(e) => error.set(e),
-                _ => error.set(err.to_string()),
-            }
-        } else {
-            yaml_content.set(String::new());
-            toaster.success("Successfully applied yaml");
-            show_dialog.set(false);
-        }
-    });
-}
-
-fn cancel(yaml_content: RwSignal<String>, show_dialog: RwSignal<bool>, error: RwSignal<String>) {
-    yaml_content.set(String::new());
-    error.set(String::new());
-    show_dialog.set(false);
+    div()
+        .child(
+            div()
+                .class(format!("dialog-overlay {overlay_class}"))
+                .attr("onclick", hide.clone()),
+        )
+        .child(
+            div().class(format!("dialog-wrapper {panel_class}")).child(
+                div()
+                    .class("dialog apply-yaml-dialog")
+                    .child(
+                        div().class("dialog-content").child(
+                            textarea()
+                                .attr("id", textarea_id.clone())
+                                .attr("name", "yaml")
+                                .text(initial_yaml),
+                        ),
+                    )
+                    .child(
+                        div()
+                            .class("dialog-footer")
+                            .child(span().attr("style", "flex: 1"))
+                            .child(
+                                button()
+                                    .class("btn btn-primary")
+                                    .attr(method_attr, submit_url)
+                                    .attr("hx-include", format!("#{textarea_id}"))
+                                    .attr("hx-target", "body")
+                                    .attr("hx-swap", "none")
+                                    .text("Apply"),
+                            )
+                            .child(
+                                button()
+                                    .class("btn btn-primary")
+                                    .attr("onclick", hide)
+                                    .text("Cancel"),
+                            ),
+                    ),
+            ),
+        )
 }

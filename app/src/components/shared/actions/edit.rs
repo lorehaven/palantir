@@ -1,50 +1,50 @@
-use api::resource as resource_api;
-use api::utils::ApiMode;
-use leptos::prelude::*;
-use leptos::task::spawn_local;
+use quench_cache::CacheStore;
+use quench_web::framework::dom::toggle_modal;
+use quench_web::prelude::*;
 
-use crate::components::prelude::*;
-use crate::components::shared::dialog::apply_yaml::ApplyYamlDialog;
+use crate::components::shared::dialog::apply_yaml::apply_yaml_dialog;
 
-#[component]
-pub fn EditAction(
-    resource_type: RwSignal<String>,
-    namespace_name: RwSignal<String>,
-    resource_name: RwSignal<String>,
-) -> impl IntoView {
-    let show_dialog = RwSignal::new(false);
-    let namespace_name = or_none(namespace_name);
-    let resource_name = or_none(resource_name);
-    let resource = RwSignal::new(None);
+pub async fn edit_action(
+    cache: &CacheStore,
+    resource_type: &str,
+    namespace: Option<&str>,
+    resource_name: &str,
+) -> Element {
+    let json = api::resource::get(
+        cache,
+        resource_type,
+        namespace.map(String::from),
+        Some(resource_name.to_string()),
+    )
+    .await
+    .unwrap_or_default();
+    let yaml = json_to_yaml(&json);
 
-    Effect::new(move |_| {
-        if show_dialog.get() {
-            spawn_local(async move {
-                let res = resource_api::get(
-                    resource_type.get_untracked(),
-                    namespace_name.get_untracked(),
-                    resource_name.get_untracked(),
-                )
-                .await
-                .unwrap_or_default();
-                let yaml_value = serde_yaml::from_str::<serde_yaml::Value>(&res).unwrap();
-                let yaml_value = serde_yaml::to_string(&yaml_value).unwrap();
-                resource.set(Some(yaml_value));
-            });
-        }
-    });
+    let overlay_class = "edit-yaml-overlay";
+    let panel_class = "edit-yaml-panel";
+    let submit_url = format!("{}/apply", crate::base_path::ui_base());
 
-    view! {
-        <Wrapper>
-            <WrapperSlot slot>
-                <div class="action edit-action">
-                    <ApplyYamlDialog show_dialog resource mode=ApiMode::Put />
-                    <div class="actions-icon" on:click=move |_| show_dialog.set(true)>
-                        <i class="fa-solid fa-pen" />
-                    </div>
-                    <div>Edit</div>
-                </div>
-            </WrapperSlot>
-        </Wrapper>
-    }
+    div()
+        .class("action edit-action")
+        .child(apply_yaml_dialog(
+            overlay_class,
+            panel_class,
+            &yaml,
+            "put",
+            &submit_url,
+        ))
+        .child(
+            div()
+                .class("actions-icon")
+                .attr("onclick", toggle_modal(overlay_class, panel_class, "show"))
+                .child(i().class("fa-solid fa-pen")),
+        )
+        .child(div().text("Edit"))
+}
+
+fn json_to_yaml(json: &str) -> String {
+    serde_json::from_str::<serde_json::Value>(json)
+        .ok()
+        .and_then(|value| serde_yaml::to_string(&value).ok())
+        .unwrap_or_default()
 }

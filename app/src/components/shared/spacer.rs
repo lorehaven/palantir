@@ -1,8 +1,5 @@
-use leptos::prelude::*;
+use quench_web::prelude::*;
 
-#[component]
-pub fn Spacer() -> impl IntoView {
-    view! {
-        <div class="spacer" />
-    }
+pub fn spacer() -> Element {
+    div().class("spacer")
 }

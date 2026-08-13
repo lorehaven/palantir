@@ -1,13 +1,3 @@
-use api::accounts::serviceaccounts as accounts_api;
-use domain::utils::time::time_until_now;
-use leptos::prelude::*;
-use leptos::task::spawn_local;
-
-use crate::components::prelude::*;
-use crate::utils::shared::effects::{clear_page_effect, update_page_effect};
-
-pub mod serviceaccount;
-
 pub mod binding;
 pub mod bindings;
 pub mod clusterbinding;
@@ -16,110 +6,86 @@ pub mod role;
 pub mod roles;
 pub mod secret;
 pub mod secrets;
+pub mod serviceaccount;
 
-#[component]
-pub fn AccountsPage() -> impl IntoView {
-    let resource_type = RwSignal::new("ServiceAccounts".to_string());
-    let resource_name = RwSignal::new(String::new());
-    let namespace_name = RwSignal::new("All Namespaces".to_string());
+use api::accounts::serviceaccounts as accounts_api;
+use domain::utils::time::time_until_now;
+use quench_cache::CacheStore;
+use quench_web::prelude::*;
 
-    view! {
-        <Header text=vec!["Service Accounts"] />
-        <PageContent>
-            <PageContentSlot slot>
-                <div class="service-accounts main-page">
-                    <Actions
-                        resource_type
-                        selected_namespace=namespace_name
-                        prompt_value=resource_name
-                        actions=&[ActionType::NamespacesFilter, ActionType::Prompt] />
-                    <AccountsList namespace_name resource_name />
-                </div>
-            </PageContentSlot>
-        </PageContent>
-        <Footer />
-    }
+use crate::components::prelude::*;
+
+const FRAGMENT_ID: &str = "serviceaccounts-table";
+const FILTER_ID: &str = "serviceaccounts-filter";
+const NAMESPACE_ID: &str = "serviceaccounts-namespace";
+const POLL_TRIGGER: &str =
+    "every 10s, keyup changed delay:300ms from:#serviceaccounts-filter, change from:#serviceaccounts-namespace";
+const INCLUDE: &str = "#serviceaccounts-filter, #serviceaccounts-namespace";
+
+pub async fn render(
+    cache: &CacheStore,
+    current_path: &str,
+    namespace: &str,
+    filter: &str,
+) -> String {
+    let namespace_select = namespaces_filter_action(cache, NAMESPACE_ID, namespace).await;
+
+    crate::shell::page(
+        &["Service Accounts"],
+        current_path,
+        div()
+            .class("service-accounts main-page")
+            .child(actions(
+                "ServiceAccounts",
+                vec![namespace_select, prompt_action(FILTER_ID, filter)],
+            ))
+            .child(fragment(cache, namespace, filter).await),
+    )
 }
 
-#[component]
-fn AccountsList(
-    namespace_name: RwSignal<String>,
-    resource_name: RwSignal<String>,
-) -> impl IntoView {
-    let table_rows = RwSignal::new(vec![]);
-    let loading = RwSignal::new(true);
+pub async fn fragment(cache: &CacheStore, namespace: &str, filter: &str) -> Element {
+    let columns = columns();
+    let rows = rows(cache, &columns, namespace, filter).await;
 
-    let columns = vec![
+    data_list_view(&columns, &rows)
+        .attr("id", FRAGMENT_ID)
+        .attr(
+            "hx-get",
+            format!("{}/accounts/fragment", crate::base_path::ui_base()),
+        )
+        .attr("hx-trigger", POLL_TRIGGER)
+        .attr("hx-include", INCLUDE)
+        .attr("hx-target", "this")
+        .attr("hx-swap", "outerHTML")
+}
+
+fn columns() -> Vec<TableColumn> {
+    vec![
         TableColumn::new("Type", TableColumnType::String, 1),
         TableColumn::new("Namespace", TableColumnType::Link, 1),
         TableColumn::new("Name", TableColumnType::Link, 2),
         TableColumn::new("Age", TableColumnType::String, 1),
-    ];
+    ]
+}
+
+async fn rows(
+    cache: &CacheStore,
+    columns: &[TableColumn],
+    namespace: &str,
+    filter: &str,
+) -> Vec<TableRow> {
     let styles = vec![String::new(); columns.len()];
     let mut params = vec![String::new(); columns.len()];
     params[1] = "/cluster/namespaces/".to_string();
     params[2] = "/accounts/:1/serviceaccounts/".to_string();
 
-    let columns_update = columns.clone();
-    let interval_handle = update_page_effect(10_000, move || {
-        update_page_list(
-            columns_update.clone(),
-            styles.clone(),
-            params.clone(),
-            table_rows,
-            namespace_name,
-            resource_name,
-            loading,
-        );
-    });
-    clear_page_effect(interval_handle);
-    data_list_view(columns, table_rows, loading)
-}
-
-fn update_page_list(
-    columns: Vec<TableColumn>,
-    styles: Vec<String>,
-    params: Vec<String>,
-    table_rows: RwSignal<Vec<TableRow>>,
-    namespace_name: RwSignal<String>,
-    resource_name: RwSignal<String>,
-    loading: RwSignal<bool>,
-) {
-    if namespace_name.is_disposed() || resource_name.is_disposed() {
-        return;
-    }
-    let namespace_name = namespace_name.get();
-    let resource_name = resource_name.get();
-
-    spawn_local(async move {
-        let list = update_page_list_async(
-            columns.clone(),
-            styles.clone(),
-            params.clone(),
-            namespace_name.clone(),
-            resource_name.clone(),
-        )
-        .await
-        .unwrap_or_default();
-        table_rows.set(list);
-        loading.set(false);
-    });
-}
-
-#[server]
-async fn update_page_list_async(
-    columns: Vec<TableColumn>,
-    styles: Vec<String>,
-    params: Vec<String>,
-    namespace_name: String,
-    resource_name: String,
-) -> Result<Vec<TableRow>, ServerFnError> {
-    let namespace_name = if namespace_name == "All Namespaces" {
+    let namespace_filter = if namespace.is_empty() || namespace == "All Namespaces" {
         None
     } else {
-        Some(namespace_name)
+        Some(namespace.to_string())
     };
-    let mut list = accounts_api::get_serviceaccounts(namespace_name)
+
+    let mut list = accounts_api::get_serviceaccounts(cache, namespace_filter)
         .await
         .unwrap_or_default()
         .into_iter()
@@ -127,18 +93,23 @@ async fn update_page_list_async(
             n.metadata
                 .name
                 .to_lowercase()
-                .contains(&resource_name.to_lowercase())
+                .contains(&filter.to_lowercase())
         })
         .map(|sa| {
             vec![
                 "ServiceAccount".to_string(),
-                sa.clone().metadata.namespace,
-                sa.clone().metadata.name,
-                time_until_now(&sa.metadata.creation_timestamp.unwrap_or_default()),
+                sa.metadata.namespace.clone(),
+                sa.metadata.name.clone(),
+                time_until_now(
+                    sa.metadata
+                        .creation_timestamp
+                        .as_deref()
+                        .unwrap_or_default(),
+                ),
             ]
         })
         .collect::<Vec<_>>();
 
     list.sort_by(|a, b| a[1].cmp(&b[1]));
-    Ok(parse_table_rows(columns, list, styles, params))
+    parse_table_rows(columns, list, &styles, &params)
 }

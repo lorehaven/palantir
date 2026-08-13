@@ -1,4 +1,4 @@
-use leptos::prelude::*;
+use quench_cache::CacheStore;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq, PartialEq)]
@@ -13,9 +13,7 @@ pub enum ApiMode {
 /// `ServiceAccount` token's typical rotation window (kubelet refreshes the
 /// file well before expiry), so a cache hit is never staler than the
 /// kubelet's own refresh cadence would already allow.
-#[cfg(not(target_arch = "wasm32"))]
 const TOKEN_CACHE_TTL_SECS: u64 = 60;
-#[cfg(not(target_arch = "wasm32"))]
 const TOKEN_CACHE_KEY: &str = "k8s-token";
 
 fn read_token_file() -> String {
@@ -26,12 +24,7 @@ fn read_token_file() -> String {
 }
 
 /// Cached read of the K8s `ServiceAccount` token.
-///
-/// Takes a store the caller already holds (e.g. `server/src/ws.rs`'s plain
-/// actix handler, which isn't inside a Leptos server-fn context and so
-/// can't use [`get_api_token`]'s own `leptos_actix::extract` path).
-#[cfg(not(target_arch = "wasm32"))]
-pub async fn get_api_token_with(store: &quench_cache::CacheStore) -> String {
+pub async fn get_api_token(store: &CacheStore) -> String {
     if let Ok(Some(cached)) = store.get(TOKEN_CACHE_KEY).await {
         if let Some(token) = cached.as_str() {
             return token.to_string();
@@ -47,29 +40,6 @@ pub async fn get_api_token_with(store: &quench_cache::CacheStore) -> String {
         )
         .await;
     token
-}
-
-/// Cached read for callers inside a Leptos server-fn context.
-///
-/// Extracts the `CacheStore` `server/src/main.rs` registered as `app_data`.
-/// Falls back to an uncached file read if no store is reachable (e.g.
-/// running outside a real request, such as a doctest) rather than failing
-/// outright.
-pub async fn get_api_token() -> String {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        if let Ok(store) =
-            leptos_actix::extract::<actix_web::web::Data<quench_cache::CacheStore>>().await
-        {
-            return get_api_token_with(&store).await;
-        }
-    }
-    read_token_file()
-}
-
-#[server]
-pub async fn get_api_token_wasm() -> Result<String, ServerFnError> {
-    Ok(get_api_token().await)
 }
 
 fn get_resource_map() -> Vec<(&'static str, &'static str, &'static str)> {
@@ -134,41 +104,24 @@ fn get_resource_map() -> Vec<(&'static str, &'static str, &'static str)> {
     ]
 }
 
-#[server]
-#[allow(clippy::unused_async)]
-pub async fn get_url(
-    kind: String,
+pub fn get_url(
+    kind: &str,
     namespace: Option<String>,
     resource_name: Option<String>,
-) -> Result<String, ServerFnError> {
+) -> anyhow::Result<String> {
     let resource_map = get_resource_map();
 
-    namespace.map_or_else(
-        || {
-            if let Some((u, k, _)) = resource_map.iter().find(|(_, _, k)| k == &kind) {
-                let prefix = if u.starts_with("v1") { "api" } else { "apis" };
-                resource_name.clone().map_or_else(
-                    || Ok(format!("{prefix}/{u}/{k}")),
-                    |resource_name| Ok(format!("{prefix}/{u}/{k}/{resource_name}")),
-                )
-            } else {
-                Err(ServerFnError::ServerError(
-                    "invalid resource - cannot build url".to_string(),
-                ))
-            }
-        },
-        |ns| {
-            if let Some((u, k, _)) = resource_map.iter().find(|(_, _, k)| k == &kind) {
-                let prefix = if u.starts_with("v1") { "api" } else { "apis" };
-                resource_name.clone().map_or_else(
-                    || Ok(format!("{prefix}/{u}/namespaces/{ns}/{k}")),
-                    |resource_name| Ok(format!("{prefix}/{u}/namespaces/{ns}/{k}/{resource_name}")),
-                )
-            } else {
-                Err(ServerFnError::ServerError(
-                    "invalid resource - cannot build url".to_string(),
-                ))
-            }
-        },
-    )
+    let Some((u, k, _)) = resource_map.iter().find(|(_, _, rk)| *rk == kind) else {
+        return Err(anyhow::anyhow!("invalid resource - cannot build url"));
+    };
+    let prefix = if u.starts_with("v1") { "api" } else { "apis" };
+
+    Ok(match (namespace, resource_name) {
+        (None, None) => format!("{prefix}/{u}/{k}"),
+        (None, Some(resource_name)) => format!("{prefix}/{u}/{k}/{resource_name}"),
+        (Some(ns), None) => format!("{prefix}/{u}/namespaces/{ns}/{k}"),
+        (Some(ns), Some(resource_name)) => {
+            format!("{prefix}/{u}/namespaces/{ns}/{k}/{resource_name}")
+        }
+    })
 }

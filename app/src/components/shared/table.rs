@@ -1,13 +1,38 @@
-use leptos::prelude::*;
-use serde::{Deserialize, Serialize};
+use quench_web::prelude::*;
 
 pub type TableRow = (TableColumnType, String, String, String);
 
+#[derive(Debug, Clone)]
+pub enum TableColumnType {
+    Bool,
+    Link,
+    String,
+    StringList,
+    StringTwoLine,
+}
+
+#[derive(Debug, Clone)]
+pub struct TableColumn {
+    header: String,
+    r#type: TableColumnType,
+    width: usize,
+}
+
+impl TableColumn {
+    pub fn new(header: &'static str, r#type: TableColumnType, width: usize) -> Self {
+        Self {
+            header: header.to_string(),
+            r#type,
+            width,
+        }
+    }
+}
+
 pub fn parse_table_rows(
-    columns: Vec<TableColumn>,
+    columns: &[TableColumn],
     values: Vec<Vec<String>>,
-    styles: Vec<String>,
-    params: Vec<String>,
+    styles: &[String],
+    params: &[String],
 ) -> Vec<TableRow> {
     values
         .clone()
@@ -49,113 +74,57 @@ pub fn parse_table_rows(
         .collect::<Vec<_>>()
 }
 
-#[component]
-pub fn TableComponent(
-    columns: Vec<TableColumn>,
-    table_rows: RwSignal<Vec<TableRow>>,
-    loading: RwSignal<bool>,
-) -> impl IntoView {
+pub fn table(columns: &[TableColumn], rows: &[TableRow]) -> Element {
     let grid_template_columns = columns
         .iter()
         .map(|column| format!("{}fr", column.width))
         .collect::<Vec<String>>()
         .join(" ");
 
-    view! {
-        <div class="table-header" style=format!("grid-template-columns: {grid_template_columns};")>
-            {columns.into_iter().map(|item| {
-                view! { <div class="table-header-item"> { item.header } </div> }.into_any()
-            }).collect::<Vec<_>>()}
-        </div>
-        {move || if loading.get() {
-            view! { <div class="loader" /> }.into_any()
-        } else {
-            view! {
-                <div class="table-body" style=format!("grid-template-columns: {grid_template_columns};")>
-                    {table_rows.get().into_iter().map(|(r#type, item, param, style)| {
-                        match r#type {
-                            TableColumnType::Bool => view! { <BoolValue item style /> }.into_any(),
-                            TableColumnType::Link => {
-                                let link = format!("{}{param}{item}", crate::base_path::router_base());
-                                view! { <LinkValue item style link /> }.into_any()
-                            },
-                            TableColumnType::String => view! { <StringValue item style /> }.into_any(),
-                            TableColumnType::StringList => view! { <StringListValue item style /> }.into_any(),
-                            TableColumnType::StringTwoLine => view! { <StringTwoLineValue item style /> }.into_any(),
-                        }
-                    }).collect::<Vec<_>>()}
-                </div>
-            }.into_any()
-        }}
-    }
+    let header = columns.iter().fold(
+        div().class("table-header").attr(
+            "style",
+            format!("grid-template-columns: {grid_template_columns};"),
+        ),
+        |el, column| el.child(div().class("table-header-item").text(&column.header)),
+    );
+
+    let body = rows.iter().fold(
+        div().class("table-body").attr(
+            "style",
+            format!("grid-template-columns: {grid_template_columns};"),
+        ),
+        |el, row| el.child(table_value(row)),
+    );
+
+    div().child(header).child(body)
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub enum TableColumnType {
-    Bool,
-    Link,
-    String,
-    StringList,
-    StringTwoLine,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct TableColumn {
-    header: String,
-    r#type: TableColumnType,
-    width: usize,
-}
-
-impl TableColumn {
-    pub fn new(header: &'static str, r#type: TableColumnType, width: usize) -> Self {
-        Self {
-            header: header.to_string(),
-            r#type,
-            width,
+fn table_value((r#type, item, param, style): &TableRow) -> Element {
+    match r#type {
+        TableColumnType::Bool => {
+            let icon = if item == "true" { "check" } else { "xmark" };
+            i().class(format!("fa-regular fa-circle-{icon}"))
+                .attr("style", style)
         }
-    }
-}
-
-#[component]
-fn BoolValue(item: String, style: String) -> impl IntoView {
-    let icon = if item == "true" { "check" } else { "xmark" };
-    view! {
-        <i class=format!("fa-regular fa-circle-{icon}") style=style />
-    }
-}
-
-#[component]
-fn LinkValue(item: String, style: String, link: String) -> impl IntoView {
-    view! {
-        <a href=link class="table-body-item-link" style=style> { item } </a>
-    }
-}
-
-#[component]
-fn StringValue(item: String, style: String) -> impl IntoView {
-    view! {
-        <span class="table-body-item" style=style> { item } </span>
-    }
-}
-
-#[component]
-fn StringListValue(item: String, style: String) -> impl IntoView {
-    view! {
-        <ul class="table-body-item-list" style=style>
-            {item.split('\n')
-                .map(|item| view! { <li> { item.to_string() } </li> })
-                .collect::<Vec<_>>()}
-        </ul>
-    }
-}
-
-#[component]
-fn StringTwoLineValue(item: String, style: String) -> impl IntoView {
-    view! {
-        <ul class="table-body-item-two" style=style>
-            {item.split('\n')
-                .map(|item| view! { <li> { item.to_string() } </li> })
-                .collect::<Vec<_>>()}
-        </ul>
+        TableColumnType::Link => {
+            let link = format!("{}{param}{item}", crate::base_path::ui_base());
+            a().attr("href", link)
+                .class("table-body-item-link")
+                .attr("style", style)
+                .text(item)
+        }
+        TableColumnType::String => span()
+            .class("table-body-item")
+            .attr("style", style)
+            .text(item),
+        TableColumnType::StringList => item.split('\n').fold(
+            ul().class("table-body-item-list").attr("style", style),
+            |el, line| el.child(li().text(line)),
+        ),
+        TableColumnType::StringTwoLine => item.split('\n').fold(
+            ul().class("table-body-item-two").attr("style", style),
+            |el, line| el.child(li().text(line)),
+        ),
     }
 }

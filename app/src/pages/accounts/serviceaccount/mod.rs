@@ -1,49 +1,74 @@
-use leptos::prelude::*;
-use leptos_router::hooks::use_params_map;
+use api::accounts::serviceaccounts as serviceaccounts_api;
+use quench_cache::CacheStore;
+use quench_web::prelude::*;
 
 use crate::components::prelude::*;
+use crate::utils::shared::display;
+use crate::utils::shared::time::format_timestamp;
 
-mod serviceaccount_info;
+pub async fn render(cache: &CacheStore, current_path: &str, namespace: &str, name: &str) -> String {
+    let confirm_url = format!(
+        "{}/accounts/{namespace}/serviceaccounts/{name}",
+        crate::base_path::ui_base()
+    );
 
-#[component]
-pub fn ServiceAccountPage() -> impl IntoView {
-    let params = use_params_map();
-    let namespace_name = params
-        .with_untracked(|p| p.get("namespace"))
+    crate::shell::page(
+        &["ServiceAccounts", namespace, name],
+        current_path,
+        div()
+            .class("service-account main-page")
+            .child(actions(
+                "ServiceAccount",
+                vec![
+                    edit_action(cache, "ServiceAccount", Some(namespace), name).await,
+                    delete_action("ServiceAccount", Some(namespace), name, &confirm_url),
+                ],
+            ))
+            .child(fragment(cache, namespace, name).await),
+    )
+}
+
+pub async fn fragment(cache: &CacheStore, namespace: &str, name: &str) -> Element {
+    let sa = serviceaccounts_api::get_serviceaccounts(cache, Some(namespace.to_string()))
+        .await
+        .unwrap_or_default()
         .into_iter()
-        .collect::<Vec<_>>()
-        .join("-");
-    let name = params
-        .with_untracked(|p| p.get("name"))
-        .into_iter()
-        .collect::<Vec<_>>()
-        .join("-");
-    let page_title = vec![
-        "ServiceAccounts".to_string(),
-        namespace_name.clone(),
-        name.clone(),
+        .find(|sa| sa.metadata.name == name)
+        .unwrap_or_default();
+
+    let data = vec![
+        ("Name".to_string(), sa.metadata.name.clone()),
+        ("Kind".to_string(), "ServiceAccount".to_string()),
+        ("Namespace".to_string(), sa.metadata.namespace.clone()),
+        (
+            "Created".to_string(),
+            format_timestamp(
+                sa.metadata
+                    .creation_timestamp
+                    .as_deref()
+                    .unwrap_or_default(),
+                None,
+            ),
+        ),
+        ("Labels".to_string(), display::hashmap(sa.metadata.labels)),
+        (
+            "Annotations".to_string(),
+            display::hashmap(sa.metadata.annotations),
+        ),
+        ("Version".to_string(), sa.metadata.resource_version),
+        ("Secrets".to_string(), String::new()),
     ];
 
-    let resource_type = RwSignal::new("ServiceAccount".to_string());
-    let namespace_name = RwSignal::new(namespace_name);
-    let name = RwSignal::new(name);
-
-    view! {
-        <Header text=page_title />
-        <PageContent>
-            <PageContentSlot slot>
-                <div class="storageclass main-page">
-                    <Actions
-                        resource_type
-                        namespace_name=namespace_name
-                        resource_name=name
-                        actions=&[ActionType::Edit, ActionType::Delete] />
-                    <serviceaccount_info::ServiceAccountInfoComponent
-                        resource_name=name
-                        namespace_name />
-                </div>
-            </PageContentSlot>
-        </PageContent>
-        <Footer />
-    }
+    resource_info_view(&data)
+        .attr("id", "serviceaccount-info")
+        .attr(
+            "hx-get",
+            format!(
+                "{}/accounts/{namespace}/serviceaccounts/{name}/fragment",
+                crate::base_path::ui_base()
+            ),
+        )
+        .attr("hx-trigger", "every 10s")
+        .attr("hx-target", "this")
+        .attr("hx-swap", "outerHTML")
 }
