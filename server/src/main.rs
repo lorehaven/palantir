@@ -57,6 +57,10 @@ fn app_scope(auth: AuthState) -> impl HttpServiceFactory {
         .route("/ws/exec", web::get().to(ws::exec_ws_handler))
         .route("/ui", web::get().to(dashboard))
         .route("/ui/home", web::get().to(dashboard))
+        .route(
+            "/ui/events/fragment",
+            web::get().to(dashboard_events_fragment),
+        )
         .service(
             web::resource("/ui/apply")
                 .route(web::post().to(routes::apply::create))
@@ -458,10 +462,20 @@ fn workloads_routes(cfg: &mut web::ServiceConfig) {
     );
 }
 
-async fn dashboard(req: HttpRequest) -> HttpResponse {
+async fn dashboard(req: HttpRequest, cache: web::Data<CacheStore>) -> HttpResponse {
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
-        .body(app::pages::dashboard::render(req.path()))
+        .body(app::pages::dashboard::render(&cache, req.path()).await)
+}
+
+async fn dashboard_events_fragment(cache: web::Data<CacheStore>) -> HttpResponse {
+    HttpResponse::Ok()
+        .content_type("text/html; charset=utf-8")
+        .body(
+            app::pages::dashboard::events_fragment(&cache)
+                .await
+                .render(),
+        )
 }
 
 async fn profile(req: HttpRequest) -> HttpResponse {
