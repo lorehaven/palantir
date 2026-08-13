@@ -5,8 +5,7 @@ pub mod node_pods;
 use quench_cache::CacheStore;
 use quench_web::prelude::*;
 
-use crate::components::stats::nodes as nodes_stat;
-use crate::components::stats::pods as pods_stat;
+use crate::components::stats::{nodes as nodes_stat, pods as pods_stat};
 
 pub async fn render(cache: &CacheStore, current_path: &str, node_name: &str) -> String {
     crate::shell::page(
