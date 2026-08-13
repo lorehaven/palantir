@@ -7,6 +7,11 @@
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(5px);
   z-index: 9998;
+  display: none;
+
+  &.show {
+    display: block;
+  }
 }
 
 .dialog-wrapper {
@@ -16,10 +21,14 @@
   left: 0;
   right: 0;
 
-  display: flex;
+  display: none;
   flex-direction: row;
   justify-content: center;
   align-items: center;
+
+  &.show {
+    display: flex;
+  }
 
   .dialog {
     height: 80%;
