@@ -30,7 +30,7 @@ name    = "server"
 image   = "ossiriand.arda:8080/forge/ci/rust-builder:latest"
 timeout = 3600
 steps = [
-    "command -v sass >/dev/null || npm install -g sass",
+    "command -v sass >/dev/null || (curl -fsSL https://github.com/sass/dart-sass/releases/download/1.102.0/dart-sass-1.102.0-linux-x64-musl.tar.gz | tar -xz -C /usr/local && ln -sf /usr/local/dart-sass/sass /usr/local/bin/sass)",
     "mkdir -p dist/assets/css",
     "sass --no-source-map styles/main.scss dist/assets/css/palantir.css",
     "cargo build --release -p server",
