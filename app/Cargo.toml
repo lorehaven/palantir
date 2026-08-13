@@ -7,16 +7,12 @@ publish = false
 
 [dependencies]
 api = { path = "../api" }
-domain = { path = "../domain" }
-
-quench-web.workspace = true
-quench-auth.workspace = true
-quench-cache.workspace = true
-
-anyhow.workspace = true
 base64.workspace = true
 chrono.workspace = true
+domain = { path = "../domain" }
+quench-auth.workspace = true
+quench-cache.workspace = true
+quench-web.workspace = true
 regex.workspace = true
-serde.workspace = true
 serde_json.workspace = true
 serde_yaml.workspace = true

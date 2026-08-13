@@ -6,12 +6,11 @@ rust-version.workspace = true
 publish = false
 
 [dependencies]
-domain = { path = "../domain" }
-
 anyhow.workspace = true
+domain = { path = "../domain" }
 quench-auth.workspace = true
 quench-cache.workspace = true
-quench-config = { version = "0.1.2", registry = "ennor" }
+quench-config.workspace = true
 reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true

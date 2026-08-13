@@ -6,25 +6,23 @@ rust-version.workspace = true
 publish = false
 
 [dependencies]
-api = { path = "../api" }
-app = { path = "../app" }
-domain = { path = "../domain" }
-
 actix-files.workspace = true
 actix-web.workspace = true
 actix-ws.workspace = true
-quench-auth.workspace = true
-quench-cache.workspace = true
-quench-starter.workspace = true
 anyhow.workspace = true
+api = { path = "../api" }
+app = { path = "../app" }
+bytes.workspace = true
 chrono.workspace = true
 futures.workspace = true
 native-tls.workspace = true
+quench-auth.workspace = true
+quench-cache.workspace = true
+quench-starter.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 serde_yaml.workspace = true
 tokio.workspace = true
 tokio-tungstenite.workspace = true
+tracing.workspace = true
 url.workspace = true
-bytes = "1.10.1"
-tracing = "0.1.44"

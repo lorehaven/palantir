@@ -313,7 +313,6 @@ dependencies = [
 name = "app"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "api",
  "base64 0.22.1",
  "chrono",
@@ -322,7 +321,6 @@ dependencies = [
  "quench-cache",
  "quench-web",
  "regex",
- "serde",
  "serde_json",
  "serde_yaml",
 ]
@@ -2984,7 +2982,6 @@ dependencies = [
  "app",
  "bytes",
  "chrono",
- "domain",
  "futures",
  "native-tls",
  "quench-auth",
