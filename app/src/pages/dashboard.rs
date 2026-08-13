@@ -37,7 +37,12 @@ pub async fn events_fragment(cache: &CacheStore) -> Element {
 fn columns() -> Vec<TableColumn> {
     vec![
         TableColumn::new("Type", TableColumnType::String, 1),
-        TableColumn::new("Name", TableColumnType::Link, 2),
+        // Not a Link: events cover every resource kind cluster-wide, and
+        // each kind needs a differently-shaped URL - a single per-column
+        // link template (see `table::parse_table_rows`) can't route all of
+        // them, so a Link here rendered `{ui_base}{name}` with no path in
+        // between and 404'd.
+        TableColumn::new("Name", TableColumnType::String, 2),
         TableColumn::new("Time", TableColumnType::String, 1),
         TableColumn::new("Reason", TableColumnType::String, 1),
         TableColumn::new("Event", TableColumnType::String, 3),

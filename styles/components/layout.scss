@@ -29,59 +29,37 @@
     }
   }
 
+  // quench-web's own shared markup wraps this whole shell in
+  // `.content-inner`/`.q-shell-content-inner`, styled by its shared CSS as
+  // a centering flex container (`align-items: center`, `justify-content:
+  // center` - built for a single centered card, not a page of chrome) -
+  // overridden back to normal top-to-bottom, full-width block flow so nested
+  // content (tables included) fills the page instead of floating centered
+  // both ways in it.
+  .content-inner {
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
   .content {
-    height: calc(100vh - 5.8rem);
-    width: 100vw;
-    display: flex;
-    flex-direction: row;
-
-    .side-nav-bar {
-      display: flex;
-      flex-direction: column;
-      padding: 1rem 0;
-      width: 6rem;
-      border-right: 0.2rem solid $primaryAccentColor;
-
-      .separator {
-        height: 0.1rem;
-        margin: 0.5rem 1rem;
-        background-color: $secondaryColor;
-      }
-
-      .side-nav-bar-entry {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        cursor: pointer;
-        color: $secondaryColor;
-        text-decoration: none;
-
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease-out;
-
-        .side-nav-bar-entry-title {
-          font-size: 0.8rem;
-        }
-
-        i {
-          font-size: 1.4rem;
-        }
-
-        &:hover {
-          background-color: $primaryAccentColor;
-        }
-
-        &.visible {
-          margin: 0.2rem 0;
-          max-height: 3rem;
-          padding: 0.4rem 1rem;
-        }
-      }
-    }
+    // quench-web's own shared CSS already puts `flex: 1 1 auto` on `.content`
+    // to fill whatever's left after its `header`/`footer` siblings - explicit
+    // here too since the old fixed `calc(100vh - Nrem)` this replaced had to
+    // be recalculated by hand every time a sibling's height changed (it
+    // wasn't, the last time one did: the top bar this rule predates).
+    flex: 1 1 auto;
+    min-height: 0;
+    // quench-web's own shared markup nests this inside its `.content-inner`
+    // (`padding: 1rem`, and `align-items: center` on a column flex
+    // container, which centers/shrinks a child to content width unless the
+    // child has a definite size of its own). `100vw` - the raw viewport,
+    // ignoring that padding and any ancestor scrollbar - overflowed and got
+    // clipped there instead of actually filling it; `100%` sizes against
+    // the real parent.
+    width: 100%;
 
     .content-internal {
-      width: 100vw;
+      width: 100%;
       padding-bottom: 1rem;
       overflow-y: auto;
       position: relative;
@@ -95,6 +73,60 @@
     height: 1.6rem;
     font-size: 0.8rem;
     background-color: $primaryAccentColor;
+  }
+}
+
+// The nav drawer `nav_button()` (quench-web) opens: palantir's own
+// resource-navigation entries, then quench-web's theme/locale switcher
+// underneath - see app/src/shell.rs's module doc for why they share this
+// panel rather than palantir getting a `NavPanelBuilder` extension point.
+// `.modal-side`/`.modal-content` themselves are already fully styled by
+// quench-web's shared CSS; this only styles the entry list poured into it.
+.modal-side .modal-content {
+  .side-nav-bar {
+    display: flex;
+    flex-direction: column;
+
+    .separator {
+      height: 0.1rem;
+      margin: 0.5rem 0;
+      background-color: $secondaryColor;
+    }
+
+    .side-nav-bar-entry {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.8rem;
+      cursor: pointer;
+      color: $secondaryColor;
+      text-decoration: none;
+
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+
+      .side-nav-bar-entry-title {
+        font-size: 1rem;
+      }
+
+      i {
+        width: 1.4rem;
+        font-size: 1.2rem;
+        text-align: center;
+      }
+
+      &:hover {
+        background-color: $primaryAccentColor;
+      }
+
+      &.visible {
+        margin: 0.1rem 0;
+        max-height: 3rem;
+        padding: 0.6rem 0.8rem;
+        border-radius: 0.25rem;
+      }
+    }
   }
 }
 

@@ -136,7 +136,12 @@
   .card-table {
     padding: 1rem;
     display: flex;
-    align-items: center;
+    // `table()` (components/shared/table.rs) wraps `.table-header`/
+    // `.table-body` in a single unstyled, unclassed `<div>` - their own
+    // `width: 100%` is relative to that wrapper, not to `.card-table`, so
+    // `align-items: center` here left the wrapper shrunk to its content
+    // width and centered instead of filling the card.
+    align-items: stretch;
     box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.8);
     flex-direction: column;
 

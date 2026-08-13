@@ -190,7 +190,7 @@ pub async fn container_fragment(cache: &CacheStore, namespace: &str, name: &str)
     let env = container
         .env
         .into_iter()
-        .map(|e| format!("{}: {}", e.name, e.value))
+        .map(|e| format!("{}: {}", e.name, display::pretty_if_json(&e.value)))
         .collect::<Vec<String>>()
         .join("\n");
 

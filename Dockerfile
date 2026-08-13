@@ -37,6 +37,11 @@ WORKDIR /app
 
 COPY --from=builder /work/target/release/server /app/
 COPY --from=builder /work/dist /app/dist
+# `available_locales()`/`parse_ftl_with_options()` (quench-web) read this
+# relative to the process's CWD at runtime, same as `dist/assets` above -
+# see forge's own `docker/Dockerfile.alpine` for the same COPY on every
+# other service in the estate.
+COPY --from=builder /work/i18n /app/i18n
 
 ENV RUST_LOG="info"
 # quench_starter::actix::serve()'s own bind address env var. BASE_PATH and

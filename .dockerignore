@@ -3,6 +3,7 @@
 !app/
 !domain/
 !frontend/
+!i18n/
 !public/
 !server/
 !styles/
