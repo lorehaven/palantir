@@ -11,7 +11,7 @@ RUN npm install -g sass
 
 # The quench-* crates (and anything else from forge's private registry) come
 # from `ennor`, which the base image has no reason to already know about -
-# mirrors forge's own docker/Dockerfile.alpine build-arg setup exactly, since
+# mirrors forge's own images/Dockerfile.alpine build-arg setup exactly, since
 # `anvil docker build` passes these same two build args regardless of which
 # Dockerfile it's building.
 ARG CARGO_REGISTRIES_ENNOR_INDEX=sparse+https://ennor.ddns.net/index/
@@ -39,7 +39,7 @@ COPY --from=builder /work/target/release/server /app/
 COPY --from=builder /work/dist /app/dist
 # `available_locales()`/`parse_ftl_with_options()` (quench-web) read this
 # relative to the process's CWD at runtime, same as `dist/assets` above -
-# see forge's own `docker/Dockerfile.alpine` for the same COPY on every
+# see forge's own `images/Dockerfile.alpine` for the same COPY on every
 # other service in the estate.
 COPY --from=builder /work/i18n /app/i18n
 

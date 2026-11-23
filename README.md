@@ -1,5 +1,32 @@
 # Palantir
 
+> ## ⚠️ Retired
+>
+> **Palantir is retired and no longer maintained.** Its dashboard now lives inside **Gantry**
+> (`forge/services/gantry`), under the **Cluster**, **Services** and **Profile** sections of its UI.
+> Nothing here is deployed any more: the `palantir` namespace and its cluster roles were removed from the
+> cluster on 2026-11-23. This repository is kept for reference only.
+>
+> | Palantir | Gantry |
+> |---|---|
+> | Nodes, namespaces, events | Cluster → Cluster (with an overview: nodes, CPU and memory, pods, warnings) |
+> | Pods, deployments, replica sets, jobs, services, ingresses, config maps | Cluster → Workloads, Network, Config |
+> | Pod logs | A pod's page → Log |
+> | Pod exec | A pod's page → Shell (off unless `GANTRY_EXEC_NAMESPACES` names the namespace) |
+> | Storage classes, volumes, claims | Cluster → Storage |
+> | Service accounts, roles, bindings | Cluster → Accounts |
+> | Facade (links to services) | Services (one link per Ingress host) |
+> | Profile (the token) | Profile (who you are, what you may do) |
+> | Delete, scale, apply YAML | A resource's page: Delete, Scale, an editable YAML; each runs as a recorded operation |
+>
+> **Not carried over:** the Secrets pages (Gantry's role cannot read Secrets, by design) and the
+> `ADDITIONAL_SERVICES` list of the facade.
+>
+> Documentation: `forge/docs/services/gantry/cluster.md`.
+
+---
+
+
 **Palantir** is a lightweight Kubernetes dashboard application built using [Rust](https://www.rust-lang.org/), [actix-web](https://actix.rs/), and [quench-web](https://github.com/lorehaven/forge). It provides an intuitive, real-time web interface to observe and manage your Kubernetes clusters with speed and elegance.
 
 ---

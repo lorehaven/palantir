@@ -10,3 +10,7 @@ packages = ["server"]
 module_name = "palantir"
 image_name = "palantir"
 registries = ["ossiriand.arda:8080/forge", "ennor.ddns.net/forge"]
+
+# Cargo never prunes target/: after `anvil build|test|nextest|lint` it is trimmed to this many GiB (`anvil clean --max-size`).
+[build]
+max_target_gb = 20
